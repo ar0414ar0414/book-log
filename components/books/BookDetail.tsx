@@ -233,11 +233,10 @@ export default function BookDetail({ book, initialQuotes, initialPhotos, initial
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-3">
+      <div className="flex items-center justify-between">
         <Link href="/books" className="p-2 hover:bg-slate-100 rounded-lg transition-colors">
           <ArrowLeft className="w-5 h-5 text-slate-600" />
         </Link>
-        <h1 className="font-bold text-slate-900 text-lg truncate flex-1">{book.title}</h1>
         <button onClick={handleDelete} disabled={deleting} className="p-2 hover:bg-red-50 text-red-400 hover:text-red-600 rounded-lg transition-colors">
           <Trash2 className="w-4 h-4" />
         </button>
