@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Noto_Sans_JP } from "next/font/google";
 import "./globals.css";
+import ProgressBar from "@/components/ProgressBar";
 
 const noto = Noto_Sans_JP({ subsets: ["latin"], weight: ["400", "500", "700"] });
 
@@ -28,7 +29,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <head>
         <link rel="apple-touch-icon" href="/icons/icon-192.png" />
       </head>
-      <body className={`${noto.className} min-h-full bg-slate-50`}>{children}</body>
+      <body className={`${noto.className} min-h-full bg-slate-50`}>
+        <ProgressBar />
+        {children}
+      </body>
     </html>
   );
 }
