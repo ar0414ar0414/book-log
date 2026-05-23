@@ -303,8 +303,8 @@ export default function BookDetail({ book, initialQuotes, initialPhotos, initial
                 {label}
               </button>
             ))}
-            {book.genre && <span className="text-xs text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full">{localizeGenre(book.genre)}</span>}
           </div>
+          {book.genre && <span className="text-xs text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full w-fit">{localizeGenre(book.genre)}</span>}
           <div className="flex gap-0.5">
             {Array.from({ length: 5 }).map((_, i) => (
               <button
