@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Send, Bot, User, Loader2, Sparkles, AlertCircle } from "lucide-react";
+import { Send, Bot, User, Loader2, Sparkles, AlertCircle, Trash2 } from "lucide-react";
 import { useAiProvider } from "@/hooks/useAiProvider";
 import { cn } from "@/lib/utils";
 import ReactMarkdown from "react-markdown";
@@ -17,6 +17,8 @@ export default function AiChatTab({ bookId, initialChat }: { bookId: string; ini
   const [summaryLoading, setSummaryLoading] = useState(false);
   const [summary, setSummary] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [confirmClear, setConfirmClear] = useState(false);
+  const [clearLoading, setClearLoading] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
   const { provider } = useAiProvider();
 
@@ -52,6 +54,20 @@ export default function AiChatTab({ bookId, initialChat }: { bookId: string; ini
     }
   }
 
+  async function handleClear() {
+    setClearLoading(true);
+    setError(null);
+    try {
+      const res = await fetch(`/api/ai/chat?bookId=${bookId}`, { method: "DELETE" });
+      if (!res.ok) { setError("削除に失敗しました"); return; }
+      setMessages([]);
+      setSummary(null);
+    } finally {
+      setClearLoading(false);
+      setConfirmClear(false);
+    }
+  }
+
   async function handleSummary() {
     setSummaryLoading(true);
     setError(null);
@@ -71,17 +87,42 @@ export default function AiChatTab({ bookId, initialChat }: { bookId: string; ini
 
   return (
     <div className="flex flex-col gap-4">
-      {/* summary button */}
-      {!summary && (
-        <button
-          onClick={handleSummary}
-          disabled={summaryLoading}
-          className="flex items-center justify-center gap-2 w-full border border-indigo-200 text-indigo-600 py-2.5 rounded-xl text-sm font-medium hover:bg-indigo-50 transition-colors disabled:opacity-50"
-        >
-          {summaryLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
-          AIに要約・考察を作ってもらう
-        </button>
+      {/* confirm clear dialog */}
+      {confirmClear && (
+        <div className="bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 flex items-center justify-between gap-3">
+          <p className="text-sm text-slate-600">会話履歴をすべて削除しますか？</p>
+          <div className="flex gap-2 flex-shrink-0">
+            <button onClick={() => setConfirmClear(false)} className="text-xs px-3 py-1.5 rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-100">キャンセル</button>
+            <button onClick={handleClear} disabled={clearLoading} className="text-xs px-3 py-1.5 rounded-lg bg-red-500 text-white hover:bg-red-600 disabled:opacity-50 flex items-center gap-1">
+              {clearLoading ? <Loader2 className="w-3 h-3 animate-spin" /> : <Trash2 className="w-3 h-3" />}
+              削除
+            </button>
+          </div>
+        </div>
       )}
+
+      {/* summary button + clear button */}
+      <div className="flex gap-2">
+        {!summary && (
+          <button
+            onClick={handleSummary}
+            disabled={summaryLoading}
+            className="flex items-center justify-center gap-2 flex-1 border border-indigo-200 text-indigo-600 py-2.5 rounded-xl text-sm font-medium hover:bg-indigo-50 transition-colors disabled:opacity-50"
+          >
+            {summaryLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+            AIに要約・考察を作ってもらう
+          </button>
+        )}
+        {messages.length > 0 && (
+          <button
+            onClick={() => setConfirmClear(true)}
+            className="flex items-center justify-center w-10 h-10 rounded-xl border border-slate-200 text-slate-400 hover:text-red-400 hover:border-red-200 transition-colors flex-shrink-0"
+            title="会話をリセット"
+          >
+            <Trash2 className="w-4 h-4" />
+          </button>
+        )}
+      </div>
 
       {error && (
         <div className="flex items-start gap-2.5 bg-red-50 border border-red-200 rounded-xl px-4 py-3">
