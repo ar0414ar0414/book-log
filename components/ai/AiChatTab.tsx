@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { Send, Bot, User, Loader2, Sparkles } from "lucide-react";
+import { useAiProvider } from "@/hooks/useAiProvider";
 import { cn } from "@/lib/utils";
 
 interface Message {
@@ -15,6 +16,7 @@ export default function AiChatTab({ bookId, initialChat }: { bookId: string; ini
   const [summaryLoading, setSummaryLoading] = useState(false);
   const [summary, setSummary] = useState<string | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const { provider } = useAiProvider();
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -35,7 +37,7 @@ export default function AiChatTab({ bookId, initialChat }: { bookId: string; ini
       const res = await fetch("/api/ai/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ bookId, message: userMsg }),
+        body: JSON.stringify({ bookId, message: userMsg, provider }),
       });
       const { reply } = await res.json();
       setMessages((m) => [...m, {
@@ -52,7 +54,7 @@ export default function AiChatTab({ bookId, initialChat }: { bookId: string; ini
       const res = await fetch("/api/ai/summary", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ bookId }),
+        body: JSON.stringify({ bookId, provider }),
       });
       const { summary: s } = await res.json();
       setSummary(s);

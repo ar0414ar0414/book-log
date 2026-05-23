@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { BookOpen, Star, Quote, Image as ImageIcon, Bot, Trash2, ArrowLeft, Sparkles, Copy, Check, Loader2, ChevronDown, ChevronUp } from "lucide-react";
+import { useAiProvider } from "@/hooks/useAiProvider";
 import Link from "next/link";
 import { cn, STATUS_LABELS, STATUS_COLORS, formatDate } from "@/lib/utils";
 import type { BookStatus } from "@/types";
@@ -68,6 +69,7 @@ export default function BookDetail({ book, initialQuotes, initialPhotos, initial
   const [aiRecordLoading, setAiRecordLoading] = useState(false);
   const [aiRecordOpen, setAiRecordOpen] = useState(false);
   const [copied, setCopied] = useState(false);
+  const { provider } = useAiProvider();
   const router = useRouter();
 
   async function handleStatusChange(newStatus: BookStatus) {
@@ -89,7 +91,7 @@ export default function BookDetail({ book, initialQuotes, initialPhotos, initial
       const res = await fetch("/api/ai/reading-record", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ bookId: book.id }),
+        body: JSON.stringify({ bookId: book.id, provider }),
       });
       const { record } = await res.json();
       setAiRecord(record);

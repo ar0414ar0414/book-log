@@ -2,6 +2,7 @@
 
 import { useState, useRef } from "react";
 import { Camera, Upload, Trash2, FileText, Loader2, Image as ImageIcon, MessageSquare, Check, X } from "lucide-react";
+import { useAiProvider } from "@/hooks/useAiProvider";
 
 interface PhotoItem {
   id: string; url: string; caption: string | null; extractedText: string | null; createdAt: Date;
@@ -12,6 +13,7 @@ export default function PhotosTab({ bookId, initialPhotos }: { bookId: string; i
   const [uploading, setUploading] = useState(false);
   const [ocrLoading, setOcrLoading] = useState<string | null>(null);
   const [selectedPhoto, setSelectedPhoto] = useState<PhotoItem | null>(null);
+  const { provider } = useAiProvider();
   const [captionEditing, setCaptionEditing] = useState(false);
   const [captionDraft, setCaptionDraft] = useState("");
   const [captionSaving, setCaptionSaving] = useState(false);
@@ -46,7 +48,7 @@ export default function PhotosTab({ bookId, initialPhotos }: { bookId: string; i
         const res = await fetch("/api/ai/ocr", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ photoId: photo.id, imageBase64: base64, mimeType: blob.type }),
+          body: JSON.stringify({ photoId: photo.id, imageBase64: base64, mimeType: blob.type, provider }),
         });
         const { text } = await res.json();
         setPhotoList((p) => p.map((item) => item.id === photo.id ? { ...item, extractedText: text } : item));
