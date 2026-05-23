@@ -275,6 +275,14 @@ function GridView({ books }: { books: Book[] }) {
             )}>
               {STATUS_LABELS[book.status]}
             </span>
+            {book.status === "reading" && book.pageCount && book.currentPage && (
+              <div className="absolute bottom-0 left-0 right-0 h-1.5 bg-black/10">
+                <div
+                  className="h-full bg-indigo-500 transition-all"
+                  style={{ width: `${Math.min((book.currentPage / book.pageCount) * 100, 100)}%` }}
+                />
+              </div>
+            )}
           </div>
           <div className="p-3 flex-1 flex flex-col gap-1">
             <p className="font-medium text-slate-900 text-sm leading-tight line-clamp-2">{book.title}</p>

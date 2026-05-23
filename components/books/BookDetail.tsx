@@ -19,6 +19,7 @@ interface Props {
     id: string; title: string; author: string | null; coverUrl: string | null;
     genre: string | null; status: string; rating: number | null; memo: string | null;
     preMemo: string | null; postMemo: string | null; aiRecord: string | null;
+    currentPage: number | null;
     startedAt: Date | null; finishedAt: Date | null; updatedAt: Date; publisher: string | null;
     publishedDate: string | null; description: string | null; pageCount: number | null;
   };
@@ -91,6 +92,9 @@ export default function BookDetail({ book, initialQuotes, initialPhotos, initial
   const [pageCount, setPageCount] = useState<number | null>(book.pageCount ?? null);
   const [editingPageCount, setEditingPageCount] = useState(false);
   const [pageCountDraft, setPageCountDraft] = useState("");
+  const [currentPage, setCurrentPage] = useState<number | null>(book.currentPage ?? null);
+  const [editingCurrentPage, setEditingCurrentPage] = useState(false);
+  const [currentPageDraft, setCurrentPageDraft] = useState("");
   const { provider } = useAiProvider();
   const router = useRouter();
   const touchStartX = useRef<number | null>(null);
@@ -131,6 +135,17 @@ export default function BookDetail({ book, initialQuotes, initialPhotos, initial
     if (diff > 0 && idx < order.length - 1) setActiveTab(order[idx + 1]);
     if (diff < 0 && idx > 0) setActiveTab(order[idx - 1]);
     touchStartX.current = null;
+  }
+
+  async function saveCurrentPage() {
+    const val = currentPageDraft.trim() ? Math.min(parseInt(currentPageDraft), pageCount ?? Infinity) : null;
+    setCurrentPage(val);
+    setEditingCurrentPage(false);
+    await fetch(`/api/books/${book.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ currentPage: val }),
+    });
   }
 
   async function savePageCount() {
@@ -328,6 +343,60 @@ export default function BookDetail({ book, initialQuotes, initialPhotos, initial
           </button>
         ))}
       </div>
+
+      {/* 読書進捗 */}
+      {status === "reading" && (
+        <div className="bg-white rounded-2xl border border-slate-100 p-4 space-y-3">
+          <p className="text-sm font-semibold text-slate-700">読書進捗</p>
+          {pageCount ? (
+            <>
+              <div className="space-y-1.5">
+                <div className="flex justify-between items-center text-xs text-slate-500">
+                  <span>{currentPage ?? 0} / {pageCount} ページ</span>
+                  <span className="font-semibold text-indigo-600">
+                    {Math.round(((currentPage ?? 0) / pageCount) * 100)}%
+                  </span>
+                </div>
+                <div className="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden">
+                  <div
+                    className="h-full bg-indigo-500 rounded-full transition-all duration-500"
+                    style={{ width: `${Math.min(((currentPage ?? 0) / pageCount) * 100, 100)}%` }}
+                  />
+                </div>
+                {currentPage && pageCount > currentPage && (
+                  <p className="text-xs text-slate-400">あと {pageCount - currentPage} ページ</p>
+                )}
+              </div>
+              {editingCurrentPage ? (
+                <div className="flex items-center gap-2">
+                  <input
+                    type="number"
+                    min={1}
+                    max={pageCount}
+                    autoFocus
+                    value={currentPageDraft}
+                    onChange={(e) => setCurrentPageDraft(e.target.value)}
+                    onKeyDown={(e) => { if (e.key === "Enter") saveCurrentPage(); if (e.key === "Escape") setEditingCurrentPage(false); }}
+                    placeholder="現在のページ"
+                    className="flex-1 border border-indigo-300 rounded-xl px-3 py-2 text-sm focus:outline-none"
+                  />
+                  <button onClick={saveCurrentPage} className="px-4 py-2 bg-indigo-600 text-white rounded-xl text-sm font-medium">保存</button>
+                  <button onClick={() => setEditingCurrentPage(false)} className="text-slate-400 text-sm">×</button>
+                </div>
+              ) : (
+                <button
+                  onClick={() => { setCurrentPageDraft(currentPage?.toString() ?? ""); setEditingCurrentPage(true); }}
+                  className="w-full py-2 border border-dashed border-indigo-200 rounded-xl text-sm text-indigo-500 hover:bg-indigo-50 transition-colors"
+                >
+                  {currentPage ? "ページを更新" : "現在のページを入力"}
+                </button>
+              )}
+            </>
+          ) : (
+            <p className="text-xs text-slate-400">進捗を表示するにはページ数を先に設定してください</p>
+          )}
+        </div>
+      )}
 
       {editingMemo ? (
         <div className="bg-amber-50 rounded-xl p-4 border border-amber-200 space-y-2">

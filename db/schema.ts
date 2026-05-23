@@ -27,6 +27,7 @@ export const books = pgTable("books", {
   preMemo: text("pre_memo"),
   postMemo: text("post_memo"),
   aiRecord: text("ai_record"),
+  currentPage: integer("current_page"),
   pageCount: integer("page_count"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
