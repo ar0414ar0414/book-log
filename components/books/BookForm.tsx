@@ -126,17 +126,18 @@ export default function BookForm() {
           >
             <Search className="w-4 h-4 text-slate-600" />
           </button>
-          {/* バーコードスキャン（モバイルのみ） */}
-          <button
-            type="button"
-            onClick={() => setScannerOpen(true)}
-            disabled={searching}
-            title="バーコードでスキャン"
-            className="sm:hidden px-4 py-2.5 bg-indigo-50 text-indigo-600 border border-indigo-100 rounded-xl hover:bg-indigo-100 transition-colors"
-          >
-            <ScanBarcode className="w-4 h-4" />
-          </button>
         </div>
+
+        {/* バーコードスキャン（モバイルのみ） */}
+        <button
+          type="button"
+          onClick={() => setScannerOpen(true)}
+          disabled={searching}
+          className="sm:hidden w-full flex items-center justify-center gap-2 py-2.5 border border-indigo-200 text-indigo-600 bg-indigo-50 rounded-xl text-sm font-medium hover:bg-indigo-100 transition-colors"
+        >
+          <ScanBarcode className="w-4 h-4" />
+          バーコードでスキャン
+        </button>
 
         {results.length > 0 && (
           <div className="border border-slate-200 rounded-xl overflow-hidden bg-white shadow-sm">
