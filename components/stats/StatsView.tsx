@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { BookOpen, Star, FileText, TrendingUp, User } from "lucide-react";
 import type { Book } from "@/types";
+import { localizeGenre } from "@/lib/utils";
 
 const MONTH_LABELS = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"];
 const COLORS = ["#4f46e5", "#7c3aed", "#2563eb", "#0891b2", "#059669", "#d97706"];
@@ -45,7 +46,7 @@ export default function StatsView({ books }: { books: Book[] }) {
     // ジャンル分布（finishedAt基準で統一）
     const genreMap = new Map<string, number>();
     doneThisYear.forEach((b) => {
-      const g = b.genre?.trim() || "未分類";
+      const g = localizeGenre(b.genre?.trim()) || "未分類";
       genreMap.set(g, (genreMap.get(g) ?? 0) + 1);
     });
     const genreSorted = [...genreMap.entries()]

@@ -4,7 +4,7 @@ import { useState, useRef } from "react";
 import { BookOpen, Star, Quote, Image as ImageIcon, Bot, Trash2, ArrowLeft, Sparkles, Copy, Check, Loader2, ChevronDown, ChevronUp, AlertCircle, Brain, Lightbulb, X } from "lucide-react";
 import { useAiProvider } from "@/hooks/useAiProvider";
 import Link from "next/link";
-import { cn, STATUS_LABELS, STATUS_COLORS, formatDate } from "@/lib/utils";
+import { cn, STATUS_LABELS, STATUS_COLORS, formatDate, localizeGenre } from "@/lib/utils";
 import type { BookStatus } from "@/types";
 import QuotesTab from "@/components/quotes/QuotesTab";
 import PhotosTab from "@/components/photos/PhotosTab";
@@ -303,7 +303,7 @@ export default function BookDetail({ book, initialQuotes, initialPhotos, initial
                 {label}
               </button>
             ))}
-            {book.genre && <span className="text-xs text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full">{book.genre}</span>}
+            {book.genre && <span className="text-xs text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full">{localizeGenre(book.genre)}</span>}
           </div>
           <div className="flex gap-0.5">
             {Array.from({ length: 5 }).map((_, i) => (
