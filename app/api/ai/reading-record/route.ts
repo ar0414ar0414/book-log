@@ -27,6 +27,7 @@ export async function POST(request: Request) {
     const prompt = buildReadingRecordPrompt(book as Book, bookQuotes as Quote[], photoTexts);
     const client = getAiClient(provider as AiProvider);
     const record = await client.generateText(prompt);
+    await db.update(books).set({ aiRecord: record, updatedAt: new Date() }).where(and(eq(books.id, bookId), eq(books.userId, user.id)));
     return NextResponse.json({ record });
   } catch (e) {
     const { code, message } = classifyAiError(e);

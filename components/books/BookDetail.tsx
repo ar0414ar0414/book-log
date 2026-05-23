@@ -17,7 +17,7 @@ interface Props {
   book: {
     id: string; title: string; author: string | null; coverUrl: string | null;
     genre: string | null; status: string; rating: number | null; memo: string | null;
-    preMemo: string | null; postMemo: string | null;
+    preMemo: string | null; postMemo: string | null; aiRecord: string | null;
     startedAt: Date | null; finishedAt: Date | null; updatedAt: Date; publisher: string | null;
     publishedDate: string | null; description: string | null; pageCount: number | null;
   };
@@ -72,7 +72,7 @@ export default function BookDetail({ book, initialQuotes, initialPhotos, initial
   const [editingMemo, setEditingMemo] = useState(false);
   const [memoDraft, setMemoDraft] = useState("");
   const [memoSaving, setMemoSaving] = useState(false);
-  const [aiRecord, setAiRecord] = useState<string | null>(null);
+  const [aiRecord, setAiRecord] = useState<string | null>(book.aiRecord ?? null);
   const [aiRecordLoading, setAiRecordLoading] = useState(false);
   const [aiRecordOpen, setAiRecordOpen] = useState(false);
   const [aiRecordError, setAiRecordError] = useState<string | null>(null);
