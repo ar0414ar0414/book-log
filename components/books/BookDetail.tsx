@@ -366,12 +366,12 @@ export default function BookDetail({ book, initialQuotes, initialPhotos, initial
       <div className="rounded-2xl border border-slate-100 overflow-hidden">
         <div className="px-4 py-3 bg-slate-50 border-b border-slate-100 flex items-center gap-2">
           <Brain className="w-4 h-4 text-indigo-500" />
-          <p className="text-sm font-semibold text-slate-700">読む前・読んだ後</p>
+          <p className="text-sm font-semibold text-slate-700">思考の変化</p>
         </div>
         <div className={cn("grid divide-slate-100", status === "done" ? "grid-cols-2 divide-x" : "grid-cols-1")}>
           {/* 読む前 */}
           <div className="p-3 space-y-2">
-            <p className="text-xs font-medium text-slate-400 flex items-center gap-1"><BookOpen className="w-3 h-3" />読む前</p>
+            <p className="text-xs font-medium text-slate-400 flex items-center gap-1"><BookOpen className="w-3 h-3" />Before</p>
             {editingPreMemo ? (
               <div className="space-y-2">
                 <AutoResizeTextarea
@@ -400,7 +400,7 @@ export default function BookDetail({ book, initialQuotes, initialPhotos, initial
           {/* 読んだ後（読了時のみ） */}
           {status === "done" && (
             <div className="p-3 space-y-2">
-              <p className="text-xs font-medium text-slate-400 flex items-center gap-1"><Lightbulb className="w-3 h-3" />読んだ後</p>
+              <p className="text-xs font-medium text-slate-400 flex items-center gap-1"><Lightbulb className="w-3 h-3" />After</p>
               {editingPostMemo ? (
                 <div className="space-y-2">
                   <AutoResizeTextarea
