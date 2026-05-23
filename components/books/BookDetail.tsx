@@ -22,11 +22,13 @@ interface Props {
   initialQuotes: {
     id: string; text: string; pageNumber: number | null; chapter: string | null;
     memo: string | null; isFavorite: boolean; createdAt: Date;
+    tags: { id: string; name: string; color: string }[];
   }[];
   initialPhotos: {
     id: string; url: string; caption: string | null; extractedText: string | null; createdAt: Date;
   }[];
   initialChat: { id: string; role: string; content: string; createdAt: Date }[];
+  initialTags: { id: string; name: string; color: string }[];
 }
 
 const tabs: { id: Tab; label: string; icon: React.ElementType }[] = [
@@ -41,7 +43,7 @@ const STATUS_OPTIONS: { value: BookStatus; label: string }[] = [
   { value: "done", label: "読了" },
 ];
 
-export default function BookDetail({ book, initialQuotes, initialPhotos, initialChat }: Props) {
+export default function BookDetail({ book, initialQuotes, initialPhotos, initialChat, initialTags }: Props) {
   const [activeTab, setActiveTab] = useState<Tab>("quotes");
   const [deleting, setDeleting] = useState(false);
   const [status, setStatus] = useState<BookStatus>(book.status as BookStatus);
@@ -151,7 +153,7 @@ export default function BookDetail({ book, initialQuotes, initialPhotos, initial
         ))}
       </div>
 
-      {activeTab === "quotes" && <QuotesTab bookId={book.id} initialQuotes={initialQuotes} />}
+      {activeTab === "quotes" && <QuotesTab bookId={book.id} initialQuotes={initialQuotes} initialTags={initialTags} />}
       {activeTab === "photos" && <PhotosTab bookId={book.id} initialPhotos={initialPhotos} />}
       {activeTab === "ai" && <AiChatTab bookId={book.id} initialChat={initialChat} />}
     </div>
