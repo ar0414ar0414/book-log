@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { Camera, Upload, Trash2, FileText, Loader2, Image as ImageIcon, MessageSquare, Check, X } from "lucide-react";
+import { Camera, Upload, Trash2, FileText, Loader2, Image as ImageIcon, MessageSquare, Check, X, AlertCircle } from "lucide-react";
 import { useAiProvider } from "@/hooks/useAiProvider";
 
 interface PhotoItem {
@@ -14,6 +14,7 @@ export default function PhotosTab({ bookId, initialPhotos }: { bookId: string; i
   const [ocrLoading, setOcrLoading] = useState<string | null>(null);
   const [selectedPhoto, setSelectedPhoto] = useState<PhotoItem | null>(null);
   const { provider } = useAiProvider();
+  const [ocrError, setOcrError] = useState<string | null>(null);
   const [captionEditing, setCaptionEditing] = useState(false);
   const [captionDraft, setCaptionDraft] = useState("");
   const [captionSaving, setCaptionSaving] = useState(false);
@@ -38,6 +39,7 @@ export default function PhotosTab({ bookId, initialPhotos }: { bookId: string; i
 
   async function handleOcr(photo: PhotoItem) {
     setOcrLoading(photo.id);
+    setOcrError(null);
     try {
       const response = await fetch(photo.url);
       const blob = await response.blob();
@@ -50,12 +52,14 @@ export default function PhotosTab({ bookId, initialPhotos }: { bookId: string; i
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ photoId: photo.id, imageBase64: base64, mimeType: blob.type, provider }),
         });
-        const { text } = await res.json();
-        setPhotoList((p) => p.map((item) => item.id === photo.id ? { ...item, extractedText: text } : item));
-        if (selectedPhoto?.id === photo.id) setSelectedPhoto((p) => p ? { ...p, extractedText: text } : p);
+        const data = await res.json();
+        if (!res.ok) { setOcrError(data.message ?? "エラーが発生しました"); setOcrLoading(null); return; }
+        setPhotoList((p) => p.map((item) => item.id === photo.id ? { ...item, extractedText: data.text } : item));
+        if (selectedPhoto?.id === photo.id) setSelectedPhoto((p) => p ? { ...p, extractedText: data.text } : p);
         setOcrLoading(null);
       };
     } catch {
+      setOcrError("AI処理中にエラーが発生しました。もう一度お試しください。");
       setOcrLoading(null);
     }
   }
@@ -149,6 +153,15 @@ export default function PhotosTab({ bookId, initialPhotos }: { bookId: string; i
           <div className="bg-white rounded-2xl w-full max-w-lg overflow-hidden" onClick={(e) => e.stopPropagation()}>
             <img src={selectedPhoto.url} alt="" className="w-full max-h-64 object-contain bg-black" />
             <div className="p-4 space-y-3">
+              {ocrError && (
+                <div className="flex items-start gap-2.5 bg-red-50 border border-red-200 rounded-xl px-3 py-2.5">
+                  <AlertCircle className="w-4 h-4 text-red-500 flex-shrink-0 mt-0.5" />
+                  <div className="flex-1">
+                    <p className="text-xs text-red-700">{ocrError}</p>
+                    <button onClick={() => setOcrError(null)} className="text-xs text-red-400 hover:text-red-600 mt-0.5">閉じる</button>
+                  </div>
+                </div>
+              )}
               {/* メモ欄 */}
               <div>
                 {captionEditing ? (

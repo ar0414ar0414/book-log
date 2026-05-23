@@ -3,7 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { db } from "@/lib/db";
 import { aiConversations, books, quotes } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
-import { getAiClient, type AiProvider } from "@/lib/ai/provider";
+import { getAiClient, classifyAiError, type AiProvider } from "@/lib/ai/provider";
 import { randomUUID } from "crypto";
 
 export async function POST(request: Request) {
@@ -33,14 +33,19 @@ ${bookQuotes.length > 0 ? `\n保存した引用:\n${bookQuotes.map((q) => `・�
 
 上記の情報をもとに、読者の質問・感想に日本語で丁寧に回答してください。`;
 
-  const client = getAiClient(provider as AiProvider);
-  const chatHistory = history.map((m) => ({ role: m.role as "user" | "assistant", content: m.content }));
-  const aiReply = await client.chatWithHistory(systemPrompt, chatHistory, message);
+  try {
+    const client = getAiClient(provider as AiProvider);
+    const chatHistory = history.map((m) => ({ role: m.role as "user" | "assistant", content: m.content }));
+    const aiReply = await client.chatWithHistory(systemPrompt, chatHistory, message);
 
-  await db.insert(aiConversations).values([
-    { id: randomUUID(), userId: user.id, bookId, role: "user", content: message },
-    { id: randomUUID(), userId: user.id, bookId, role: "assistant", content: aiReply },
-  ]);
+    await db.insert(aiConversations).values([
+      { id: randomUUID(), userId: user.id, bookId, role: "user", content: message },
+      { id: randomUUID(), userId: user.id, bookId, role: "assistant", content: aiReply },
+    ]);
 
-  return NextResponse.json({ reply: aiReply });
+    return NextResponse.json({ reply: aiReply });
+  } catch (e) {
+    const { code, message: msg } = classifyAiError(e);
+    return NextResponse.json({ error: code, message: msg }, { status: code === "quota_exceeded" ? 429 : 500 });
+  }
 }

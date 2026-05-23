@@ -3,7 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { db } from "@/lib/db";
 import { books, quotes, photos } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
-import { getAiClient, type AiProvider } from "@/lib/ai/provider";
+import { getAiClient, classifyAiError, type AiProvider } from "@/lib/ai/provider";
 import { buildReadingRecordPrompt } from "@/lib/gemini/prompts";
 import type { Book, Quote } from "@/types";
 
@@ -22,10 +22,14 @@ export async function POST(request: Request) {
 
   if (!book) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
-  const photoTexts = bookPhotos.filter((p) => p.extractedText).map((p) => p.extractedText as string);
-  const prompt = buildReadingRecordPrompt(book as Book, bookQuotes as Quote[], photoTexts);
-  const client = getAiClient(provider as AiProvider);
-  const record = await client.generateText(prompt);
-
-  return NextResponse.json({ record });
+  try {
+    const photoTexts = bookPhotos.filter((p) => p.extractedText).map((p) => p.extractedText as string);
+    const prompt = buildReadingRecordPrompt(book as Book, bookQuotes as Quote[], photoTexts);
+    const client = getAiClient(provider as AiProvider);
+    const record = await client.generateText(prompt);
+    return NextResponse.json({ record });
+  } catch (e) {
+    const { code, message } = classifyAiError(e);
+    return NextResponse.json({ error: code, message }, { status: code === "quota_exceeded" ? 429 : 500 });
+  }
 }

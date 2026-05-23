@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { BookOpen, Star, Quote, Image as ImageIcon, Bot, Trash2, ArrowLeft, Sparkles, Copy, Check, Loader2, ChevronDown, ChevronUp } from "lucide-react";
+import { BookOpen, Star, Quote, Image as ImageIcon, Bot, Trash2, ArrowLeft, Sparkles, Copy, Check, Loader2, ChevronDown, ChevronUp, AlertCircle } from "lucide-react";
 import { useAiProvider } from "@/hooks/useAiProvider";
 import Link from "next/link";
 import { cn, STATUS_LABELS, STATUS_COLORS, formatDate } from "@/lib/utils";
@@ -68,6 +68,7 @@ export default function BookDetail({ book, initialQuotes, initialPhotos, initial
   const [aiRecord, setAiRecord] = useState<string | null>(null);
   const [aiRecordLoading, setAiRecordLoading] = useState(false);
   const [aiRecordOpen, setAiRecordOpen] = useState(false);
+  const [aiRecordError, setAiRecordError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const { provider } = useAiProvider();
   const router = useRouter();
@@ -87,14 +88,16 @@ export default function BookDetail({ book, initialQuotes, initialPhotos, initial
   async function generateAiRecord() {
     setAiRecordLoading(true);
     setAiRecordOpen(true);
+    setAiRecordError(null);
     try {
       const res = await fetch("/api/ai/reading-record", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ bookId: book.id, provider }),
       });
-      const { record } = await res.json();
-      setAiRecord(record);
+      const data = await res.json();
+      if (!res.ok) { setAiRecordError(data.message ?? "エラーが発生しました"); return; }
+      setAiRecord(data.record);
     } finally {
       setAiRecordLoading(false);
     }
@@ -214,6 +217,16 @@ export default function BookDetail({ book, initialQuotes, initialPhotos, initial
             <div className="px-4 py-6 text-center">
               <Loader2 className="w-6 h-6 text-indigo-400 animate-spin mx-auto mb-2" />
               <p className="text-sm text-slate-400">AIが読書記録を作成しています...</p>
+            </div>
+          )}
+
+          {aiRecordError && !aiRecordLoading && (
+            <div className="mx-4 mb-4 flex items-start gap-2.5 bg-red-50 border border-red-200 rounded-xl px-4 py-3">
+              <AlertCircle className="w-4 h-4 text-red-500 flex-shrink-0 mt-0.5" />
+              <div className="flex-1">
+                <p className="text-sm text-red-700">{aiRecordError}</p>
+                <button onClick={() => { setAiRecordError(null); setAiRecordOpen(false); }} className="text-xs text-red-400 hover:text-red-600 mt-0.5">閉じる</button>
+              </div>
             </div>
           )}
 

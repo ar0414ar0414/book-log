@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Send, Bot, User, Loader2, Sparkles } from "lucide-react";
+import { Send, Bot, User, Loader2, Sparkles, AlertCircle } from "lucide-react";
 import { useAiProvider } from "@/hooks/useAiProvider";
 import { cn } from "@/lib/utils";
 
@@ -15,6 +15,7 @@ export default function AiChatTab({ bookId, initialChat }: { bookId: string; ini
   const [loading, setLoading] = useState(false);
   const [summaryLoading, setSummaryLoading] = useState(false);
   const [summary, setSummary] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const { provider } = useAiProvider();
 
@@ -32,6 +33,7 @@ export default function AiChatTab({ bookId, initialChat }: { bookId: string; ini
       id: Date.now().toString(), role: "user", content: userMsg, createdAt: new Date()
     }]);
     setLoading(true);
+    setError(null);
 
     try {
       const res = await fetch("/api/ai/chat", {
@@ -39,9 +41,10 @@ export default function AiChatTab({ bookId, initialChat }: { bookId: string; ini
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ bookId, message: userMsg, provider }),
       });
-      const { reply } = await res.json();
+      const data = await res.json();
+      if (!res.ok) { setError(data.message ?? "エラーが発生しました"); return; }
       setMessages((m) => [...m, {
-        id: (Date.now() + 1).toString(), role: "assistant", content: reply, createdAt: new Date()
+        id: (Date.now() + 1).toString(), role: "assistant", content: data.reply, createdAt: new Date()
       }]);
     } finally {
       setLoading(false);
@@ -50,14 +53,16 @@ export default function AiChatTab({ bookId, initialChat }: { bookId: string; ini
 
   async function handleSummary() {
     setSummaryLoading(true);
+    setError(null);
     try {
       const res = await fetch("/api/ai/summary", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ bookId, provider }),
       });
-      const { summary: s } = await res.json();
-      setSummary(s);
+      const data = await res.json();
+      if (!res.ok) { setError(data.message ?? "エラーが発生しました"); return; }
+      setSummary(data.summary);
     } finally {
       setSummaryLoading(false);
     }
@@ -75,6 +80,16 @@ export default function AiChatTab({ bookId, initialChat }: { bookId: string; ini
           {summaryLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
           AIに要約・考察を作ってもらう
         </button>
+      )}
+
+      {error && (
+        <div className="flex items-start gap-2.5 bg-red-50 border border-red-200 rounded-xl px-4 py-3">
+          <AlertCircle className="w-4 h-4 text-red-500 flex-shrink-0 mt-0.5" />
+          <div className="flex-1 min-w-0">
+            <p className="text-sm text-red-700">{error}</p>
+            <button onClick={() => setError(null)} className="text-xs text-red-400 hover:text-red-600 mt-0.5">閉じる</button>
+          </div>
+        </div>
       )}
 
       {summary && (
