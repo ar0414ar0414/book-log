@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { BookOpen, Star, Quote, Image as ImageIcon, Bot, Trash2, ArrowLeft, Sparkles, Copy, Check, Loader2, ChevronDown, ChevronUp, AlertCircle } from "lucide-react";
+import { BookOpen, Star, Quote, Image as ImageIcon, Bot, Trash2, ArrowLeft, Sparkles, Copy, Check, Loader2, ChevronDown, ChevronUp, AlertCircle, Brain, X } from "lucide-react";
 import { useAiProvider } from "@/hooks/useAiProvider";
 import Link from "next/link";
 import { cn, STATUS_LABELS, STATUS_COLORS, formatDate } from "@/lib/utils";
@@ -17,6 +17,7 @@ interface Props {
   book: {
     id: string; title: string; author: string | null; coverUrl: string | null;
     genre: string | null; status: string; rating: number | null; memo: string | null;
+    preMemo: string | null; postMemo: string | null;
     startedAt: Date | null; finishedAt: Date | null; updatedAt: Date; publisher: string | null;
     publishedDate: string | null; description: string | null; pageCount: number | null;
   };
@@ -76,6 +77,14 @@ export default function BookDetail({ book, initialQuotes, initialPhotos, initial
   const [aiRecordOpen, setAiRecordOpen] = useState(false);
   const [aiRecordError, setAiRecordError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [preMemo, setPreMemo] = useState(book.preMemo ?? "");
+  const [postMemo, setPostMemo] = useState(book.postMemo ?? "");
+  const [editingPreMemo, setEditingPreMemo] = useState(false);
+  const [editingPostMemo, setEditingPostMemo] = useState(false);
+  const [preDraft, setPreDraft] = useState("");
+  const [postDraft, setPostDraft] = useState("");
+  const [reflectionSaving, setReflectionSaving] = useState(false);
+  const [showPostPopup, setShowPostPopup] = useState(false);
   const { provider } = useAiProvider();
   const router = useRouter();
 
@@ -116,6 +125,22 @@ export default function BookDetail({ book, initialQuotes, initialPhotos, initial
       body: JSON.stringify({ status: newStatus }),
     });
     setUpdatingStatus(false);
+    if (newStatus === "done" && !postMemo) {
+      setPostDraft("");
+      setShowPostPopup(true);
+    }
+  }
+
+  async function saveReflection(field: "preMemo" | "postMemo", value: string) {
+    setReflectionSaving(true);
+    await fetch(`/api/books/${book.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ [field]: value.trim() || null }),
+    });
+    if (field === "preMemo") { setPreMemo(value.trim()); setEditingPreMemo(false); }
+    else { setPostMemo(value.trim()); setEditingPostMemo(false); setShowPostPopup(false); }
+    setReflectionSaving(false);
   }
 
   async function generateAiRecord() {
@@ -251,6 +276,108 @@ export default function BookDetail({ book, initialQuotes, initialPhotos, initial
             <p className="text-sm text-slate-400 group-hover:text-indigo-500 transition-colors">メモを追加...</p>
           )}
         </button>
+      )}
+
+      {/* 読書前後の思考変化 */}
+      <div className="rounded-2xl border border-slate-100 overflow-hidden">
+        <div className="px-4 py-3 bg-slate-50 border-b border-slate-100 flex items-center gap-2">
+          <Brain className="w-4 h-4 text-indigo-500" />
+          <p className="text-sm font-semibold text-slate-700">読む前・読んだ後</p>
+        </div>
+        <div className={cn("grid divide-slate-100", status === "done" ? "grid-cols-2 divide-x" : "grid-cols-1")}>
+          {/* 読む前 */}
+          <div className="p-3 space-y-2">
+            <p className="text-xs font-medium text-slate-400">📖 読む前</p>
+            {editingPreMemo ? (
+              <div className="space-y-2">
+                <textarea
+                  value={preDraft}
+                  onChange={(e) => setPreDraft(e.target.value)}
+                  autoFocus
+                  rows={4}
+                  placeholder="この本への期待・仮説・疑問..."
+                  className="w-full text-sm border border-indigo-200 rounded-lg px-2.5 py-2 focus:outline-none focus:border-indigo-400 resize-none"
+                />
+                <div className="flex gap-1.5">
+                  <button onClick={() => setEditingPreMemo(false)} className="flex-1 py-1.5 text-xs rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-50">キャンセル</button>
+                  <button onClick={() => saveReflection("preMemo", preDraft)} disabled={reflectionSaving} className="flex-1 py-1.5 text-xs rounded-lg bg-indigo-600 text-white font-medium disabled:opacity-50">保存</button>
+                </div>
+              </div>
+            ) : (
+              <button
+                onClick={() => { setPreDraft(preMemo); setEditingPreMemo(true); }}
+                className="w-full text-left text-sm text-slate-600 leading-relaxed whitespace-pre-wrap hover:bg-slate-50 rounded-lg p-1.5 -mx-1.5 transition-colors min-h-[3rem]"
+              >
+                {preMemo || <span className="text-slate-300 text-xs">タップして入力...</span>}
+              </button>
+            )}
+          </div>
+
+          {/* 読んだ後（読了時のみ） */}
+          {status === "done" && (
+            <div className="p-3 space-y-2">
+              <p className="text-xs font-medium text-slate-400">💡 読んだ後</p>
+              {editingPostMemo ? (
+                <div className="space-y-2">
+                  <textarea
+                    value={postDraft}
+                    onChange={(e) => setPostDraft(e.target.value)}
+                    autoFocus
+                    rows={4}
+                    placeholder="考えが変わったこと・気づき..."
+                    className="w-full text-sm border border-emerald-200 rounded-lg px-2.5 py-2 focus:outline-none focus:border-emerald-400 resize-none"
+                  />
+                  <div className="flex gap-1.5">
+                    <button onClick={() => setEditingPostMemo(false)} className="flex-1 py-1.5 text-xs rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-50">キャンセル</button>
+                    <button onClick={() => saveReflection("postMemo", postDraft)} disabled={reflectionSaving} className="flex-1 py-1.5 text-xs rounded-lg bg-emerald-600 text-white font-medium disabled:opacity-50">保存</button>
+                  </div>
+                </div>
+              ) : (
+                <button
+                  onClick={() => { setPostDraft(postMemo); setEditingPostMemo(true); }}
+                  className="w-full text-left text-sm text-slate-600 leading-relaxed whitespace-pre-wrap hover:bg-slate-50 rounded-lg p-1.5 -mx-1.5 transition-colors min-h-[3rem]"
+                >
+                  {postMemo || <span className="text-slate-300 text-xs">タップして入力...</span>}
+                </button>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* 読了ポップアップ */}
+      {showPostPopup && (
+        <div className="fixed inset-0 z-50 bg-black/60 flex items-end sm:items-center justify-center p-4">
+          <div className="bg-white rounded-2xl w-full max-w-md p-5 space-y-4">
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="font-bold text-slate-900">読了おめでとう🎉</p>
+                <p className="text-sm text-slate-500 mt-0.5">読んで何が変わりましたか？</p>
+              </div>
+              <button onClick={() => setShowPostPopup(false)} className="text-slate-300 hover:text-slate-500 p-1">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <textarea
+              value={postDraft}
+              onChange={(e) => setPostDraft(e.target.value)}
+              autoFocus
+              rows={4}
+              placeholder="考えが変わったこと・気づき・印象に残ったこと..."
+              className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-emerald-400 resize-none"
+            />
+            <div className="flex gap-2">
+              <button onClick={() => setShowPostPopup(false)} className="flex-1 py-2.5 rounded-xl border border-slate-200 text-slate-600 text-sm hover:bg-slate-50">スキップ</button>
+              <button
+                onClick={() => saveReflection("postMemo", postDraft)}
+                disabled={reflectionSaving || !postDraft.trim()}
+                className="flex-1 py-2.5 rounded-xl bg-emerald-600 text-white text-sm font-medium hover:bg-emerald-700 disabled:opacity-50"
+              >
+                {reflectionSaving ? "保存中..." : "保存する"}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* AI読書記録 */}

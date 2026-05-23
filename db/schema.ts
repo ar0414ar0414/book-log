@@ -24,6 +24,8 @@ export const books = pgTable("books", {
   startedAt: timestamp("started_at"),
   finishedAt: timestamp("finished_at"),
   memo: text("memo"),
+  preMemo: text("pre_memo"),
+  postMemo: text("post_memo"),
   pageCount: integer("page_count"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
