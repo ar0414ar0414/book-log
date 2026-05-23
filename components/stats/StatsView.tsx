@@ -138,30 +138,27 @@ export default function StatsView({ books }: { books: Book[] }) {
         {stats.doneThisYear.length === 0 ? (
           <p className="text-xs text-slate-400 text-center py-6">{year}年の読了データがありません</p>
         ) : (
-          <div className="flex items-end gap-1.5 h-28">
+          <div className="flex items-end gap-1.5">
             {stats.monthly.map((count, i) => {
               const isCurrentMonth =
                 year === new Date().getFullYear() && i === new Date().getMonth();
-              const heightPct = (count / maxMonthly) * 100;
+              const BAR_MAX_H = 80;
+              const barH = count > 0 ? Math.max((count / maxMonthly) * BAR_MAX_H, 8) : 3;
               return (
                 <div key={i} className="flex-1 flex flex-col items-center gap-1">
-                  {count > 0 && (
-                    <span className="text-xs font-semibold text-indigo-600">{count}</span>
-                  )}
-                  <div className="w-full flex-1 flex items-end">
-                    <div
-                      className="w-full rounded-t-md transition-all"
-                      style={{
-                        height: count > 0 ? `${Math.max(heightPct, 8)}%` : "4px",
-                        backgroundColor: count > 0
-                          ? isCurrentMonth ? "#4f46e5" : "#a5b4fc"
-                          : "#f1f5f9",
-                      }}
-                    />
-                  </div>
-                  <span
-                    className={`text-xs ${isCurrentMonth ? "text-indigo-600 font-semibold" : "text-slate-400"}`}
-                  >
+                  <span className="text-xs font-semibold text-indigo-600" style={{ minHeight: 16 }}>
+                    {count > 0 ? count : ""}
+                  </span>
+                  <div
+                    className="w-full rounded-t-md transition-all"
+                    style={{
+                      height: barH,
+                      backgroundColor: count > 0
+                        ? isCurrentMonth ? "#4f46e5" : "#a5b4fc"
+                        : "#f1f5f9",
+                    }}
+                  />
+                  <span className={`text-xs ${isCurrentMonth ? "text-indigo-600 font-semibold" : "text-slate-400"}`}>
                     {MONTH_LABELS[i]}
                   </span>
                 </div>
