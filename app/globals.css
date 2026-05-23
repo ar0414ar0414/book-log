@@ -13,3 +13,13 @@ body {
 * {
   -webkit-tap-highlight-color: transparent;
 }
+
+/* BottomNav の safe-area 対応: nav 本体の下余白 */
+.safe-area-pb {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* コンテンツの下余白 = nav高さ(3.5rem) + safe-area */
+.pb-nav-safe {
+  padding-bottom: calc(3.5rem + env(safe-area-inset-bottom, 0px));
+}

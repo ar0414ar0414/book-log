@@ -68,7 +68,7 @@ export default function BookDetail({ book, initialQuotes, initialPhotos, initial
   }
 
   return (
-    <div className="pb-20 sm:pb-6 space-y-4">
+    <div className="space-y-4">
       <div className="flex items-center gap-3">
         <Link href="/books" className="p-2 hover:bg-slate-100 rounded-lg transition-colors">
           <ArrowLeft className="w-5 h-5 text-slate-600" />

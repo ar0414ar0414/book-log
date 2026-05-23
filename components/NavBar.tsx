@@ -42,7 +42,7 @@ export default function NavBar({ user }: { user: User }) {
       </header>
 
       {/* bottom nav (mobile) */}
-      <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-slate-100 flex sm:hidden">
+      <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-slate-100 flex sm:hidden safe-area-pb">
         {navItems.map(({ href, icon: Icon, label }) => (
           <Link
             key={href}
