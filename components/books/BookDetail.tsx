@@ -32,6 +32,8 @@ interface Props {
   }[];
   initialChat: { id: string; role: string; content: string; createdAt: Date }[];
   initialTags: { id: string; name: string; color: string }[];
+  prevId: string | null;
+  nextId: string | null;
 }
 
 const tabs: { id: Tab; label: string; icon: React.ElementType }[] = [
@@ -62,7 +64,7 @@ function parseRecord(text: string): { heading: string; body: string }[] {
   return sections.length > 0 ? sections : [{ heading: "", body: text }];
 }
 
-export default function BookDetail({ book, initialQuotes, initialPhotos, initialChat, initialTags }: Props) {
+export default function BookDetail({ book, initialQuotes, initialPhotos, initialChat, initialTags, prevId, nextId }: Props) {
   const [activeTab, setActiveTab] = useState<Tab>("quotes");
   const [deleting, setDeleting] = useState(false);
   const [status, setStatus] = useState<BookStatus>(book.status as BookStatus);
@@ -92,6 +94,29 @@ export default function BookDetail({ book, initialQuotes, initialPhotos, initial
   const { provider } = useAiProvider();
   const router = useRouter();
   const touchStartX = useRef<number | null>(null);
+  const cardTouchStartX = useRef<number | null>(null);
+  const [cardOffset, setCardOffset] = useState(0);
+
+  function handleCardTouchStart(e: React.TouchEvent) {
+    cardTouchStartX.current = e.touches[0].clientX;
+  }
+
+  function handleCardTouchMove(e: React.TouchEvent) {
+    if (cardTouchStartX.current === null) return;
+    const diff = e.touches[0].clientX - cardTouchStartX.current;
+    if (Math.abs(diff) > 10) setCardOffset(Math.sign(diff) * Math.min(Math.abs(diff) * 0.3, 40));
+  }
+
+  function handleCardTouchEnd(e: React.TouchEvent) {
+    if (cardTouchStartX.current === null) return;
+    const diff = e.changedTouches[0].clientX - cardTouchStartX.current;
+    setCardOffset(0);
+    if (Math.abs(diff) >= 70) {
+      if (diff < 0 && nextId) router.push(`/books/${nextId}`);
+      if (diff > 0 && prevId) router.push(`/books/${prevId}`);
+    }
+    cardTouchStartX.current = null;
+  }
 
   function handleTouchStart(e: React.TouchEvent) {
     touchStartX.current = e.touches[0].clientX;
@@ -219,7 +244,13 @@ export default function BookDetail({ book, initialQuotes, initialPhotos, initial
       </div>
 
       {/* book info card */}
-      <div className="bg-white rounded-2xl border border-slate-100 p-4 flex gap-4">
+      <div
+        className="bg-white rounded-2xl border border-slate-100 p-4 flex gap-4 transition-transform duration-75 select-none"
+        style={{ transform: `translateX(${cardOffset}px)` }}
+        onTouchStart={handleCardTouchStart}
+        onTouchMove={handleCardTouchMove}
+        onTouchEnd={handleCardTouchEnd}
+      >
         {book.coverUrl ? (
           <img src={book.coverUrl} alt={book.title} className="w-20 h-28 object-cover rounded-lg shadow flex-shrink-0" />
         ) : (

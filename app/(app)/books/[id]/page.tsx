@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { db } from "@/lib/db";
 import { books, quotes, photos, aiConversations, tags, quoteTags } from "@/db/schema";
-import { eq, and, inArray } from "drizzle-orm";
+import { eq, and, inArray, desc } from "drizzle-orm";
 import { notFound } from "next/navigation";
 import BookDetail from "@/components/books/BookDetail";
 
@@ -13,6 +13,11 @@ export default async function BookPage({ params }: { params: Promise<{ id: strin
 
   const [book] = await db.select().from(books).where(and(eq(books.id, id), eq(books.userId, user.id)));
   if (!book) notFound();
+
+  const allBooks = await db.select({ id: books.id }).from(books).where(eq(books.userId, user.id)).orderBy(desc(books.updatedAt));
+  const currentIdx = allBooks.findIndex((b) => b.id === id);
+  const prevId = currentIdx > 0 ? allBooks[currentIdx - 1].id : null;
+  const nextId = currentIdx < allBooks.length - 1 ? allBooks[currentIdx + 1].id : null;
 
   const [bookQuotes, bookPhotos, chatHistory, userTags] = await Promise.all([
     db.select().from(quotes).where(and(eq(quotes.bookId, id), eq(quotes.userId, user.id))).orderBy(quotes.createdAt),
@@ -53,6 +58,8 @@ export default async function BookPage({ params }: { params: Promise<{ id: strin
       initialPhotos={bookPhotos}
       initialChat={chatHistory}
       initialTags={normalizedTags}
+      prevId={prevId}
+      nextId={nextId}
     />
   );
 }
