@@ -16,22 +16,22 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 to-purple-50 px-4">
-      <div className="w-full max-w-sm bg-white rounded-2xl shadow-lg p-8 flex flex-col items-center gap-6">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 dark:from-indigo-950 to-purple-50 dark:to-slate-900 px-4">
+      <div className="w-full max-w-sm bg-white dark:bg-slate-800 rounded-2xl shadow-lg p-8 flex flex-col items-center gap-6">
         <div className="flex items-center gap-3">
-          <div className="w-12 h-12 bg-indigo-600 rounded-xl flex items-center justify-center">
+          <div className="w-12 h-12 bg-indigo-600 dark:bg-indigo-500 rounded-xl flex items-center justify-center">
             <BookOpen className="w-7 h-7 text-white" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-slate-900">Folio</h1>
-            <p className="text-sm text-slate-500">読書記録アプリ</p>
+            <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Folio</h1>
+            <p className="text-sm text-slate-500 dark:text-slate-400">読書記録アプリ</p>
           </div>
         </div>
 
-        <div className="w-full border-t border-slate-100" />
+        <div className="w-full border-t border-slate-100 dark:border-slate-700" />
 
         <div className="text-center">
-          <p className="text-slate-600 text-sm leading-relaxed">
+          <p className="text-slate-600 dark:text-slate-400 text-sm leading-relaxed">
             読んだ本を記録し、お気に入りの一文を保存。<br />
             AIと一緒に本の世界を深く味わおう。
           </p>
@@ -39,7 +39,7 @@ export default function LoginPage() {
 
         <button
           onClick={signInWithGoogle}
-          className="w-full flex items-center justify-center gap-3 px-4 py-3 border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors font-medium text-slate-700"
+          className="w-full flex items-center justify-center gap-3 px-4 py-3 border border-slate-200 dark:border-slate-600 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors font-medium text-slate-700 dark:text-slate-300"
         >
           <svg className="w-5 h-5" viewBox="0 0 24 24">
             <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
@@ -50,7 +50,7 @@ export default function LoginPage() {
           Googleでログイン
         </button>
 
-        <p className="text-xs text-slate-400 text-center">
+        <p className="text-xs text-slate-400 dark:text-slate-500 text-center">
           ログインすることで利用規約とプライバシーポリシーに同意したことになります
         </p>
       </div>

@@ -99,14 +99,14 @@ export default function PhotosTab({ bookId, initialPhotos }: { bookId: string; i
       <div className="flex gap-2">
         <button
           onClick={() => { if (inputRef.current) { inputRef.current.accept = "image/*"; inputRef.current.capture = "environment"; inputRef.current.click(); } }}
-          className="flex-1 flex items-center justify-center gap-2 bg-indigo-600 text-white py-2.5 rounded-xl text-sm font-medium hover:bg-indigo-700 transition-colors"
+          className="flex-1 flex items-center justify-center gap-2 bg-indigo-600 dark:bg-indigo-500 text-white py-2.5 rounded-xl text-sm font-medium hover:bg-indigo-700 dark:hover:bg-indigo-600 transition-colors"
         >
           <Camera className="w-4 h-4" />
           撮影する
         </button>
         <button
           onClick={() => { if (inputRef.current) { inputRef.current.removeAttribute("capture"); inputRef.current.click(); } }}
-          className="flex-1 flex items-center justify-center gap-2 bg-white border border-slate-200 text-slate-700 py-2.5 rounded-xl text-sm font-medium hover:bg-slate-50 transition-colors"
+          className="flex-1 flex items-center justify-center gap-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 py-2.5 rounded-xl text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
           disabled={uploading}
         >
           {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
@@ -125,15 +125,15 @@ export default function PhotosTab({ bookId, initialPhotos }: { bookId: string; i
 
       {photoList.length === 0 ? (
         <div className="text-center py-12">
-          <ImageIcon className="w-10 h-10 text-slate-200 mx-auto mb-2" />
-          <p className="text-slate-400 text-sm">写真がありません</p>
+          <ImageIcon className="w-10 h-10 text-slate-200 dark:text-slate-700 mx-auto mb-2" />
+          <p className="text-slate-400 dark:text-slate-500 text-sm">写真がありません</p>
         </div>
       ) : (
         <div className="grid grid-cols-2 gap-2">
           {photoList.map((photo) => (
             <div
               key={photo.id}
-              className="relative rounded-xl overflow-hidden border border-slate-100 cursor-pointer"
+              className="relative rounded-xl overflow-hidden border border-slate-100 dark:border-slate-700 cursor-pointer"
               onClick={() => setSelectedPhoto(photo)}
             >
               <img src={photo.url} alt={photo.caption ?? ""} className="w-full aspect-[4/3] object-cover" />
@@ -152,23 +152,22 @@ export default function PhotosTab({ bookId, initialPhotos }: { bookId: string; i
       {/* photo modal */}
       {selectedPhoto && (
         <div className="fixed inset-0 z-50 bg-black/70 flex items-end sm:items-center justify-center p-4" onClick={() => { setSelectedPhoto(null); setCaptionEditing(false); }}>
-          <div className="bg-white rounded-2xl w-full max-w-lg overflow-hidden" onClick={(e) => e.stopPropagation()}>
+          <div className="bg-white dark:bg-slate-800 rounded-2xl w-full max-w-lg overflow-hidden" onClick={(e) => e.stopPropagation()}>
             <img src={selectedPhoto.url} alt="" className="w-full max-h-64 object-contain bg-black" />
             <div className="p-4 space-y-3">
               {ocrError && (
-                <div className="flex items-start gap-2.5 bg-red-50 border border-red-200 rounded-xl px-3 py-2.5">
+                <div className="flex items-start gap-2.5 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 rounded-xl px-3 py-2.5">
                   <AlertCircle className="w-4 h-4 text-red-500 flex-shrink-0 mt-0.5" />
                   <div className="flex-1">
-                    <p className="text-xs text-red-700">{ocrError}</p>
+                    <p className="text-xs text-red-700 dark:text-red-300">{ocrError}</p>
                     <button onClick={() => setOcrError(null)} className="text-xs text-red-400 hover:text-red-600 mt-0.5">閉じる</button>
                   </div>
                 </div>
               )}
-              {/* メモ欄 */}
               <div>
                 {captionEditing ? (
                   <div className="space-y-2">
-                    <p className="text-xs font-medium text-slate-500 flex items-center gap-1">
+                    <p className="text-xs font-medium text-slate-500 dark:text-slate-400 flex items-center gap-1">
                       <MessageSquare className="w-3 h-3" />メモ
                     </p>
                     <AutoResizeTextarea
@@ -181,19 +180,19 @@ export default function PhotosTab({ bookId, initialPhotos }: { bookId: string; i
                       rows={3}
                       placeholder="この写真のメモを入力..."
                       autoFocus
-                      className="w-full border border-indigo-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-indigo-400"
+                      className="w-full border border-indigo-300 dark:border-indigo-600 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-indigo-400 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100"
                     />
                     <div className="flex gap-2">
                       <button
                         onClick={() => setCaptionEditing(false)}
-                        className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl border border-slate-200 text-slate-600 text-sm hover:bg-slate-50 transition-colors"
+                        className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-400 text-sm hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
                       >
                         <X className="w-3.5 h-3.5" />キャンセル
                       </button>
                       <button
                         onClick={() => saveCaption(selectedPhoto.id)}
                         disabled={captionSaving}
-                        className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-700 disabled:opacity-50 transition-colors"
+                        className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl bg-indigo-600 dark:bg-indigo-500 text-white text-sm font-medium hover:bg-indigo-700 dark:hover:bg-indigo-600 disabled:opacity-50 transition-colors"
                       >
                         {captionSaving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
                         保存
@@ -203,29 +202,28 @@ export default function PhotosTab({ bookId, initialPhotos }: { bookId: string; i
                 ) : (
                   <button
                     onClick={() => openCaptionEdit(selectedPhoto)}
-                    className="w-full flex items-start gap-2 px-3 py-2.5 rounded-xl border border-dashed border-slate-200 hover:border-indigo-300 hover:bg-indigo-50 transition-colors text-left group"
+                    className="w-full flex items-start gap-2 px-3 py-2.5 rounded-xl border border-dashed border-slate-200 dark:border-slate-600 hover:border-indigo-300 dark:hover:border-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-950/30 transition-colors text-left group"
                   >
-                    <MessageSquare className="w-4 h-4 text-slate-400 group-hover:text-indigo-500 flex-shrink-0 mt-0.5 transition-colors" />
+                    <MessageSquare className="w-4 h-4 text-slate-400 dark:text-slate-500 group-hover:text-indigo-500 dark:group-hover:text-indigo-400 flex-shrink-0 mt-0.5 transition-colors" />
                     {selectedPhoto.caption ? (
-                      <p className="text-sm text-slate-700 leading-relaxed">{selectedPhoto.caption}</p>
+                      <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed">{selectedPhoto.caption}</p>
                     ) : (
-                      <p className="text-sm text-slate-400 group-hover:text-indigo-500 transition-colors">メモを追加...</p>
+                      <p className="text-sm text-slate-400 dark:text-slate-500 group-hover:text-indigo-500 dark:group-hover:text-indigo-400 transition-colors">メモを追加...</p>
                     )}
                   </button>
                 )}
               </div>
 
-              {/* OCR */}
               {selectedPhoto.extractedText ? (
-                <div className="bg-slate-50 rounded-xl p-3">
-                  <p className="text-xs font-medium text-slate-500 mb-1 flex items-center gap-1"><FileText className="w-3 h-3" />抽出テキスト</p>
-                  <p className="text-sm text-slate-700 whitespace-pre-wrap">{selectedPhoto.extractedText}</p>
+                <div className="bg-slate-50 dark:bg-slate-700 rounded-xl p-3">
+                  <p className="text-xs font-medium text-slate-500 dark:text-slate-400 mb-1 flex items-center gap-1"><FileText className="w-3 h-3" />抽出テキスト</p>
+                  <p className="text-sm text-slate-700 dark:text-slate-300 whitespace-pre-wrap">{selectedPhoto.extractedText}</p>
                 </div>
               ) : (
                 <button
                   onClick={() => handleOcr(selectedPhoto)}
                   disabled={ocrLoading === selectedPhoto.id}
-                  className="w-full flex items-center justify-center gap-2 border border-indigo-200 text-indigo-600 py-2.5 rounded-xl text-sm font-medium hover:bg-indigo-50 transition-colors disabled:opacity-50"
+                  className="w-full flex items-center justify-center gap-2 border border-indigo-200 dark:border-indigo-700 text-indigo-600 dark:text-indigo-400 py-2.5 rounded-xl text-sm font-medium hover:bg-indigo-50 dark:hover:bg-indigo-950/30 transition-colors disabled:opacity-50"
                 >
                   {ocrLoading === selectedPhoto.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <FileText className="w-4 h-4" />}
                   AIでテキスト抽出
@@ -233,7 +231,7 @@ export default function PhotosTab({ bookId, initialPhotos }: { bookId: string; i
               )}
               <button
                 onClick={() => handleDelete(selectedPhoto.id)}
-                className="w-full flex items-center justify-center gap-2 text-red-500 py-2 text-sm hover:bg-red-50 rounded-xl transition-colors"
+                className="w-full flex items-center justify-center gap-2 text-red-500 dark:text-red-400 py-2 text-sm hover:bg-red-50 dark:hover:bg-red-950/30 rounded-xl transition-colors"
               >
                 <Trash2 className="w-4 h-4" />
                 削除

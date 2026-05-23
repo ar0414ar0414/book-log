@@ -26,7 +26,6 @@ export default function StatsView({ books }: { books: Book[] }) {
   const [year, setYear] = useState(currentYear);
 
   const stats = useMemo(() => {
-    // finishedAt がない読了本は updatedAt → createdAt で代替
     const doneDate = (b: Book) =>
       b.finishedAt ? new Date(b.finishedAt) : new Date(b.updatedAt ?? b.createdAt);
 
@@ -38,12 +37,10 @@ export default function StatsView({ books }: { books: Book[] }) {
     const ratings = doneThisYear.filter((b) => b.rating != null).map((b) => b.rating!);
     const avgRating = ratings.length ? ratings.reduce((a, b) => a + b, 0) / ratings.length : 0;
 
-    // 月別読了数
     const monthly = Array.from({ length: 12 }, (_, i) =>
       doneThisYear.filter((b) => doneDate(b).getMonth() === i).length
     );
 
-    // ジャンル分布（finishedAt基準で統一）
     const genreMap = new Map<string, number>();
     doneThisYear.forEach((b) => {
       const g = localizeGenre(b.genre?.trim()) || "未分類";
@@ -53,13 +50,11 @@ export default function StatsView({ books }: { books: Book[] }) {
       .sort((a, b) => b[1] - a[1])
       .slice(0, 6);
 
-    // 評価分布（全期間）
     const ratingDist = [5, 4, 3, 2, 1].map((r) => ({
       r,
       count: books.filter((b) => Math.round(b.rating ?? 0) === r).length,
     }));
 
-    // 著者別冊数（finishedAt基準・著者不明除外・上位8名）
     const authorMap = new Map<string, { count: number; ratingSum: number; ratingCount: number }>();
     doneThisYear.forEach((b) => {
       const a = b.author?.trim();
@@ -89,7 +84,7 @@ export default function StatsView({ books }: { books: Book[] }) {
     <div className="space-y-5">
       {/* 年セレクタ */}
       <div className="flex items-center gap-2">
-        <span className="text-sm text-slate-500">表示年：</span>
+        <span className="text-sm text-slate-500 dark:text-slate-400">表示年：</span>
         <div className="flex gap-1.5">
           {availableYears.map((y) => (
             <button
@@ -97,8 +92,8 @@ export default function StatsView({ books }: { books: Book[] }) {
               onClick={() => setYear(y)}
               className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
                 y === year
-                  ? "bg-indigo-600 text-white"
-                  : "bg-white border border-slate-200 text-slate-600 hover:border-indigo-300"
+                  ? "bg-indigo-600 dark:bg-indigo-500 text-white"
+                  : "bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-400 hover:border-indigo-300 dark:hover:border-indigo-600"
               }`}
             >
               {y}
@@ -110,7 +105,7 @@ export default function StatsView({ books }: { books: Book[] }) {
       {/* サマリーカード */}
       <div className="grid grid-cols-3 gap-3">
         <SummaryCard
-          icon={<BookOpen className="w-4 h-4 text-indigo-500" />}
+          icon={<BookOpen className="w-4 h-4 text-indigo-500 dark:text-indigo-400" />}
           label="読了"
           value={stats.doneThisYear.length}
           unit="冊"
@@ -130,13 +125,13 @@ export default function StatsView({ books }: { books: Book[] }) {
       </div>
 
       {/* 月別読了数 */}
-      <section className="bg-white rounded-2xl border border-slate-100 p-4">
-        <h2 className="text-sm font-semibold text-slate-700 mb-4 flex items-center gap-2">
-          <TrendingUp className="w-4 h-4 text-indigo-500" />
+      <section className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 p-4">
+        <h2 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-4 flex items-center gap-2">
+          <TrendingUp className="w-4 h-4 text-indigo-500 dark:text-indigo-400" />
           月別読了数
         </h2>
         {stats.doneThisYear.length === 0 ? (
-          <p className="text-xs text-slate-400 text-center py-6">{year}年の読了データがありません</p>
+          <p className="text-xs text-slate-400 dark:text-slate-500 text-center py-6">{year}年の読了データがありません</p>
         ) : (
           <div className="flex items-end gap-1.5">
             {stats.monthly.map((count, i) => {
@@ -146,7 +141,7 @@ export default function StatsView({ books }: { books: Book[] }) {
               const barH = count > 0 ? Math.max((count / maxMonthly) * BAR_MAX_H, 8) : 3;
               return (
                 <div key={i} className="flex-1 flex flex-col items-center gap-1">
-                  <span className="text-xs font-semibold text-indigo-600" style={{ minHeight: 16 }}>
+                  <span className="text-xs font-semibold text-indigo-600 dark:text-indigo-400" style={{ minHeight: 16 }}>
                     {count > 0 ? count : ""}
                   </span>
                   <div
@@ -155,10 +150,10 @@ export default function StatsView({ books }: { books: Book[] }) {
                       height: barH,
                       backgroundColor: count > 0
                         ? isCurrentMonth ? "#4f46e5" : "#a5b4fc"
-                        : "#f1f5f9",
+                        : "#334155",
                     }}
                   />
-                  <span className={`text-xs ${isCurrentMonth ? "text-indigo-600 font-semibold" : "text-slate-400"}`}>
+                  <span className={`text-xs ${isCurrentMonth ? "text-indigo-600 dark:text-indigo-400 font-semibold" : "text-slate-400 dark:text-slate-500"}`}>
                     {MONTH_LABELS[i]}
                   </span>
                 </div>
@@ -170,16 +165,16 @@ export default function StatsView({ books }: { books: Book[] }) {
 
       {/* ジャンル分布 */}
       {stats.genreSorted.length > 0 && (
-        <section className="bg-white rounded-2xl border border-slate-100 p-4">
-          <h2 className="text-sm font-semibold text-slate-700 mb-4 flex items-center gap-2">
-            <BookOpen className="w-4 h-4 text-indigo-500" />
+        <section className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 p-4">
+          <h2 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-4 flex items-center gap-2">
+            <BookOpen className="w-4 h-4 text-indigo-500 dark:text-indigo-400" />
             ジャンル（{year}年読了）
           </h2>
           <div className="space-y-2.5">
             {stats.genreSorted.map(([genre, count], i) => (
               <div key={genre} className="flex items-center gap-3">
-                <span className="text-xs text-slate-600 w-20 truncate flex-shrink-0">{genre}</span>
-                <div className="flex-1 bg-slate-100 rounded-full h-2 overflow-hidden">
+                <span className="text-xs text-slate-600 dark:text-slate-400 w-20 truncate flex-shrink-0">{genre}</span>
+                <div className="flex-1 bg-slate-100 dark:bg-slate-700 rounded-full h-2 overflow-hidden">
                   <div
                     className="h-full rounded-full transition-all"
                     style={{
@@ -188,7 +183,7 @@ export default function StatsView({ books }: { books: Book[] }) {
                     }}
                   />
                 </div>
-                <span className="text-xs font-medium text-slate-500 w-8 text-right flex-shrink-0">
+                <span className="text-xs font-medium text-slate-500 dark:text-slate-400 w-8 text-right flex-shrink-0">
                   {count}冊
                 </span>
               </div>
@@ -199,9 +194,9 @@ export default function StatsView({ books }: { books: Book[] }) {
 
       {/* 著者別冊数 */}
       {stats.authorSorted.length > 0 && (
-        <section className="bg-white rounded-2xl border border-slate-100 p-4">
-          <h2 className="text-sm font-semibold text-slate-700 mb-4 flex items-center gap-2">
-            <User className="w-4 h-4 text-indigo-500" />
+        <section className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 p-4">
+          <h2 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-4 flex items-center gap-2">
+            <User className="w-4 h-4 text-indigo-500 dark:text-indigo-400" />
             著者別（{year}年読了）
           </h2>
           <div className="space-y-2.5">
@@ -209,8 +204,8 @@ export default function StatsView({ books }: { books: Book[] }) {
               const maxCount = stats.authorSorted[0].count;
               return (
                 <div key={name} className="flex items-center gap-3">
-                  <span className="text-xs text-slate-600 w-24 truncate flex-shrink-0">{name}</span>
-                  <div className="flex-1 bg-slate-100 rounded-full h-2 overflow-hidden">
+                  <span className="text-xs text-slate-600 dark:text-slate-400 w-24 truncate flex-shrink-0">{name}</span>
+                  <div className="flex-1 bg-slate-100 dark:bg-slate-700 rounded-full h-2 overflow-hidden">
                     <div
                       className="h-full rounded-full transition-all"
                       style={{
@@ -220,7 +215,7 @@ export default function StatsView({ books }: { books: Book[] }) {
                     />
                   </div>
                   <div className="flex items-center gap-2 flex-shrink-0">
-                    <span className="text-xs font-medium text-slate-500 w-8 text-right">{count}冊</span>
+                    <span className="text-xs font-medium text-slate-500 dark:text-slate-400 w-8 text-right">{count}冊</span>
                     {avgRating != null && (
                       <span className="text-xs text-amber-500 flex items-center gap-0.5 w-10">
                         <Star className="w-3 h-3 fill-amber-400" />
@@ -237,8 +232,8 @@ export default function StatsView({ books }: { books: Book[] }) {
 
       {/* 評価分布 */}
       {books.some((b) => b.rating != null) && (
-        <section className="bg-white rounded-2xl border border-slate-100 p-4">
-          <h2 className="text-sm font-semibold text-slate-700 mb-4 flex items-center gap-2">
+        <section className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 p-4">
+          <h2 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-4 flex items-center gap-2">
             <Star className="w-4 h-4 text-amber-500" />
             評価分布（全期間）
           </h2>
@@ -249,17 +244,17 @@ export default function StatsView({ books }: { books: Book[] }) {
                   {Array.from({ length: 5 }).map((_, i) => (
                     <Star
                       key={i}
-                      className={`w-3 h-3 ${i < r ? "fill-amber-400 text-amber-400" : "text-slate-200"}`}
+                      className={`w-3 h-3 ${i < r ? "fill-amber-400 text-amber-400" : "text-slate-200 dark:text-slate-700"}`}
                     />
                   ))}
                 </div>
-                <div className="flex-1 bg-slate-100 rounded-full h-2 overflow-hidden">
+                <div className="flex-1 bg-slate-100 dark:bg-slate-700 rounded-full h-2 overflow-hidden">
                   <div
                     className="h-full rounded-full bg-amber-400 transition-all"
                     style={{ width: `${(count / maxRating) * 100}%` }}
                   />
                 </div>
-                <span className="text-xs font-medium text-slate-500 w-8 text-right flex-shrink-0">
+                <span className="text-xs font-medium text-slate-500 dark:text-slate-400 w-8 text-right flex-shrink-0">
                   {count}冊
                 </span>
               </div>
@@ -270,8 +265,8 @@ export default function StatsView({ books }: { books: Book[] }) {
 
       {books.length === 0 && (
         <div className="text-center py-16">
-          <TrendingUp className="w-12 h-12 text-slate-200 mx-auto mb-3" />
-          <p className="text-slate-500">本を登録すると統計が表示されます</p>
+          <TrendingUp className="w-12 h-12 text-slate-200 dark:text-slate-700 mx-auto mb-3" />
+          <p className="text-slate-500 dark:text-slate-400">本を登録すると統計が表示されます</p>
         </div>
       )}
     </div>
@@ -290,14 +285,14 @@ function SummaryCard({
   unit: string;
 }) {
   return (
-    <div className="bg-white rounded-xl p-3 border border-slate-100 flex flex-col gap-1.5">
+    <div className="bg-white dark:bg-slate-800 rounded-xl p-3 border border-slate-100 dark:border-slate-700 flex flex-col gap-1.5">
       <div className="flex items-center gap-1.5">
         {icon}
-        <span className="text-xs text-slate-500">{label}</span>
+        <span className="text-xs text-slate-500 dark:text-slate-400">{label}</span>
       </div>
       <div className="flex items-baseline gap-0.5">
-        <span className="text-xl font-bold text-slate-900">{value}</span>
-        {unit && <span className="text-xs text-slate-400">{unit}</span>}
+        <span className="text-xl font-bold text-slate-900 dark:text-slate-100">{value}</span>
+        {unit && <span className="text-xs text-slate-400 dark:text-slate-500">{unit}</span>}
       </div>
     </div>
   );

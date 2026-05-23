@@ -29,14 +29,14 @@ export default function NavBar({ user }: { user: User }) {
   return (
     <>
       {/* top header */}
-      <header className="sticky top-0 z-50 bg-white border-b border-slate-100 px-4 h-14 flex items-center justify-between">
-        <Link href="/dashboard" className="flex items-center gap-2 font-bold text-indigo-600">
+      <header className="sticky top-0 z-50 bg-white dark:bg-slate-800 border-b border-slate-100 dark:border-slate-700 px-4 h-14 flex items-center justify-between">
+        <Link href="/dashboard" className="flex items-center gap-2 font-bold text-indigo-600 dark:text-indigo-400">
           <BookOpen className="w-5 h-5" />
           Folio
         </Link>
         <button
           onClick={signOut}
-          className="flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-800 transition-colors"
+          className="flex items-center gap-1.5 text-sm text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 transition-colors"
         >
           <LogOut className="w-4 h-4" />
           <span className="hidden sm:inline">ログアウト</span>
@@ -44,7 +44,7 @@ export default function NavBar({ user }: { user: User }) {
       </header>
 
       {/* bottom nav (mobile) */}
-      <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-slate-100 flex sm:hidden safe-area-pb">
+      <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-slate-800 border-t border-slate-100 dark:border-slate-700 flex sm:hidden safe-area-pb">
         {navItems.map(({ href, icon: Icon, label }) => (
           <Link
             key={href}
@@ -52,8 +52,8 @@ export default function NavBar({ user }: { user: User }) {
             className={cn(
               "flex-1 flex flex-col items-center justify-center py-2 gap-0.5 text-xs transition-colors active:scale-95 active:opacity-60",
               pathname === href || (href !== "/dashboard" && pathname.startsWith(href))
-                ? "text-indigo-600"
-                : "text-slate-400"
+                ? "text-indigo-600 dark:text-indigo-400"
+                : "text-slate-400 dark:text-slate-500"
             )}
           >
             <Icon className="w-5 h-5" />
@@ -63,7 +63,7 @@ export default function NavBar({ user }: { user: User }) {
       </nav>
 
       {/* side nav (desktop) */}
-      <div className="hidden sm:flex fixed left-0 top-14 bottom-0 w-48 border-r border-slate-100 bg-white flex-col gap-1 p-3">
+      <div className="hidden sm:flex fixed left-0 top-14 bottom-0 w-48 border-r border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800 flex-col gap-1 p-3">
         {navItems.map(({ href, icon: Icon, label }) => (
           <Link
             key={href}
@@ -71,8 +71,8 @@ export default function NavBar({ user }: { user: User }) {
             className={cn(
               "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors active:scale-95 active:opacity-60",
               pathname === href || (href !== "/dashboard" && pathname.startsWith(href))
-                ? "bg-indigo-50 text-indigo-700"
-                : "text-slate-600 hover:bg-slate-50"
+                ? "bg-indigo-50 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300"
+                : "text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700"
             )}
           >
             <Icon className="w-4 h-4" />

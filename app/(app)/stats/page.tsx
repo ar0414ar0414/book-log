@@ -14,7 +14,7 @@ export default async function StatsPage() {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-xl font-bold text-slate-900">読書統計</h1>
+      <h1 className="text-xl font-bold text-slate-900 dark:text-slate-100">読書統計</h1>
       <StatsView books={allBooks as Book[]} />
     </div>
   );

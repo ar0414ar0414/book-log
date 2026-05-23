@@ -45,19 +45,16 @@ export default function QuotesView({ items }: { items: QuoteItem[] }) {
 
   return (
     <div className="pb-nav-safe sm:pb-6 space-y-4">
-      {/* ヘッダー */}
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-bold text-slate-900">引用一覧</h1>
-        <span className="text-sm text-slate-500">{items.length}件</span>
+        <h1 className="text-xl font-bold text-slate-900 dark:text-slate-100">引用一覧</h1>
+        <span className="text-sm text-slate-500 dark:text-slate-400">{items.length}件</span>
       </div>
 
-      {/* コントロールバー */}
       <div className="space-y-2">
         <div className="flex items-center gap-2">
-          {/* 検索 */}
           {searchOpen ? (
             <>
-              <div className="flex-1 flex items-center gap-2 bg-white border border-indigo-300 rounded-full px-3.5 py-2 shadow-sm">
+              <div className="flex-1 flex items-center gap-2 bg-white dark:bg-slate-800 border border-indigo-300 dark:border-indigo-600 rounded-full px-3.5 py-2 shadow-sm">
                 <Search className="w-4 h-4 text-indigo-400 flex-shrink-0" />
                 <input
                   autoFocus
@@ -65,17 +62,17 @@ export default function QuotesView({ items }: { items: QuoteItem[] }) {
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   placeholder="引用・メモを検索..."
-                  className="flex-1 text-sm bg-transparent focus:outline-none text-slate-700 placeholder:text-slate-400"
+                  className="flex-1 text-sm bg-transparent focus:outline-none text-slate-700 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500"
                 />
                 {query && (
-                  <button onClick={() => setQuery("")} className="text-slate-300 hover:text-slate-500 transition-colors">
+                  <button onClick={() => setQuery("")} className="text-slate-300 dark:text-slate-600 hover:text-slate-500 dark:hover:text-slate-400 transition-colors">
                     <X className="w-3.5 h-3.5" />
                   </button>
                 )}
               </div>
               <button
                 onClick={() => { setSearchOpen(false); setQuery(""); }}
-                className="text-sm text-slate-500 hover:text-slate-700 whitespace-nowrap px-1"
+                className="text-sm text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 whitespace-nowrap px-1"
               >
                 キャンセル
               </button>
@@ -84,30 +81,28 @@ export default function QuotesView({ items }: { items: QuoteItem[] }) {
             <>
               <button
                 onClick={() => setSearchOpen(true)}
-                className="w-9 h-9 flex items-center justify-center rounded-full bg-white border border-slate-200 text-slate-500 hover:border-indigo-300 hover:text-indigo-500 transition-colors shadow-sm flex-shrink-0"
+                className="w-9 h-9 flex items-center justify-center rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-500 dark:text-slate-400 hover:border-indigo-300 dark:hover:border-indigo-600 hover:text-indigo-500 dark:hover:text-indigo-400 transition-colors shadow-sm flex-shrink-0"
               >
                 <Search className="w-4 h-4" />
               </button>
 
-              {/* お気に入りトグル */}
               <button
                 onClick={() => setFavOnly((v) => !v)}
                 className={cn(
                   "flex items-center gap-1.5 px-3.5 py-2 rounded-full text-sm font-medium border transition-colors shadow-sm",
                   favOnly
                     ? "bg-amber-500 border-amber-500 text-white"
-                    : "bg-white border-slate-200 text-slate-500 hover:border-amber-300 hover:text-amber-500"
+                    : "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-600 text-slate-500 dark:text-slate-400 hover:border-amber-300 hover:text-amber-500 dark:hover:border-amber-600 dark:hover:text-amber-400"
                 )}
               >
                 <Star className={cn("w-3.5 h-3.5", favOnly && "fill-white")} />
                 お気に入り
               </button>
 
-              {/* リセット */}
               {hasFilter && (
                 <button
                   onClick={() => { setFavOnly(false); setSelectedBook(null); setQuery(""); }}
-                  className="ml-auto flex items-center gap-1 text-xs text-slate-400 hover:text-slate-600 transition-colors"
+                  className="ml-auto flex items-center gap-1 text-xs text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
                 >
                   <X className="w-3 h-3" />
                   解除
@@ -117,7 +112,6 @@ export default function QuotesView({ items }: { items: QuoteItem[] }) {
           )}
         </div>
 
-        {/* 本フィルター */}
         {!searchOpen && books.length > 1 && (
           <div className="flex gap-1.5 overflow-x-auto pb-0.5 scrollbar-hide">
             {books.map((book) => (
@@ -127,8 +121,8 @@ export default function QuotesView({ items }: { items: QuoteItem[] }) {
                 className={cn(
                   "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border whitespace-nowrap transition-colors flex-shrink-0",
                   selectedBook === book.id
-                    ? "bg-indigo-600 border-indigo-600 text-white"
-                    : "bg-white border-slate-200 text-slate-600 hover:border-indigo-300"
+                    ? "bg-indigo-600 dark:bg-indigo-500 border-indigo-600 dark:border-indigo-500 text-white"
+                    : "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-400 hover:border-indigo-300 dark:hover:border-indigo-600"
                 )}
               >
                 {book.coverUrl ? (
@@ -143,22 +137,20 @@ export default function QuotesView({ items }: { items: QuoteItem[] }) {
         )}
       </div>
 
-      {/* ヒット件数 */}
       {hasFilter && (
-        <p className="text-xs text-slate-400">{filtered.length} 件ヒット</p>
+        <p className="text-xs text-slate-400 dark:text-slate-500">{filtered.length} 件ヒット</p>
       )}
 
-      {/* 引用リスト */}
       {items.length === 0 ? (
         <div className="text-center py-16">
-          <Quote className="w-12 h-12 text-slate-200 mx-auto mb-3" />
-          <p className="text-slate-500">引用がまだありません</p>
-          <p className="text-sm text-slate-400 mt-1">本の詳細ページから引用を追加できます</p>
+          <Quote className="w-12 h-12 text-slate-200 dark:text-slate-700 mx-auto mb-3" />
+          <p className="text-slate-500 dark:text-slate-400">引用がまだありません</p>
+          <p className="text-sm text-slate-400 dark:text-slate-500 mt-1">本の詳細ページから引用を追加できます</p>
         </div>
       ) : filtered.length === 0 ? (
         <div className="text-center py-12">
-          <Quote className="w-10 h-10 text-slate-200 mx-auto mb-2" />
-          <p className="text-slate-400 text-sm">該当する引用が見つかりません</p>
+          <Quote className="w-10 h-10 text-slate-200 dark:text-slate-700 mx-auto mb-2" />
+          <p className="text-slate-400 dark:text-slate-500 text-sm">該当する引用が見つかりません</p>
         </div>
       ) : (
         <div className="space-y-3">
@@ -166,21 +158,23 @@ export default function QuotesView({ items }: { items: QuoteItem[] }) {
             <div
               key={quote.id}
               className={cn(
-                "bg-white rounded-xl border p-4 space-y-3 border-l-4",
-                quote.isFavorite ? "border-l-amber-400 border-amber-100" : "border-l-indigo-200 border-slate-100"
+                "bg-white dark:bg-slate-800 rounded-xl border p-4 space-y-3 border-l-4",
+                quote.isFavorite
+                  ? "border-l-amber-400 border-amber-100 dark:border-amber-800"
+                  : "border-l-indigo-200 dark:border-l-indigo-700 border-slate-100 dark:border-slate-700"
               )}
             >
-              <p className="text-slate-800 leading-relaxed">「{quote.text}」</p>
+              <p className="text-slate-800 dark:text-slate-200 leading-relaxed">「{quote.text}」</p>
               <div className="flex items-center justify-between">
                 <Link href={`/books/${book.id}`} className="flex items-center gap-2 hover:opacity-70 transition-opacity">
                   {book.coverUrl ? (
                     <img src={book.coverUrl} alt={book.title} className="w-6 h-8 object-cover rounded" />
                   ) : (
-                    <BookOpen className="w-4 h-4 text-indigo-300" />
+                    <BookOpen className="w-4 h-4 text-indigo-300 dark:text-indigo-600" />
                   )}
-                  <span className="text-sm text-slate-500 truncate max-w-[200px]">{book.title}</span>
+                  <span className="text-sm text-slate-500 dark:text-slate-400 truncate max-w-[200px]">{book.title}</span>
                 </Link>
-                <div className="flex items-center gap-1 text-xs text-slate-400">
+                <div className="flex items-center gap-1 text-xs text-slate-400 dark:text-slate-500">
                   {quote.pageNumber && <span>p.{quote.pageNumber}</span>}
                   {quote.isFavorite && <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />}
                 </div>
@@ -195,7 +189,7 @@ export default function QuotesView({ items }: { items: QuoteItem[] }) {
                 </div>
               )}
               {quote.memo && (
-                <p className="text-xs text-slate-500 bg-slate-50 rounded-lg px-3 py-2">{quote.memo}</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-700 rounded-lg px-3 py-2">{quote.memo}</p>
               )}
             </div>
           ))}

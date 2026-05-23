@@ -25,10 +25,10 @@ export default async function BooksPage({
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-bold text-slate-900">本棚</h1>
+        <h1 className="text-xl font-bold text-slate-900 dark:text-slate-100">本棚</h1>
         <Link
           href="/books/new"
-          className="flex items-center gap-1.5 bg-indigo-600 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-indigo-700 transition-colors"
+          className="flex items-center gap-1.5 bg-indigo-600 dark:bg-indigo-500 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-indigo-700 dark:hover:bg-indigo-600 transition-colors"
         >
           <Plus className="w-4 h-4" />
           追加
@@ -44,8 +44,8 @@ export default async function BooksPage({
             className={cn(
               "flex-shrink-0 px-4 py-1.5 rounded-full text-sm font-medium border transition-colors",
               (!status && !s) || status === s
-                ? "bg-indigo-600 text-white border-indigo-600"
-                : "bg-white text-slate-600 border-slate-200 hover:border-indigo-300"
+                ? "bg-indigo-600 dark:bg-indigo-500 text-white border-indigo-600 dark:border-indigo-500"
+                : "bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-600 hover:border-indigo-300 dark:hover:border-indigo-600"
             )}
           >
             {s ? STATUS_LABELS[s] : "すべて"}

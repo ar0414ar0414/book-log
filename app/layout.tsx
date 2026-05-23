@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Noto_Sans_JP } from "next/font/google";
 import "./globals.css";
 import ProgressBar from "@/components/ProgressBar";
+import ThemeProvider from "@/components/ThemeProvider";
 
 const noto = Noto_Sans_JP({ subsets: ["latin"], weight: ["400", "500", "700"] });
 
@@ -28,10 +29,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="ja" className="h-full">
       <head>
         <link rel="apple-touch-icon" href="/icons/icon-192.png" />
+        <script dangerouslySetInnerHTML={{ __html: `(function(){try{var s=localStorage.getItem('folio-theme');var t=s?JSON.parse(s):null;if(t&&t.state&&t.state.theme==='dark')document.documentElement.classList.add('dark');}catch(e){}})();` }} />
       </head>
-      <body className={`${noto.className} min-h-full bg-slate-50`}>
-        <ProgressBar />
-        {children}
+      <body className={`${noto.className} min-h-full bg-slate-50 dark:bg-slate-900 dark:text-slate-100`}>
+        <ThemeProvider>
+          <ProgressBar />
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   );

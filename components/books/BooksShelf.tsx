@@ -108,8 +108,7 @@ export default function BooksShelf({
       <div className="flex items-center justify-end gap-2">
         {searchOpen ? (
           <>
-            {/* 展開した検索バー */}
-            <div className="flex-1 flex items-center gap-2 bg-white border border-indigo-300 rounded-full px-3.5 py-2 shadow-sm">
+            <div className="flex-1 flex items-center gap-2 bg-white dark:bg-slate-800 border border-indigo-300 dark:border-indigo-600 rounded-full px-3.5 py-2 shadow-sm">
               <Search className="w-4 h-4 text-indigo-400 flex-shrink-0" />
               <input
                 ref={searchInputRef}
@@ -117,12 +116,12 @@ export default function BooksShelf({
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="タイトル・著者..."
-                className="flex-1 text-sm bg-transparent focus:outline-none text-slate-700 placeholder:text-slate-400"
+                className="flex-1 text-sm bg-transparent focus:outline-none text-slate-700 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500"
               />
               {query && (
                 <button
                   onClick={() => setQuery("")}
-                  className="text-slate-300 hover:text-slate-500 transition-colors"
+                  className="text-slate-300 dark:text-slate-600 hover:text-slate-500 dark:hover:text-slate-400 transition-colors"
                 >
                   <X className="w-3.5 h-3.5" />
                 </button>
@@ -130,22 +129,20 @@ export default function BooksShelf({
             </div>
             <button
               onClick={closeSearch}
-              className="text-sm text-slate-500 hover:text-slate-700 transition-colors whitespace-nowrap px-1"
+              className="text-sm text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors whitespace-nowrap px-1"
             >
               キャンセル
             </button>
           </>
         ) : (
           <>
-            {/* 検索アイコン */}
             <button
               onClick={openSearch}
-              className="w-9 h-9 flex items-center justify-center rounded-full bg-white border border-slate-200 text-slate-500 hover:border-indigo-300 hover:text-indigo-500 transition-colors shadow-sm flex-shrink-0"
+              className="w-9 h-9 flex items-center justify-center rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-500 dark:text-slate-400 hover:border-indigo-300 dark:hover:border-indigo-600 hover:text-indigo-500 dark:hover:text-indigo-400 transition-colors shadow-sm flex-shrink-0"
             >
               <Search className="w-4 h-4" />
             </button>
 
-            {/* ソートアイコン */}
             <div ref={sortRef} className="relative flex-shrink-0">
               <button
                 onClick={() => setSortOpen((v) => !v)}
@@ -153,17 +150,17 @@ export default function BooksShelf({
                 className={cn(
                   "w-9 h-9 flex items-center justify-center rounded-full border transition-colors shadow-sm",
                   sortOpen
-                    ? "bg-indigo-600 border-indigo-600 text-white"
+                    ? "bg-indigo-600 dark:bg-indigo-500 border-indigo-600 dark:border-indigo-500 text-white"
                     : sortKey !== "createdAt_desc"
-                      ? "bg-indigo-50 border-indigo-300 text-indigo-600"
-                      : "bg-white border-slate-200 text-slate-500 hover:border-indigo-300 hover:text-indigo-500"
+                      ? "bg-indigo-50 dark:bg-indigo-900/50 border-indigo-300 dark:border-indigo-600 text-indigo-600 dark:text-indigo-400"
+                      : "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-600 text-slate-500 dark:text-slate-400 hover:border-indigo-300 dark:hover:border-indigo-600 hover:text-indigo-500 dark:hover:text-indigo-400"
                 )}
               >
                 <ArrowUpDown className="w-4 h-4" />
               </button>
 
               {sortOpen && (
-                <div className="absolute top-full right-0 mt-1.5 w-52 bg-white border border-slate-100 rounded-2xl shadow-xl z-20 py-1.5 overflow-hidden">
+                <div className="absolute top-full right-0 mt-1.5 w-52 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl shadow-xl z-20 py-1.5 overflow-hidden">
                   {SORT_OPTIONS.map((opt) => (
                     <button
                       key={opt.value}
@@ -171,14 +168,14 @@ export default function BooksShelf({
                       className={cn(
                         "w-full flex items-center gap-3 px-4 py-2.5 text-sm transition-colors text-left",
                         opt.value === sortKey
-                          ? "text-indigo-600 font-medium bg-indigo-50"
-                          : "text-slate-600 hover:bg-slate-50"
+                          ? "text-indigo-600 dark:text-indigo-400 font-medium bg-indigo-50 dark:bg-indigo-900/50"
+                          : "text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700"
                       )}
                     >
                       <Check
                         className={cn(
                           "w-3.5 h-3.5 flex-shrink-0",
-                          opt.value === sortKey ? "opacity-100 text-indigo-600" : "opacity-0"
+                          opt.value === sortKey ? "opacity-100 text-indigo-600 dark:text-indigo-400" : "opacity-0"
                         )}
                       />
                       {opt.label}
@@ -188,16 +185,15 @@ export default function BooksShelf({
               )}
             </div>
 
-            {/* 表示切替（セグメントコントロール） */}
-            <div className="flex bg-slate-100 rounded-full p-0.5 shadow-inner flex-shrink-0">
+            <div className="flex bg-slate-100 dark:bg-slate-700 rounded-full p-0.5 shadow-inner flex-shrink-0">
               <button
                 onClick={() => toggleView("grid")}
                 aria-label="グリッド表示"
                 className={cn(
                   "w-8 h-8 flex items-center justify-center rounded-full transition-all duration-200",
                   viewMode === "grid"
-                    ? "bg-white text-indigo-600 shadow-sm"
-                    : "text-slate-400 hover:text-slate-600"
+                    ? "bg-white dark:bg-slate-600 text-indigo-600 dark:text-indigo-400 shadow-sm"
+                    : "text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300"
                 )}
               >
                 <LayoutGrid className="w-4 h-4" />
@@ -208,8 +204,8 @@ export default function BooksShelf({
                 className={cn(
                   "w-8 h-8 flex items-center justify-center rounded-full transition-all duration-200",
                   viewMode === "list"
-                    ? "bg-white text-indigo-600 shadow-sm"
-                    : "text-slate-400 hover:text-slate-600"
+                    ? "bg-white dark:bg-slate-600 text-indigo-600 dark:text-indigo-400 shadow-sm"
+                    : "text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300"
                 )}
               >
                 <List className="w-4 h-4" />
@@ -219,24 +215,22 @@ export default function BooksShelf({
         )}
       </div>
 
-      {/* ヒット件数 */}
       {query && (
-        <p className="text-xs text-slate-400">
+        <p className="text-xs text-slate-400 dark:text-slate-500">
           {filtered.length} 件ヒット
         </p>
       )}
 
-      {/* 本一覧 */}
       {filtered.length === 0 ? (
         <div className="text-center py-16">
-          <BookOpen className="w-12 h-12 text-slate-200 mx-auto mb-3" />
-          <p className="text-slate-500">
+          <BookOpen className="w-12 h-12 text-slate-200 dark:text-slate-700 mx-auto mb-3" />
+          <p className="text-slate-500 dark:text-slate-400">
             {query ? "該当する本が見つかりません" : "本がありません"}
           </p>
           {!query && (
             <Link
               href="/books/new"
-              className="inline-flex items-center gap-2 mt-4 text-indigo-600 hover:underline text-sm"
+              className="inline-flex items-center gap-2 mt-4 text-indigo-600 dark:text-indigo-400 hover:underline text-sm"
             >
               <Plus className="w-4 h-4" />
               本を追加する
@@ -259,14 +253,14 @@ function GridView({ books }: { books: Book[] }) {
         <Link
           key={book.id}
           href={`/books/${book.id}`}
-          className="bg-white rounded-xl border border-slate-100 overflow-hidden hover:border-indigo-200 hover:shadow-md transition-all flex flex-col active:scale-95 active:opacity-70"
+          className="bg-white dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-700 overflow-hidden hover:border-indigo-200 dark:hover:border-indigo-700 hover:shadow-md transition-all flex flex-col active:scale-95 active:opacity-70"
         >
-          <div className="aspect-[2/3] bg-indigo-50 relative">
+          <div className="aspect-[2/3] bg-indigo-50 dark:bg-indigo-950 relative">
             {book.coverUrl ? (
               <img src={book.coverUrl} alt={book.title} className="w-full h-full object-cover" />
             ) : (
               <div className="w-full h-full flex items-center justify-center">
-                <BookOpen className="w-10 h-10 text-indigo-200" />
+                <BookOpen className="w-10 h-10 text-indigo-200 dark:text-indigo-700" />
               </div>
             )}
             <span className={cn(
@@ -285,18 +279,18 @@ function GridView({ books }: { books: Book[] }) {
             )}
           </div>
           <div className="p-3 flex-1 flex flex-col gap-1">
-            <p className="font-medium text-slate-900 text-sm leading-tight line-clamp-2">{book.title}</p>
-            <p className="text-xs text-slate-500 truncate">{book.author ?? "著者不明"}</p>
+            <p className="font-medium text-slate-900 dark:text-slate-100 text-sm leading-tight line-clamp-2">{book.title}</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400 truncate">{book.author ?? "著者不明"}</p>
             <div className="flex items-center justify-between mt-auto">
               {book.rating != null ? (
                 <div className="flex items-center gap-0.5 text-amber-500">
                   {Array.from({ length: 5 }).map((_, i) => (
-                    <Star key={i} className={cn("w-3 h-3", i < book.rating! ? "fill-current" : "text-slate-200")} />
+                    <Star key={i} className={cn("w-3 h-3", i < book.rating! ? "fill-current" : "text-slate-200 dark:text-slate-700")} />
                   ))}
                 </div>
               ) : <span />}
               {book.pageCount && (
-                <span className="text-xs text-slate-400">{book.pageCount}p</span>
+                <span className="text-xs text-slate-400 dark:text-slate-500">{book.pageCount}p</span>
               )}
             </div>
           </div>
@@ -313,24 +307,24 @@ function ListView({ books }: { books: Book[] }) {
         <Link
           key={book.id}
           href={`/books/${book.id}`}
-          className="flex items-center gap-3 bg-white rounded-xl border border-slate-100 p-3 hover:border-indigo-200 hover:shadow-sm transition-all active:scale-95 active:opacity-70"
+          className="flex items-center gap-3 bg-white dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-700 p-3 hover:border-indigo-200 dark:hover:border-indigo-700 hover:shadow-sm transition-all active:scale-95 active:opacity-70"
         >
-          <div className="w-10 h-14 bg-indigo-50 rounded-md overflow-hidden flex-shrink-0">
+          <div className="w-10 h-14 bg-indigo-50 dark:bg-indigo-950 rounded-md overflow-hidden flex-shrink-0">
             {book.coverUrl ? (
               <img src={book.coverUrl} alt={book.title} className="w-full h-full object-cover" />
             ) : (
               <div className="w-full h-full flex items-center justify-center">
-                <BookOpen className="w-5 h-5 text-indigo-200" />
+                <BookOpen className="w-5 h-5 text-indigo-200 dark:text-indigo-700" />
               </div>
             )}
           </div>
           <div className="flex-1 min-w-0 space-y-0.5">
-            <p className="font-medium text-slate-900 text-sm leading-tight truncate">{book.title}</p>
-            <p className="text-xs text-slate-500 truncate">{book.author ?? "著者不明"}</p>
+            <p className="font-medium text-slate-900 dark:text-slate-100 text-sm leading-tight truncate">{book.title}</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400 truncate">{book.author ?? "著者不明"}</p>
             {book.rating != null && (
               <div className="flex items-center gap-0.5">
                 {Array.from({ length: 5 }).map((_, i) => (
-                  <Star key={i} className={cn("w-3 h-3 text-amber-500", i < book.rating! ? "fill-current" : "text-slate-200")} />
+                  <Star key={i} className={cn("w-3 h-3 text-amber-500", i < book.rating! ? "fill-current" : "text-slate-200 dark:text-slate-700")} />
                 ))}
               </div>
             )}

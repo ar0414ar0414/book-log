@@ -249,17 +249,17 @@ export default function BookDetail({ book, initialQuotes, initialPhotos, initial
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <Link href="/books" className="p-2 hover:bg-slate-100 rounded-lg transition-colors active:scale-90 active:opacity-60">
-          <ArrowLeft className="w-5 h-5 text-slate-600" />
+        <Link href="/books" className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors active:scale-90 active:opacity-60">
+          <ArrowLeft className="w-5 h-5 text-slate-600 dark:text-slate-400" />
         </Link>
-        <button onClick={handleDelete} disabled={deleting} className="p-2 hover:bg-red-50 text-red-400 hover:text-red-600 rounded-lg transition-colors">
+        <button onClick={handleDelete} disabled={deleting} className="p-2 hover:bg-red-50 dark:hover:bg-red-950/50 text-red-400 hover:text-red-600 dark:hover:text-red-400 rounded-lg transition-colors">
           <Trash2 className="w-4 h-4" />
         </button>
       </div>
 
       {/* book info card */}
       <div
-        className="bg-white rounded-2xl border border-slate-100 p-4 flex gap-4 transition-transform duration-75 select-none"
+        className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 p-4 flex gap-4 transition-transform duration-75 select-none"
         style={{ transform: `translateX(${cardOffset}px)` }}
         onTouchStart={handleCardTouchStart}
         onTouchMove={handleCardTouchMove}
@@ -268,15 +268,15 @@ export default function BookDetail({ book, initialQuotes, initialPhotos, initial
         {book.coverUrl ? (
           <img src={book.coverUrl} alt={book.title} className="w-20 h-28 object-cover rounded-lg shadow flex-shrink-0" />
         ) : (
-          <div className="w-20 h-28 bg-indigo-50 rounded-lg flex items-center justify-center flex-shrink-0">
-            <BookOpen className="w-8 h-8 text-indigo-200" />
+          <div className="w-20 h-28 bg-indigo-50 dark:bg-indigo-950 rounded-lg flex items-center justify-center flex-shrink-0">
+            <BookOpen className="w-8 h-8 text-indigo-200 dark:text-indigo-700" />
           </div>
         )}
         <div className="flex-1 min-w-0 space-y-2">
           <div>
-            <p className="font-semibold text-slate-900 text-base leading-tight">{book.title}</p>
-            <p className="text-sm text-slate-500">{book.author ?? "著者不明"}</p>
-            {book.publisher && <p className="text-xs text-slate-400">{book.publisher}{book.publishedDate && ` · ${book.publishedDate}`}</p>}
+            <p className="font-semibold text-slate-900 dark:text-slate-100 text-base leading-tight">{book.title}</p>
+            <p className="text-sm text-slate-500 dark:text-slate-400">{book.author ?? "著者不明"}</p>
+            {book.publisher && <p className="text-xs text-slate-400 dark:text-slate-500">{book.publisher}{book.publishedDate && ` · ${book.publishedDate}`}</p>}
             {editingPageCount ? (
               <div className="flex items-center gap-1 mt-0.5">
                 <input
@@ -287,21 +287,21 @@ export default function BookDetail({ book, initialQuotes, initialPhotos, initial
                   onChange={(e) => setPageCountDraft(e.target.value)}
                   onKeyDown={(e) => { if (e.key === "Enter") savePageCount(); if (e.key === "Escape") setEditingPageCount(false); }}
                   placeholder="ページ数"
-                  className="w-24 border border-indigo-300 rounded-lg px-2 py-0.5 text-xs focus:outline-none"
+                  className="w-24 border border-indigo-300 dark:border-indigo-600 rounded-lg px-2 py-0.5 text-xs focus:outline-none bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100"
                 />
-                <button onClick={savePageCount} className="text-xs text-indigo-600 hover:text-indigo-800">保存</button>
-                <button onClick={() => setEditingPageCount(false)} className="text-xs text-slate-400">×</button>
+                <button onClick={savePageCount} className="text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300">保存</button>
+                <button onClick={() => setEditingPageCount(false)} className="text-xs text-slate-400 dark:text-slate-500">×</button>
               </div>
             ) : (
               <button
                 onClick={() => { setPageCountDraft(pageCount?.toString() ?? ""); setEditingPageCount(true); }}
-                className="text-xs text-slate-400 hover:text-indigo-500 transition-colors mt-0.5 text-left"
+                className="text-xs text-slate-400 dark:text-slate-500 hover:text-indigo-500 dark:hover:text-indigo-400 transition-colors mt-0.5 text-left"
               >
                 {pageCount ? `${pageCount}ページ` : "+ ページ数を追加"}
               </button>
             )}
           </div>
-          {book.genre && <span className="text-xs text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full w-fit">{localizeGenre(book.genre)}</span>}
+          {book.genre && <span className="text-xs text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-700 px-2 py-0.5 rounded-full w-fit">{localizeGenre(book.genre)}</span>}
           <div className="flex gap-0.5">
             {Array.from({ length: 5 }).map((_, i) => (
               <button
@@ -313,12 +313,12 @@ export default function BookDetail({ book, initialQuotes, initialPhotos, initial
               >
                 <Star className={cn(
                   "w-4 h-4 transition-colors",
-                  i < (hoverRating || rating) ? "fill-amber-400 text-amber-400" : "text-slate-200"
+                  i < (hoverRating || rating) ? "fill-amber-400 text-amber-400" : "text-slate-200 dark:text-slate-700"
                 )} />
               </button>
             ))}
           </div>
-          <div className="text-xs text-slate-400 space-y-0.5">
+          <div className="text-xs text-slate-400 dark:text-slate-500 space-y-0.5">
             {book.startedAt && <p>開始: {formatDate(book.startedAt)}</p>}
             {book.finishedAt && <p>読了: {formatDate(book.finishedAt)}</p>}
           </div>
@@ -336,7 +336,7 @@ export default function BookDetail({ book, initialQuotes, initialPhotos, initial
               "flex-1 py-2.5 rounded-xl text-sm font-medium border transition-colors",
               status === value
                 ? STATUS_COLORS[value] + " border-transparent"
-                : "bg-white text-slate-400 border-slate-200 hover:border-slate-300"
+                : "bg-white dark:bg-slate-800 text-slate-400 dark:text-slate-500 border-slate-200 dark:border-slate-600 hover:border-slate-300 dark:hover:border-slate-500"
             )}
           >
             {label}
@@ -346,25 +346,25 @@ export default function BookDetail({ book, initialQuotes, initialPhotos, initial
 
       {/* 読書進捗 */}
       {status === "reading" && (
-        <div className="bg-white rounded-2xl border border-slate-100 p-4 space-y-3">
-          <p className="text-sm font-semibold text-slate-700">読書進捗</p>
+        <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 p-4 space-y-3">
+          <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">読書進捗</p>
           {pageCount ? (
             <>
               <div className="space-y-1.5">
-                <div className="flex justify-between items-center text-xs text-slate-500">
+                <div className="flex justify-between items-center text-xs text-slate-500 dark:text-slate-400">
                   <span>{currentPage ?? 0} / {pageCount} ページ</span>
-                  <span className="font-semibold text-indigo-600">
+                  <span className="font-semibold text-indigo-600 dark:text-indigo-400">
                     {Math.round(((currentPage ?? 0) / pageCount) * 100)}%
                   </span>
                 </div>
-                <div className="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden">
+                <div className="w-full bg-slate-100 dark:bg-slate-700 rounded-full h-2.5 overflow-hidden">
                   <div
                     className="h-full bg-indigo-500 rounded-full transition-all duration-500"
                     style={{ width: `${Math.min(((currentPage ?? 0) / pageCount) * 100, 100)}%` }}
                   />
                 </div>
                 {currentPage && pageCount > currentPage && (
-                  <p className="text-xs text-slate-400">あと {pageCount - currentPage} ページ</p>
+                  <p className="text-xs text-slate-400 dark:text-slate-500">あと {pageCount - currentPage} ページ</p>
                 )}
               </div>
               {editingCurrentPage ? (
@@ -378,38 +378,38 @@ export default function BookDetail({ book, initialQuotes, initialPhotos, initial
                     onChange={(e) => setCurrentPageDraft(e.target.value)}
                     onKeyDown={(e) => { if (e.key === "Enter") saveCurrentPage(); if (e.key === "Escape") setEditingCurrentPage(false); }}
                     placeholder="現在のページ"
-                    className="flex-1 border border-indigo-300 rounded-xl px-3 py-2 text-sm focus:outline-none"
+                    className="flex-1 border border-indigo-300 dark:border-indigo-600 rounded-xl px-3 py-2 text-sm focus:outline-none bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100"
                   />
-                  <button onClick={saveCurrentPage} className="px-4 py-2 bg-indigo-600 text-white rounded-xl text-sm font-medium">保存</button>
-                  <button onClick={() => setEditingCurrentPage(false)} className="text-slate-400 text-sm">×</button>
+                  <button onClick={saveCurrentPage} className="px-4 py-2 bg-indigo-600 dark:bg-indigo-500 text-white rounded-xl text-sm font-medium">保存</button>
+                  <button onClick={() => setEditingCurrentPage(false)} className="text-slate-400 dark:text-slate-500 text-sm">×</button>
                 </div>
               ) : (
                 <button
                   onClick={() => { setCurrentPageDraft(currentPage?.toString() ?? ""); setEditingCurrentPage(true); }}
-                  className="w-full py-2 border border-dashed border-indigo-200 rounded-xl text-sm text-indigo-500 hover:bg-indigo-50 transition-colors"
+                  className="w-full py-2 border border-dashed border-indigo-200 dark:border-indigo-700 rounded-xl text-sm text-indigo-500 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/50 transition-colors"
                 >
                   {currentPage ? "ページを更新" : "現在のページを入力"}
                 </button>
               )}
             </>
           ) : (
-            <p className="text-xs text-slate-400">進捗を表示するにはページ数を先に設定してください</p>
+            <p className="text-xs text-slate-400 dark:text-slate-500">進捗を表示するにはページ数を先に設定してください</p>
           )}
         </div>
       )}
 
       {editingMemo ? (
-        <div className="bg-amber-50 rounded-xl p-4 border border-amber-200 space-y-2">
+        <div className="bg-amber-50 dark:bg-amber-950/30 rounded-xl p-4 border border-amber-200 dark:border-amber-800 space-y-2">
           <AutoResizeTextarea
             value={memoDraft}
             onChange={(e) => setMemoDraft(e.target.value)}
             rows={4}
             autoFocus
             placeholder="感想・メモを自由に..."
-            className="w-full bg-white border border-amber-200 rounded-xl px-3 py-2.5 text-sm text-amber-900 focus:outline-none focus:border-amber-400"
+            className="w-full bg-white dark:bg-slate-800 border border-amber-200 dark:border-amber-700 rounded-xl px-3 py-2.5 text-sm text-amber-900 dark:text-amber-200 focus:outline-none focus:border-amber-400 dark:focus:border-amber-600"
           />
           <div className="flex gap-2">
-            <button onClick={() => setEditingMemo(false)} className="flex-1 py-2 rounded-xl border border-amber-200 text-amber-700 text-sm hover:bg-amber-100 transition-colors">キャンセル</button>
+            <button onClick={() => setEditingMemo(false)} className="flex-1 py-2 rounded-xl border border-amber-200 dark:border-amber-700 text-amber-700 dark:text-amber-300 text-sm hover:bg-amber-100 dark:hover:bg-amber-900/30 transition-colors">キャンセル</button>
             <button onClick={saveMemo} disabled={memoSaving} className="flex-1 py-2 rounded-xl bg-amber-500 text-white text-sm font-medium hover:bg-amber-600 disabled:opacity-50 transition-colors">
               {memoSaving ? "保存中..." : "保存"}
             </button>
@@ -421,28 +421,28 @@ export default function BookDetail({ book, initialQuotes, initialPhotos, initial
           className={cn(
             "w-full text-left rounded-xl p-4 border transition-colors group",
             memo
-              ? "bg-amber-50 border-amber-100 hover:border-amber-300"
-              : "bg-slate-50 border-dashed border-slate-200 hover:border-indigo-300 hover:bg-indigo-50/30"
+              ? "bg-amber-50 dark:bg-amber-950/30 border-amber-100 dark:border-amber-800 hover:border-amber-300 dark:hover:border-amber-700"
+              : "bg-slate-50 dark:bg-slate-800 border-dashed border-slate-200 dark:border-slate-600 hover:border-indigo-300 dark:hover:border-indigo-600 hover:bg-indigo-50/30 dark:hover:bg-indigo-950/20"
           )}
         >
           {memo ? (
-            <p className="text-sm text-amber-800 leading-relaxed whitespace-pre-wrap">{memo}</p>
+            <p className="text-sm text-amber-800 dark:text-amber-200 leading-relaxed whitespace-pre-wrap">{memo}</p>
           ) : (
-            <p className="text-sm text-slate-400 group-hover:text-indigo-500 transition-colors">メモを追加...</p>
+            <p className="text-sm text-slate-400 dark:text-slate-500 group-hover:text-indigo-500 dark:group-hover:text-indigo-400 transition-colors">メモを追加...</p>
           )}
         </button>
       )}
 
       {/* 読書前後の思考変化 */}
-      <div className="rounded-2xl border border-slate-100 overflow-hidden">
-        <div className="px-4 py-3 bg-slate-50 border-b border-slate-100 flex items-center gap-2">
-          <Brain className="w-4 h-4 text-indigo-500" />
-          <p className="text-sm font-semibold text-slate-700">思考の変化</p>
+      <div className="rounded-2xl border border-slate-100 dark:border-slate-700 overflow-hidden">
+        <div className="px-4 py-3 bg-slate-50 dark:bg-slate-800 border-b border-slate-100 dark:border-slate-700 flex items-center gap-2">
+          <Brain className="w-4 h-4 text-indigo-500 dark:text-indigo-400" />
+          <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">思考の変化</p>
         </div>
-        <div className={cn("grid divide-slate-100", status === "done" ? "grid-cols-2 divide-x" : "grid-cols-1")}>
+        <div className={cn("grid divide-slate-100 dark:divide-slate-700", status === "done" ? "grid-cols-2 divide-x" : "grid-cols-1")}>
           {/* 読む前 */}
           <div className="p-3 space-y-2">
-            <p className="text-xs font-medium text-slate-400 flex items-center gap-1"><BookOpen className="w-3 h-3" />Before</p>
+            <p className="text-xs font-medium text-slate-400 dark:text-slate-500 flex items-center gap-1"><BookOpen className="w-3 h-3" />Before</p>
             {editingPreMemo ? (
               <div className="space-y-2">
                 <AutoResizeTextarea
@@ -451,19 +451,19 @@ export default function BookDetail({ book, initialQuotes, initialPhotos, initial
                   autoFocus
                   rows={4}
                   placeholder="この本への期待・仮説・疑問..."
-                  className="w-full text-sm border border-indigo-200 rounded-lg px-2.5 py-2 focus:outline-none focus:border-indigo-400"
+                  className="w-full text-sm border border-indigo-200 dark:border-indigo-700 rounded-lg px-2.5 py-2 focus:outline-none focus:border-indigo-400 dark:focus:border-indigo-500 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
                 />
                 <div className="flex gap-1.5">
-                  <button onClick={() => setEditingPreMemo(false)} className="flex-1 py-1.5 text-xs rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-50">キャンセル</button>
-                  <button onClick={() => saveReflection("preMemo", preDraft)} disabled={reflectionSaving} className="flex-1 py-1.5 text-xs rounded-lg bg-indigo-600 text-white font-medium disabled:opacity-50">保存</button>
+                  <button onClick={() => setEditingPreMemo(false)} className="flex-1 py-1.5 text-xs rounded-lg border border-slate-200 dark:border-slate-600 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700">キャンセル</button>
+                  <button onClick={() => saveReflection("preMemo", preDraft)} disabled={reflectionSaving} className="flex-1 py-1.5 text-xs rounded-lg bg-indigo-600 dark:bg-indigo-500 text-white font-medium disabled:opacity-50">保存</button>
                 </div>
               </div>
             ) : (
               <button
                 onClick={() => { setPreDraft(preMemo); setEditingPreMemo(true); }}
-                className="w-full text-left text-sm text-slate-600 leading-relaxed whitespace-pre-wrap hover:bg-slate-50 rounded-lg p-1.5 -mx-1.5 transition-colors min-h-[3rem]"
+                className="w-full text-left text-sm text-slate-600 dark:text-slate-400 leading-relaxed whitespace-pre-wrap hover:bg-slate-50 dark:hover:bg-slate-700 rounded-lg p-1.5 -mx-1.5 transition-colors min-h-[3rem]"
               >
-                {preMemo || <span className="text-slate-300 text-xs">タップして入力...</span>}
+                {preMemo || <span className="text-slate-300 dark:text-slate-600 text-xs">タップして入力...</span>}
               </button>
             )}
           </div>
@@ -471,7 +471,7 @@ export default function BookDetail({ book, initialQuotes, initialPhotos, initial
           {/* 読んだ後（読了時のみ） */}
           {status === "done" && (
             <div className="p-3 space-y-2">
-              <p className="text-xs font-medium text-slate-400 flex items-center gap-1"><Lightbulb className="w-3 h-3" />After</p>
+              <p className="text-xs font-medium text-slate-400 dark:text-slate-500 flex items-center gap-1"><Lightbulb className="w-3 h-3" />After</p>
               {editingPostMemo ? (
                 <div className="space-y-2">
                   <AutoResizeTextarea
@@ -480,19 +480,19 @@ export default function BookDetail({ book, initialQuotes, initialPhotos, initial
                     autoFocus
                     rows={4}
                     placeholder="考えが変わったこと・気づき..."
-                    className="w-full text-sm border border-emerald-200 rounded-lg px-2.5 py-2 focus:outline-none focus:border-emerald-400"
+                    className="w-full text-sm border border-emerald-200 dark:border-emerald-700 rounded-lg px-2.5 py-2 focus:outline-none focus:border-emerald-400 dark:focus:border-emerald-500 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
                   />
                   <div className="flex gap-1.5">
-                    <button onClick={() => setEditingPostMemo(false)} className="flex-1 py-1.5 text-xs rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-50">キャンセル</button>
-                    <button onClick={() => saveReflection("postMemo", postDraft)} disabled={reflectionSaving} className="flex-1 py-1.5 text-xs rounded-lg bg-emerald-600 text-white font-medium disabled:opacity-50">保存</button>
+                    <button onClick={() => setEditingPostMemo(false)} className="flex-1 py-1.5 text-xs rounded-lg border border-slate-200 dark:border-slate-600 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700">キャンセル</button>
+                    <button onClick={() => saveReflection("postMemo", postDraft)} disabled={reflectionSaving} className="flex-1 py-1.5 text-xs rounded-lg bg-emerald-600 dark:bg-emerald-500 text-white font-medium disabled:opacity-50">保存</button>
                   </div>
                 </div>
               ) : (
                 <button
                   onClick={() => { setPostDraft(postMemo); setEditingPostMemo(true); }}
-                  className="w-full text-left text-sm text-slate-600 leading-relaxed whitespace-pre-wrap hover:bg-slate-50 rounded-lg p-1.5 -mx-1.5 transition-colors min-h-[3rem]"
+                  className="w-full text-left text-sm text-slate-600 dark:text-slate-400 leading-relaxed whitespace-pre-wrap hover:bg-slate-50 dark:hover:bg-slate-700 rounded-lg p-1.5 -mx-1.5 transition-colors min-h-[3rem]"
                 >
-                  {postMemo || <span className="text-slate-300 text-xs">タップして入力...</span>}
+                  {postMemo || <span className="text-slate-300 dark:text-slate-600 text-xs">タップして入力...</span>}
                 </button>
               )}
             </div>
@@ -503,13 +503,13 @@ export default function BookDetail({ book, initialQuotes, initialPhotos, initial
       {/* 読了ポップアップ */}
       {showPostPopup && (
         <div className="fixed inset-0 z-50 bg-black/60 flex items-end sm:items-center justify-center p-4">
-          <div className="bg-white rounded-2xl w-full max-w-md p-5 space-y-4">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl w-full max-w-md p-5 space-y-4">
             <div className="flex items-start justify-between">
               <div>
-                <p className="font-bold text-slate-900">読了おめでとう🎉</p>
-                <p className="text-sm text-slate-500 mt-0.5">読んで何が変わりましたか？</p>
+                <p className="font-bold text-slate-900 dark:text-slate-100">読了おめでとう🎉</p>
+                <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">読んで何が変わりましたか？</p>
               </div>
-              <button onClick={() => setShowPostPopup(false)} className="text-slate-300 hover:text-slate-500 p-1">
+              <button onClick={() => setShowPostPopup(false)} className="text-slate-300 dark:text-slate-600 hover:text-slate-500 dark:hover:text-slate-400 p-1">
                 <X className="w-4 h-4" />
               </button>
             </div>
@@ -519,14 +519,14 @@ export default function BookDetail({ book, initialQuotes, initialPhotos, initial
               autoFocus
               rows={4}
               placeholder="考えが変わったこと・気づき・印象に残ったこと..."
-              className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-emerald-400"
+              className="w-full border border-slate-200 dark:border-slate-600 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-emerald-400 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100"
             />
             <div className="flex gap-2">
-              <button onClick={() => setShowPostPopup(false)} className="flex-1 py-2.5 rounded-xl border border-slate-200 text-slate-600 text-sm hover:bg-slate-50">スキップ</button>
+              <button onClick={() => setShowPostPopup(false)} className="flex-1 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-400 text-sm hover:bg-slate-50 dark:hover:bg-slate-700">スキップ</button>
               <button
                 onClick={() => saveReflection("postMemo", postDraft)}
                 disabled={reflectionSaving || !postDraft.trim()}
-                className="flex-1 py-2.5 rounded-xl bg-emerald-600 text-white text-sm font-medium hover:bg-emerald-700 disabled:opacity-50"
+                className="flex-1 py-2.5 rounded-xl bg-emerald-600 dark:bg-emerald-500 text-white text-sm font-medium hover:bg-emerald-700 dark:hover:bg-emerald-600 disabled:opacity-50"
               >
                 {reflectionSaving ? "保存中..." : "保存する"}
               </button>
@@ -537,24 +537,24 @@ export default function BookDetail({ book, initialQuotes, initialPhotos, initial
 
       {/* AI読書記録 */}
       {status === "done" && (
-        <div className="rounded-2xl border border-indigo-100 overflow-hidden">
+        <div className="rounded-2xl border border-indigo-100 dark:border-indigo-800 overflow-hidden">
           <button
             onClick={() => aiRecord ? setAiRecordOpen((v) => !v) : generateAiRecord()}
             disabled={aiRecordLoading}
-            className="w-full flex items-center justify-between gap-3 px-4 py-3 bg-gradient-to-r from-indigo-50 to-purple-50 hover:from-indigo-100 hover:to-purple-100 transition-colors"
+            className="w-full flex items-center justify-between gap-3 px-4 py-3 bg-gradient-to-r from-indigo-50 dark:from-indigo-950/60 to-purple-50 dark:to-purple-950/40 hover:from-indigo-100 dark:hover:from-indigo-900/60 hover:to-purple-100 dark:hover:to-purple-900/40 transition-colors"
           >
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 bg-indigo-600 rounded-xl flex items-center justify-center flex-shrink-0">
+              <div className="w-8 h-8 bg-indigo-600 dark:bg-indigo-500 rounded-xl flex items-center justify-center flex-shrink-0">
                 {aiRecordLoading
                   ? <Loader2 className="w-4 h-4 text-white animate-spin" />
                   : <Sparkles className="w-4 h-4 text-white" />
                 }
               </div>
               <div className="text-left">
-                <p className="text-sm font-semibold text-indigo-900">
+                <p className="text-sm font-semibold text-indigo-900 dark:text-indigo-200">
                   {aiRecord ? "AI読書記録" : "AI読書記録を生成"}
                 </p>
-                <p className="text-xs text-indigo-500">
+                <p className="text-xs text-indigo-500 dark:text-indigo-400">
                   {aiRecord ? "メモ・引用・写真メモをもとに作成" : "メモ・引用・写真メモから自動まとめ"}
                 </p>
               </div>
@@ -569,38 +569,38 @@ export default function BookDetail({ book, initialQuotes, initialPhotos, initial
           {aiRecordLoading && (
             <div className="px-4 py-6 text-center">
               <Loader2 className="w-6 h-6 text-indigo-400 animate-spin mx-auto mb-2" />
-              <p className="text-sm text-slate-400">AIが読書記録を作成しています...</p>
+              <p className="text-sm text-slate-400 dark:text-slate-500">AIが読書記録を作成しています...</p>
             </div>
           )}
 
           {aiRecordError && !aiRecordLoading && (
-            <div className="mx-4 mb-4 flex items-start gap-2.5 bg-red-50 border border-red-200 rounded-xl px-4 py-3">
+            <div className="mx-4 mb-4 flex items-start gap-2.5 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 rounded-xl px-4 py-3">
               <AlertCircle className="w-4 h-4 text-red-500 flex-shrink-0 mt-0.5" />
               <div className="flex-1">
-                <p className="text-sm text-red-700">{aiRecordError}</p>
+                <p className="text-sm text-red-700 dark:text-red-300">{aiRecordError}</p>
                 <button onClick={() => { setAiRecordError(null); setAiRecordOpen(false); }} className="text-xs text-red-400 hover:text-red-600 mt-0.5">閉じる</button>
               </div>
             </div>
           )}
 
           {aiRecord && aiRecordOpen && (
-            <div className="bg-white px-4 pb-4 pt-3 space-y-4">
+            <div className="bg-white dark:bg-slate-800 px-4 pb-4 pt-3 space-y-4">
               {parseRecord(aiRecord).map((section, i) => (
                 <div key={i}>
                   {section.heading && (
-                    <p className="text-xs font-semibold text-indigo-600 uppercase tracking-wide mb-1.5">
+                    <p className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 uppercase tracking-wide mb-1.5">
                       {section.heading}
                     </p>
                   )}
-                  <p className="text-sm text-slate-700 leading-relaxed whitespace-pre-wrap">
+                  <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed whitespace-pre-wrap">
                     {section.body.trim()}
                   </p>
                 </div>
               ))}
-              <div className="flex gap-2 pt-1 border-t border-slate-100">
+              <div className="flex gap-2 pt-1 border-t border-slate-100 dark:border-slate-700">
                 <button
                   onClick={copyRecord}
-                  className="flex items-center gap-1.5 text-xs text-slate-500 hover:text-indigo-600 transition-colors"
+                  className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
                 >
                   {copied
                     ? <><Check className="w-3.5 h-3.5 text-emerald-500" /><span className="text-emerald-500">コピーしました</span></>
@@ -610,7 +610,7 @@ export default function BookDetail({ book, initialQuotes, initialPhotos, initial
                 <button
                   onClick={generateAiRecord}
                   disabled={aiRecordLoading}
-                  className="ml-auto flex items-center gap-1.5 text-xs text-slate-400 hover:text-indigo-500 transition-colors disabled:opacity-50"
+                  className="ml-auto flex items-center gap-1.5 text-xs text-slate-400 dark:text-slate-500 hover:text-indigo-500 dark:hover:text-indigo-400 transition-colors disabled:opacity-50"
                 >
                   <Sparkles className="w-3.5 h-3.5" />
                   再生成
@@ -622,7 +622,7 @@ export default function BookDetail({ book, initialQuotes, initialPhotos, initial
       )}
 
       {/* tabs */}
-      <div className="flex border-b border-slate-100">
+      <div className="flex border-b border-slate-100 dark:border-slate-700">
         {tabs.map(({ id, label, icon: Icon }) => (
           <button
             key={id}
@@ -630,8 +630,8 @@ export default function BookDetail({ book, initialQuotes, initialPhotos, initial
             className={cn(
               "flex-1 flex items-center justify-center gap-1.5 py-2.5 text-sm font-medium border-b-2 transition-colors",
               activeTab === id
-                ? "border-indigo-600 text-indigo-600"
-                : "border-transparent text-slate-500 hover:text-slate-700"
+                ? "border-indigo-600 dark:border-indigo-400 text-indigo-600 dark:text-indigo-400"
+                : "border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"
             )}
           >
             <Icon className="w-4 h-4" />

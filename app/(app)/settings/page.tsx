@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Sparkles, Check, AlertCircle } from "lucide-react";
+import { Sparkles, Check, AlertCircle, Sun, Moon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAiProvider } from "@/hooks/useAiProvider";
+import { useTheme } from "@/hooks/useTheme";
 import type { AiProvider } from "@/lib/ai/provider";
 
 interface ProviderAvailability { gemini: boolean; claude: boolean }
@@ -27,6 +28,7 @@ const PROVIDERS: { id: AiProvider; name: string; model: string; description: str
 
 export default function SettingsPage() {
   const { provider, setProvider } = useAiProvider();
+  const { theme, setTheme } = useTheme();
   const [availability, setAvailability] = useState<ProviderAvailability | null>(null);
   const [saved, setSaved] = useState(false);
 
@@ -49,23 +51,58 @@ export default function SettingsPage() {
   return (
     <div className="space-y-6 pb-nav-safe sm:pb-6">
       <div>
-        <h1 className="text-xl font-bold text-slate-900">設定</h1>
-        <p className="text-sm text-slate-500 mt-0.5">アプリの動作をカスタマイズ</p>
+        <h1 className="text-xl font-bold text-slate-900 dark:text-slate-100">設定</h1>
+        <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">アプリの動作をカスタマイズ</p>
       </div>
 
+      {/* テーマ */}
+      <section className="space-y-3">
+        <h2 className="font-semibold text-slate-800 dark:text-slate-200 flex items-center gap-2">
+          <Sun className="w-4 h-4 text-amber-500" />
+          テーマ
+        </h2>
+        <div className="flex gap-2">
+          <button
+            onClick={() => setTheme("light")}
+            className={cn(
+              "flex-1 flex items-center justify-center gap-2 py-3 rounded-xl border-2 text-sm font-medium transition-all",
+              theme === "light"
+                ? "border-indigo-400 bg-indigo-50 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300"
+                : "border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:border-indigo-200 dark:hover:border-indigo-700"
+            )}
+          >
+            <Sun className="w-4 h-4" />
+            ライト
+          </button>
+          <button
+            onClick={() => setTheme("dark")}
+            className={cn(
+              "flex-1 flex items-center justify-center gap-2 py-3 rounded-xl border-2 text-sm font-medium transition-all",
+              theme === "dark"
+                ? "border-indigo-400 bg-indigo-50 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300"
+                : "border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:border-indigo-200 dark:hover:border-indigo-700"
+            )}
+          >
+            <Moon className="w-4 h-4" />
+            ダーク
+          </button>
+        </div>
+      </section>
+
+      {/* AI プロバイダー */}
       <section className="space-y-3">
         <div className="flex items-center justify-between">
-          <h2 className="font-semibold text-slate-800 flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-indigo-500" />
+          <h2 className="font-semibold text-slate-800 dark:text-slate-200 flex items-center gap-2">
+            <Sparkles className="w-4 h-4 text-indigo-500 dark:text-indigo-400" />
             AI プロバイダー
           </h2>
           {saved && (
-            <span className="text-xs text-emerald-600 flex items-center gap-1 font-medium">
+            <span className="text-xs text-emerald-600 dark:text-emerald-400 flex items-center gap-1 font-medium">
               <Check className="w-3.5 h-3.5" />保存しました
             </span>
           )}
         </div>
-        <p className="text-xs text-slate-400">
+        <p className="text-xs text-slate-400 dark:text-slate-500">
           チャット・要約・OCR に使用する AI エンジンを選択します。
           APIキーは管理者が環境変数で設定します。
         </p>
@@ -84,10 +121,10 @@ export default function SettingsPage() {
                 className={cn(
                   "w-full flex items-center gap-4 p-4 rounded-2xl border-2 text-left transition-all",
                   isSelected
-                    ? "border-indigo-400 bg-indigo-50 shadow-sm"
+                    ? "border-indigo-400 bg-indigo-50 dark:bg-indigo-900/40 shadow-sm"
                     : disabled
-                      ? "border-slate-100 bg-slate-50 opacity-50 cursor-not-allowed"
-                      : "border-slate-200 bg-white hover:border-indigo-200 hover:bg-indigo-50/30"
+                      ? "border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 opacity-50 cursor-not-allowed"
+                      : "border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 hover:border-indigo-200 dark:hover:border-indigo-700 hover:bg-indigo-50/30 dark:hover:bg-indigo-900/20"
                 )}
               >
                 <div
@@ -98,19 +135,19 @@ export default function SettingsPage() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <p className="font-semibold text-slate-900">{p.name}</p>
-                    <span className="text-xs text-slate-400 font-mono">{p.model}</span>
+                    <p className="font-semibold text-slate-900 dark:text-slate-100">{p.name}</p>
+                    <span className="text-xs text-slate-400 dark:text-slate-500 font-mono">{p.model}</span>
                   </div>
-                  <p className="text-xs text-slate-500 mt-0.5">{p.description}</p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{p.description}</p>
                   {disabled && (
-                    <p className="text-xs text-amber-600 flex items-center gap-1 mt-1">
+                    <p className="text-xs text-amber-600 dark:text-amber-400 flex items-center gap-1 mt-1">
                       <AlertCircle className="w-3 h-3" />
                       APIキー未設定
                     </p>
                   )}
                 </div>
                 {isSelected && !disabled && (
-                  <div className="w-5 h-5 rounded-full bg-indigo-600 flex items-center justify-center flex-shrink-0">
+                  <div className="w-5 h-5 rounded-full bg-indigo-600 dark:bg-indigo-500 flex items-center justify-center flex-shrink-0">
                     <Check className="w-3 h-3 text-white" />
                   </div>
                 )}
