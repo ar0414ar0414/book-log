@@ -16,6 +16,9 @@ export interface Book {
   startedAt: Date | null;
   finishedAt: Date | null;
   memo: string | null;
+  preMemo: string | null;
+  postMemo: string | null;
+  aiRecord: string | null;
   pageCount: number | null;
   createdAt: Date;
   updatedAt: Date;

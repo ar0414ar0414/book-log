@@ -30,6 +30,7 @@ export default function PhotosTab({ bookId, initialPhotos }: { bookId: string; i
         formData.append("file", file);
         formData.append("bookId", bookId);
         const res = await fetch("/api/photos", { method: "POST", body: formData });
+        if (!res.ok) continue;
         const photo = await res.json();
         setPhotoList((p) => [...p, photo]);
       }

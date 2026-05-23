@@ -11,7 +11,9 @@ export const claudeClient: AiClient = {
       max_tokens: 2048,
       messages: [{ role: "user", content: prompt }],
     });
-    return (msg.content[0] as { type: "text"; text: string }).text;
+    const block = msg.content[0];
+    if (!block || block.type !== "text") throw new Error("Unexpected response type from Claude");
+    return block.text;
   },
 
   async chatWithHistory(systemPrompt, history, message) {
@@ -25,7 +27,9 @@ export const claudeClient: AiClient = {
       system: systemPrompt,
       messages,
     });
-    return (msg.content[0] as { type: "text"; text: string }).text;
+    const block = msg.content[0];
+    if (!block || block.type !== "text") throw new Error("Unexpected response type from Claude");
+    return block.text;
   },
 
   async visionOcr(imageBase64, mimeType, prompt) {
@@ -45,6 +49,8 @@ export const claudeClient: AiClient = {
         },
       ],
     });
-    return (msg.content[0] as { type: "text"; text: string }).text;
+    const block = msg.content[0];
+    if (!block || block.type !== "text") throw new Error("Unexpected response type from Claude");
+    return block.text;
   },
 };

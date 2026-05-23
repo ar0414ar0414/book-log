@@ -49,5 +49,6 @@ export async function POST(request: Request) {
     finishedAt: body.finishedAt ? new Date(body.finishedAt) : null,
   }).returning();
 
+  if (!book) return NextResponse.json({ error: "Insert failed" }, { status: 500 });
   return NextResponse.json(book);
 }

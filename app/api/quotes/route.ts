@@ -37,5 +37,6 @@ export async function POST(request: Request) {
     isFavorite: body.isFavorite ?? false,
   }).returning();
 
+  if (!quote) return NextResponse.json({ error: "Insert failed" }, { status: 500 });
   return NextResponse.json(quote);
 }

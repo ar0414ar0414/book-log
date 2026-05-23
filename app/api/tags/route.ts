@@ -29,5 +29,6 @@ export async function POST(request: Request) {
     color: color ?? "#6366f1",
   }).returning();
 
+  if (!tag) return NextResponse.json({ error: "Insert failed" }, { status: 500 });
   return NextResponse.json(tag);
 }
