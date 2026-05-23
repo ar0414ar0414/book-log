@@ -10,6 +10,7 @@ import QuotesTab from "@/components/quotes/QuotesTab";
 import PhotosTab from "@/components/photos/PhotosTab";
 import AiChatTab from "@/components/ai/AiChatTab";
 import { useRouter } from "next/navigation";
+import AutoResizeTextarea from "@/components/ui/AutoResizeTextarea";
 
 type Tab = "quotes" | "photos" | "ai";
 
@@ -282,13 +283,13 @@ export default function BookDetail({ book, initialQuotes, initialPhotos, initial
 
       {editingMemo ? (
         <div className="bg-amber-50 rounded-xl p-4 border border-amber-200 space-y-2">
-          <textarea
+          <AutoResizeTextarea
             value={memoDraft}
             onChange={(e) => setMemoDraft(e.target.value)}
             rows={4}
             autoFocus
             placeholder="感想・メモを自由に..."
-            className="w-full bg-white border border-amber-200 rounded-xl px-3 py-2.5 text-sm text-amber-900 focus:outline-none focus:border-amber-400 resize-none"
+            className="w-full bg-white border border-amber-200 rounded-xl px-3 py-2.5 text-sm text-amber-900 focus:outline-none focus:border-amber-400"
           />
           <div className="flex gap-2">
             <button onClick={() => setEditingMemo(false)} className="flex-1 py-2 rounded-xl border border-amber-200 text-amber-700 text-sm hover:bg-amber-100 transition-colors">キャンセル</button>
@@ -327,13 +328,13 @@ export default function BookDetail({ book, initialQuotes, initialPhotos, initial
             <p className="text-xs font-medium text-slate-400 flex items-center gap-1"><BookOpen className="w-3 h-3" />読む前</p>
             {editingPreMemo ? (
               <div className="space-y-2">
-                <textarea
+                <AutoResizeTextarea
                   value={preDraft}
                   onChange={(e) => setPreDraft(e.target.value)}
                   autoFocus
                   rows={4}
                   placeholder="この本への期待・仮説・疑問..."
-                  className="w-full text-sm border border-indigo-200 rounded-lg px-2.5 py-2 focus:outline-none focus:border-indigo-400 resize-none"
+                  className="w-full text-sm border border-indigo-200 rounded-lg px-2.5 py-2 focus:outline-none focus:border-indigo-400"
                 />
                 <div className="flex gap-1.5">
                   <button onClick={() => setEditingPreMemo(false)} className="flex-1 py-1.5 text-xs rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-50">キャンセル</button>
@@ -356,13 +357,13 @@ export default function BookDetail({ book, initialQuotes, initialPhotos, initial
               <p className="text-xs font-medium text-slate-400 flex items-center gap-1"><Lightbulb className="w-3 h-3" />読んだ後</p>
               {editingPostMemo ? (
                 <div className="space-y-2">
-                  <textarea
+                  <AutoResizeTextarea
                     value={postDraft}
                     onChange={(e) => setPostDraft(e.target.value)}
                     autoFocus
                     rows={4}
                     placeholder="考えが変わったこと・気づき..."
-                    className="w-full text-sm border border-emerald-200 rounded-lg px-2.5 py-2 focus:outline-none focus:border-emerald-400 resize-none"
+                    className="w-full text-sm border border-emerald-200 rounded-lg px-2.5 py-2 focus:outline-none focus:border-emerald-400"
                   />
                   <div className="flex gap-1.5">
                     <button onClick={() => setEditingPostMemo(false)} className="flex-1 py-1.5 text-xs rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-50">キャンセル</button>
@@ -395,13 +396,13 @@ export default function BookDetail({ book, initialQuotes, initialPhotos, initial
                 <X className="w-4 h-4" />
               </button>
             </div>
-            <textarea
+            <AutoResizeTextarea
               value={postDraft}
               onChange={(e) => setPostDraft(e.target.value)}
               autoFocus
               rows={4}
               placeholder="考えが変わったこと・気づき・印象に残ったこと..."
-              className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-emerald-400 resize-none"
+              className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-emerald-400"
             />
             <div className="flex gap-2">
               <button onClick={() => setShowPostPopup(false)} className="flex-1 py-2.5 rounded-xl border border-slate-200 text-slate-600 text-sm hover:bg-slate-50">スキップ</button>

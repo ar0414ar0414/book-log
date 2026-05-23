@@ -2,6 +2,7 @@
 
 import { useState, useRef } from "react";
 import { Camera, Upload, Trash2, FileText, Loader2, Image as ImageIcon, MessageSquare, Check, X, AlertCircle } from "lucide-react";
+import AutoResizeTextarea from "@/components/ui/AutoResizeTextarea";
 import { useAiProvider } from "@/hooks/useAiProvider";
 
 interface PhotoItem {
@@ -169,7 +170,7 @@ export default function PhotosTab({ bookId, initialPhotos }: { bookId: string; i
                     <p className="text-xs font-medium text-slate-500 flex items-center gap-1">
                       <MessageSquare className="w-3 h-3" />メモ
                     </p>
-                    <textarea
+                    <AutoResizeTextarea
                       value={captionDraft}
                       onChange={(e) => setCaptionDraft(e.target.value)}
                       onKeyDown={(e) => {
@@ -179,7 +180,7 @@ export default function PhotosTab({ bookId, initialPhotos }: { bookId: string; i
                       rows={3}
                       placeholder="この写真のメモを入力..."
                       autoFocus
-                      className="w-full border border-indigo-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-indigo-400 resize-none"
+                      className="w-full border border-indigo-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-indigo-400"
                     />
                     <div className="flex gap-2">
                       <button

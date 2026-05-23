@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Plus, Star, Trash2, Quote, Tag, X, Edit2 } from "lucide-react";
+import AutoResizeTextarea from "@/components/ui/AutoResizeTextarea";
 import { cn } from "@/lib/utils";
 
 const TAG_COLORS = [
@@ -219,12 +220,12 @@ export default function QuotesTab({
       {/* 追加フォーム */}
       {showForm && (
         <form onSubmit={handleAdd} className="bg-white rounded-xl border border-indigo-200 p-4 space-y-3">
-          <textarea
+          <AutoResizeTextarea
             value={form.text}
             onChange={(e) => setForm((f) => ({ ...f, text: e.target.value }))}
             placeholder="引用したいテキストを入力..."
             rows={4}
-            className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-indigo-400 resize-none"
+            className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-indigo-400"
             autoFocus
           />
           <div className="grid grid-cols-2 gap-2">
@@ -428,11 +429,11 @@ export default function QuotesTab({
             </div>
 
             <div className="px-5 pb-6 space-y-3">
-              <textarea
+              <AutoResizeTextarea
                 value={editForm.text}
                 onChange={(e) => setEditForm((f) => ({ ...f, text: e.target.value }))}
                 rows={4}
-                className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-indigo-400 resize-none"
+                className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-indigo-400"
                 autoFocus
               />
               <div className="grid grid-cols-2 gap-2">
