@@ -23,3 +23,11 @@ body {
 .pb-nav-safe {
   padding-bottom: calc(3.5rem + env(safe-area-inset-bottom, 0px));
 }
+
+/* バーコードスキャナー用 */
+.pt-safe-top {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+.pb-safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}

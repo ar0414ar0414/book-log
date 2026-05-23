@@ -2,9 +2,15 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Search, BookOpen, Star, X } from "lucide-react";
+import { Search, BookOpen, Star, X, ScanBarcode } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { GoogleBookInfo } from "@/lib/google-books/search";
+import dynamic from "next/dynamic";
+
+const BarcodeScanner = dynamic(
+  () => import("@/components/books/BarcodeScanner"),
+  { ssr: false }
+);
 
 const STATUS_OPTIONS = [
   { value: "want", label: "積読" },
@@ -18,6 +24,7 @@ export default function BookForm() {
   const [results, setResults] = useState<GoogleBookInfo[]>([]);
   const [searching, setSearching] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [scannerOpen, setScannerOpen] = useState(false);
   const [form, setForm] = useState({
     title: "",
     author: "",
@@ -40,6 +47,23 @@ export default function BookForm() {
       const res = await fetch(`/api/books/search?q=${encodeURIComponent(query)}`);
       const data = await res.json();
       setResults(data);
+    } finally {
+      setSearching(false);
+    }
+  }
+
+  async function handleBarcodeDetected(isbn: string) {
+    setScannerOpen(false);
+    setSearching(true);
+    try {
+      const res = await fetch(`/api/books/search?q=${encodeURIComponent(`isbn:${isbn}`)}`);
+      const data: GoogleBookInfo[] = await res.json();
+      if (data.length > 0) {
+        selectBook(data[0]);
+      } else {
+        setResults([]);
+        alert("書籍情報が見つかりませんでした");
+      }
     } finally {
       setSearching(false);
     }
@@ -101,6 +125,16 @@ export default function BookForm() {
             className="px-4 py-2.5 bg-slate-100 rounded-xl hover:bg-slate-200 transition-colors"
           >
             <Search className="w-4 h-4 text-slate-600" />
+          </button>
+          {/* バーコードスキャン（モバイルのみ） */}
+          <button
+            type="button"
+            onClick={() => setScannerOpen(true)}
+            disabled={searching}
+            title="バーコードでスキャン"
+            className="sm:hidden px-4 py-2.5 bg-indigo-50 text-indigo-600 border border-indigo-100 rounded-xl hover:bg-indigo-100 transition-colors"
+          >
+            <ScanBarcode className="w-4 h-4" />
           </button>
         </div>
 
@@ -228,6 +262,17 @@ export default function BookForm() {
       >
         {saving ? "保存中..." : "登録する"}
       </button>
+
+      {searching && (
+        <p className="text-center text-sm text-slate-400 animate-pulse">書籍情報を検索中...</p>
+      )}
+
+      {scannerOpen && (
+        <BarcodeScanner
+          onDetected={handleBarcodeDetected}
+          onClose={() => setScannerOpen(false)}
+        />
+      )}
     </form>
   );
 }
