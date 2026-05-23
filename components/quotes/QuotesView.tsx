@@ -11,6 +11,7 @@ interface QuoteItem {
     memo: string | null; isFavorite: boolean; createdAt: Date;
   };
   book: { id: string; title: string; coverUrl: string | null };
+  tags: { id: string; name: string; color: string }[];
 }
 
 export default function QuotesView({ items }: { items: QuoteItem[] }) {
@@ -161,7 +162,7 @@ export default function QuotesView({ items }: { items: QuoteItem[] }) {
         </div>
       ) : (
         <div className="space-y-3">
-          {filtered.map(({ quote, book }) => (
+          {filtered.map(({ quote, book, tags }) => (
             <div
               key={quote.id}
               className={cn(
@@ -184,6 +185,15 @@ export default function QuotesView({ items }: { items: QuoteItem[] }) {
                   {quote.isFavorite && <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />}
                 </div>
               </div>
+              {tags.length > 0 && (
+                <div className="flex flex-wrap gap-1">
+                  {tags.map((tag) => (
+                    <span key={tag.id} className="text-xs px-2 py-0.5 rounded-full font-medium" style={{ backgroundColor: `${tag.color}20`, color: tag.color }}>
+                      {tag.name}
+                    </span>
+                  ))}
+                </div>
+              )}
               {quote.memo && (
                 <p className="text-xs text-slate-500 bg-slate-50 rounded-lg px-3 py-2">{quote.memo}</p>
               )}
