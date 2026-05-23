@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { BookOpen, Star, Quote, Image as ImageIcon, Bot, Trash2, ArrowLeft, Sparkles, Copy, Check, Loader2, ChevronDown, ChevronUp, AlertCircle, Brain, Lightbulb, X } from "lucide-react";
 import { useAiProvider } from "@/hooks/useAiProvider";
 import Link from "next/link";
@@ -91,6 +91,22 @@ export default function BookDetail({ book, initialQuotes, initialPhotos, initial
   const [pageCountDraft, setPageCountDraft] = useState("");
   const { provider } = useAiProvider();
   const router = useRouter();
+  const touchStartX = useRef<number | null>(null);
+
+  function handleTouchStart(e: React.TouchEvent) {
+    touchStartX.current = e.touches[0].clientX;
+  }
+
+  function handleTouchEnd(e: React.TouchEvent) {
+    if (touchStartX.current === null) return;
+    const diff = touchStartX.current - e.changedTouches[0].clientX;
+    if (Math.abs(diff) < 60) return;
+    const order: Tab[] = ["quotes", "photos", "ai"];
+    const idx = order.indexOf(activeTab);
+    if (diff > 0 && idx < order.length - 1) setActiveTab(order[idx + 1]);
+    if (diff < 0 && idx > 0) setActiveTab(order[idx - 1]);
+    touchStartX.current = null;
+  }
 
   async function savePageCount() {
     const val = pageCountDraft.trim() ? parseInt(pageCountDraft) : null;
@@ -523,9 +539,11 @@ export default function BookDetail({ book, initialQuotes, initialPhotos, initial
         ))}
       </div>
 
-      {activeTab === "quotes" && <QuotesTab bookId={book.id} initialQuotes={initialQuotes} initialTags={initialTags} />}
-      {activeTab === "photos" && <PhotosTab bookId={book.id} initialPhotos={initialPhotos} />}
-      {activeTab === "ai" && <AiChatTab bookId={book.id} initialChat={initialChat} />}
+      <div onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
+        {activeTab === "quotes" && <QuotesTab bookId={book.id} initialQuotes={initialQuotes} initialTags={initialTags} />}
+        {activeTab === "photos" && <PhotosTab bookId={book.id} initialPhotos={initialPhotos} />}
+        {activeTab === "ai" && <AiChatTab bookId={book.id} initialChat={initialChat} />}
+      </div>
     </div>
   );
 }
