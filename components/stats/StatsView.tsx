@@ -14,8 +14,10 @@ export default function StatsView({ books }: { books: Book[] }) {
     const years = new Set<number>();
     years.add(currentYear);
     books.forEach((b) => {
-      if (b.finishedAt) years.add(new Date(b.finishedAt).getFullYear());
-      if (b.createdAt) years.add(new Date(b.createdAt).getFullYear());
+      if (b.status === "done") {
+        const d = b.finishedAt ?? b.updatedAt ?? b.createdAt;
+        years.add(new Date(d).getFullYear());
+      }
     });
     return [...years].sort((a, b) => b - a);
   }, [books, currentYear]);
@@ -23,10 +25,13 @@ export default function StatsView({ books }: { books: Book[] }) {
   const [year, setYear] = useState(currentYear);
 
   const stats = useMemo(() => {
-    const doneThisYear = books.filter((b) => {
-      if (b.status !== "done" || !b.finishedAt) return false;
-      return new Date(b.finishedAt).getFullYear() === year;
-    });
+    // finishedAt がない読了本は updatedAt → createdAt で代替
+    const doneDate = (b: Book) =>
+      b.finishedAt ? new Date(b.finishedAt) : new Date(b.updatedAt ?? b.createdAt);
+
+    const doneThisYear = books.filter((b) =>
+      b.status === "done" && doneDate(b).getFullYear() === year
+    );
 
     const totalPages = doneThisYear.reduce((s, b) => s + (b.pageCount ?? 0), 0);
     const ratings = doneThisYear.filter((b) => b.rating != null).map((b) => b.rating!);
@@ -34,7 +39,7 @@ export default function StatsView({ books }: { books: Book[] }) {
 
     // 月別読了数
     const monthly = Array.from({ length: 12 }, (_, i) =>
-      doneThisYear.filter((b) => new Date(b.finishedAt!).getMonth() === i).length
+      doneThisYear.filter((b) => doneDate(b).getMonth() === i).length
     );
 
     // ジャンル分布（finishedAt基準で統一）
