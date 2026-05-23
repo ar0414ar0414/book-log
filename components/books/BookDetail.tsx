@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { BookOpen, Star, Quote, Image as ImageIcon, Bot, Trash2, ArrowLeft, Sparkles, Copy, Check, Loader2, ChevronDown, ChevronUp, AlertCircle, Brain, X } from "lucide-react";
+import { BookOpen, Star, Quote, Image as ImageIcon, Bot, Trash2, ArrowLeft, Sparkles, Copy, Check, Loader2, ChevronDown, ChevronUp, AlertCircle, Brain, Lightbulb, X } from "lucide-react";
 import { useAiProvider } from "@/hooks/useAiProvider";
 import Link from "next/link";
 import { cn, STATUS_LABELS, STATUS_COLORS, formatDate } from "@/lib/utils";
@@ -287,7 +287,7 @@ export default function BookDetail({ book, initialQuotes, initialPhotos, initial
         <div className={cn("grid divide-slate-100", status === "done" ? "grid-cols-2 divide-x" : "grid-cols-1")}>
           {/* 読む前 */}
           <div className="p-3 space-y-2">
-            <p className="text-xs font-medium text-slate-400">📖 読む前</p>
+            <p className="text-xs font-medium text-slate-400 flex items-center gap-1"><BookOpen className="w-3 h-3" />読む前</p>
             {editingPreMemo ? (
               <div className="space-y-2">
                 <textarea
@@ -316,7 +316,7 @@ export default function BookDetail({ book, initialQuotes, initialPhotos, initial
           {/* 読んだ後（読了時のみ） */}
           {status === "done" && (
             <div className="p-3 space-y-2">
-              <p className="text-xs font-medium text-slate-400">💡 読んだ後</p>
+              <p className="text-xs font-medium text-slate-400 flex items-center gap-1"><Lightbulb className="w-3 h-3" />読んだ後</p>
               {editingPostMemo ? (
                 <div className="space-y-2">
                   <textarea
