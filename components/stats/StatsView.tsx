@@ -37,12 +37,9 @@ export default function StatsView({ books }: { books: Book[] }) {
       doneThisYear.filter((b) => new Date(b.finishedAt!).getMonth() === i).length
     );
 
-    // ジャンル分布（全ステータス・当年追加分）
-    const addedThisYear = books.filter(
-      (b) => new Date(b.createdAt).getFullYear() === year
-    );
+    // ジャンル分布（finishedAt基準で統一）
     const genreMap = new Map<string, number>();
-    addedThisYear.forEach((b) => {
+    doneThisYear.forEach((b) => {
       const g = b.genre?.trim() || "未分類";
       genreMap.set(g, (genreMap.get(g) ?? 0) + 1);
     });
@@ -56,9 +53,9 @@ export default function StatsView({ books }: { books: Book[] }) {
       count: books.filter((b) => Math.round(b.rating ?? 0) === r).length,
     }));
 
-    // 著者別冊数（年フィルタ連動・著者不明除外・上位8名）
+    // 著者別冊数（finishedAt基準・著者不明除外・上位8名）
     const authorMap = new Map<string, { count: number; ratingSum: number; ratingCount: number }>();
-    addedThisYear.forEach((b) => {
+    doneThisYear.forEach((b) => {
       const a = b.author?.trim();
       if (!a) return;
       const entry = authorMap.get(a) ?? { count: 0, ratingSum: 0, ratingCount: 0 };
@@ -173,7 +170,7 @@ export default function StatsView({ books }: { books: Book[] }) {
         <section className="bg-white rounded-2xl border border-slate-100 p-4">
           <h2 className="text-sm font-semibold text-slate-700 mb-4 flex items-center gap-2">
             <BookOpen className="w-4 h-4 text-indigo-500" />
-            ジャンル（{year}年追加）
+            ジャンル（{year}年読了）
           </h2>
           <div className="space-y-2.5">
             {stats.genreSorted.map(([genre, count], i) => (
@@ -202,7 +199,7 @@ export default function StatsView({ books }: { books: Book[] }) {
         <section className="bg-white rounded-2xl border border-slate-100 p-4">
           <h2 className="text-sm font-semibold text-slate-700 mb-4 flex items-center gap-2">
             <User className="w-4 h-4 text-indigo-500" />
-            著者別（{year}年追加）
+            著者別（{year}年読了）
           </h2>
           <div className="space-y-2.5">
             {stats.authorSorted.map(({ name, count, avgRating }, i) => {

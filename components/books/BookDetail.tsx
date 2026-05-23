@@ -65,6 +65,12 @@ export default function BookDetail({ book, initialQuotes, initialPhotos, initial
   const [deleting, setDeleting] = useState(false);
   const [status, setStatus] = useState<BookStatus>(book.status as BookStatus);
   const [updatingStatus, setUpdatingStatus] = useState(false);
+  const [rating, setRating] = useState<number>(book.rating ?? 0);
+  const [hoverRating, setHoverRating] = useState<number>(0);
+  const [memo, setMemo] = useState<string>(book.memo ?? "");
+  const [editingMemo, setEditingMemo] = useState(false);
+  const [memoDraft, setMemoDraft] = useState("");
+  const [memoSaving, setMemoSaving] = useState(false);
   const [aiRecord, setAiRecord] = useState<string | null>(null);
   const [aiRecordLoading, setAiRecordLoading] = useState(false);
   const [aiRecordOpen, setAiRecordOpen] = useState(false);
@@ -72,6 +78,33 @@ export default function BookDetail({ book, initialQuotes, initialPhotos, initial
   const [copied, setCopied] = useState(false);
   const { provider } = useAiProvider();
   const router = useRouter();
+
+  async function handleRatingChange(newRating: number) {
+    const next = newRating === rating ? 0 : newRating;
+    setRating(next);
+    await fetch(`/api/books/${book.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ rating: next || null }),
+    });
+  }
+
+  function openMemoEdit() {
+    setMemoDraft(memo);
+    setEditingMemo(true);
+  }
+
+  async function saveMemo() {
+    setMemoSaving(true);
+    await fetch(`/api/books/${book.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ memo: memoDraft.trim() || null }),
+    });
+    setMemo(memoDraft.trim());
+    setEditingMemo(false);
+    setMemoSaving(false);
+  }
 
   async function handleStatusChange(newStatus: BookStatus) {
     if (newStatus === status || updatingStatus) return;
@@ -162,13 +195,22 @@ export default function BookDetail({ book, initialQuotes, initialPhotos, initial
             ))}
             {book.genre && <span className="text-xs text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full">{book.genre}</span>}
           </div>
-          {book.rating && (
-            <div className="flex gap-0.5">
-              {Array.from({ length: 5 }).map((_, i) => (
-                <Star key={i} className={cn("w-4 h-4", i < book.rating! ? "fill-amber-400 text-amber-400" : "text-slate-200")} />
-              ))}
-            </div>
-          )}
+          <div className="flex gap-0.5">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <button
+                key={i}
+                onClick={() => handleRatingChange(i + 1)}
+                onMouseEnter={() => setHoverRating(i + 1)}
+                onMouseLeave={() => setHoverRating(0)}
+                className="p-0.5 transition-transform hover:scale-110"
+              >
+                <Star className={cn(
+                  "w-4 h-4 transition-colors",
+                  i < (hoverRating || rating) ? "fill-amber-400 text-amber-400" : "text-slate-200"
+                )} />
+              </button>
+            ))}
+          </div>
           <div className="text-xs text-slate-400 space-y-0.5">
             {book.startedAt && <p>開始: {formatDate(book.startedAt)}</p>}
             {book.finishedAt && <p>読了: {formatDate(book.finishedAt)}</p>}
@@ -176,10 +218,39 @@ export default function BookDetail({ book, initialQuotes, initialPhotos, initial
         </div>
       </div>
 
-      {book.memo && (
-        <div className="bg-amber-50 rounded-xl p-4 border border-amber-100">
-          <p className="text-sm text-amber-800 leading-relaxed whitespace-pre-wrap">{book.memo}</p>
+      {editingMemo ? (
+        <div className="bg-amber-50 rounded-xl p-4 border border-amber-200 space-y-2">
+          <textarea
+            value={memoDraft}
+            onChange={(e) => setMemoDraft(e.target.value)}
+            rows={4}
+            autoFocus
+            placeholder="感想・メモを自由に..."
+            className="w-full bg-white border border-amber-200 rounded-xl px-3 py-2.5 text-sm text-amber-900 focus:outline-none focus:border-amber-400 resize-none"
+          />
+          <div className="flex gap-2">
+            <button onClick={() => setEditingMemo(false)} className="flex-1 py-2 rounded-xl border border-amber-200 text-amber-700 text-sm hover:bg-amber-100 transition-colors">キャンセル</button>
+            <button onClick={saveMemo} disabled={memoSaving} className="flex-1 py-2 rounded-xl bg-amber-500 text-white text-sm font-medium hover:bg-amber-600 disabled:opacity-50 transition-colors">
+              {memoSaving ? "保存中..." : "保存"}
+            </button>
+          </div>
         </div>
+      ) : (
+        <button
+          onClick={openMemoEdit}
+          className={cn(
+            "w-full text-left rounded-xl p-4 border transition-colors group",
+            memo
+              ? "bg-amber-50 border-amber-100 hover:border-amber-300"
+              : "bg-slate-50 border-dashed border-slate-200 hover:border-indigo-300 hover:bg-indigo-50/30"
+          )}
+        >
+          {memo ? (
+            <p className="text-sm text-amber-800 leading-relaxed whitespace-pre-wrap">{memo}</p>
+          ) : (
+            <p className="text-sm text-slate-400 group-hover:text-indigo-500 transition-colors">メモを追加...</p>
+          )}
+        </button>
       )}
 
       {/* AI読書記録 */}
