@@ -105,7 +105,7 @@ export default function BooksShelf({
   return (
     <div className="space-y-4">
       {/* ── コントロールバー ── */}
-      <div className="flex items-center gap-2">
+      <div className="flex items-center justify-end gap-2">
         {searchOpen ? (
           <>
             {/* 展開した検索バー */}
