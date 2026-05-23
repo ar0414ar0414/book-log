@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Plus, Star, Trash2, Quote, Tag, X } from "lucide-react";
+import { Plus, Star, Trash2, Quote, Tag, X, Edit2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const TAG_COLORS = [
@@ -33,6 +33,9 @@ export default function QuotesTab({
   const [openPickerId, setOpenPickerId] = useState<string | null>(null);
   const [newTagName, setNewTagName] = useState("");
   const [newTagColor, setNewTagColor] = useState(TAG_COLORS[0]);
+  const [editingQuote, setEditingQuote] = useState<QuoteItem | null>(null);
+  const [editForm, setEditForm] = useState({ text: "", pageNumber: "", chapter: "", memo: "" });
+  const [editSaving, setEditSaving] = useState(false);
   const pickerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -44,6 +47,38 @@ export default function QuotesTab({
     document.addEventListener("mousedown", onClickOutside);
     return () => document.removeEventListener("mousedown", onClickOutside);
   }, []);
+
+  function openEdit(q: QuoteItem) {
+    setEditingQuote(q);
+    setEditForm({
+      text: q.text,
+      pageNumber: q.pageNumber?.toString() ?? "",
+      chapter: q.chapter ?? "",
+      memo: q.memo ?? "",
+    });
+  }
+
+  async function handleEditSave() {
+    if (!editingQuote || !editForm.text.trim()) return;
+    setEditSaving(true);
+    try {
+      const res = await fetch(`/api/quotes/${editingQuote.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          text: editForm.text,
+          pageNumber: editForm.pageNumber ? parseInt(editForm.pageNumber) : null,
+          chapter: editForm.chapter || null,
+          memo: editForm.memo || null,
+        }),
+      });
+      const updated = await res.json();
+      setQuoteList((list) => list.map((q) => q.id === editingQuote.id ? { ...q, ...updated } : q));
+      setEditingQuote(null);
+    } finally {
+      setEditSaving(false);
+    }
+  }
 
   // ──────────── 引用 CRUD ────────────
   async function handleAdd(e: React.FormEvent) {
@@ -280,6 +315,9 @@ export default function QuotesTab({
                     </button>
                   </div>
                   <div className="flex items-center gap-1 flex-shrink-0">
+                    <button onClick={() => openEdit(q)} className="p-1.5 hover:bg-slate-100 text-slate-300 hover:text-slate-600 rounded-lg transition-colors">
+                      <Edit2 className="w-4 h-4" />
+                    </button>
                     <button onClick={() => toggleFavorite(q.id, q.isFavorite)} className="p-1.5 hover:bg-amber-50 rounded-lg transition-colors">
                       <Star className={cn("w-4 h-4", q.isFavorite ? "fill-amber-400 text-amber-400" : "text-slate-300")} />
                     </button>
@@ -364,6 +402,80 @@ export default function QuotesTab({
             );
           })}
         </div>
+      )}
+      {/* 編集ボトムシート */}
+      {editingQuote && (
+        <>
+          <div
+            className="fixed inset-0 bg-black/40 z-40 backdrop-blur-sm"
+            onClick={() => setEditingQuote(null)}
+          />
+          <div className="fixed bottom-0 left-0 right-0 z-50 bg-white rounded-t-2xl shadow-2xl max-w-lg mx-auto">
+            {/* ハンドルバー */}
+            <div className="flex justify-center pt-3 pb-1">
+              <div className="w-10 h-1 rounded-full bg-slate-200" />
+            </div>
+
+            <div className="px-5 pb-2 pt-1 flex items-center justify-between">
+              <p className="font-semibold text-slate-900">引用を編集</p>
+              <button
+                onClick={() => setEditingQuote(null)}
+                className="p-1.5 hover:bg-slate-100 rounded-lg transition-colors text-slate-400"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="px-5 pb-6 space-y-3">
+              <textarea
+                value={editForm.text}
+                onChange={(e) => setEditForm((f) => ({ ...f, text: e.target.value }))}
+                rows={4}
+                className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-indigo-400 resize-none"
+                autoFocus
+              />
+              <div className="grid grid-cols-2 gap-2">
+                <input
+                  type="number"
+                  value={editForm.pageNumber}
+                  onChange={(e) => setEditForm((f) => ({ ...f, pageNumber: e.target.value }))}
+                  placeholder="ページ番号"
+                  className="border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-indigo-400"
+                />
+                <input
+                  value={editForm.chapter}
+                  onChange={(e) => setEditForm((f) => ({ ...f, chapter: e.target.value }))}
+                  placeholder="章・セクション"
+                  className="border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-indigo-400"
+                />
+              </div>
+              <input
+                value={editForm.memo}
+                onChange={(e) => setEditForm((f) => ({ ...f, memo: e.target.value }))}
+                placeholder="メモ（任意）"
+                className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-indigo-400"
+              />
+              <div className="flex gap-2 pt-1">
+                <button
+                  onClick={() => setEditingQuote(null)}
+                  className="flex-1 py-2.5 rounded-xl border border-slate-200 text-slate-600 text-sm font-medium hover:bg-slate-50 transition-colors"
+                >
+                  キャンセル
+                </button>
+                <button
+                  onClick={handleEditSave}
+                  disabled={editSaving || !editForm.text.trim()}
+                  className="flex-1 py-2.5 rounded-xl bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-700 disabled:opacity-50 transition-colors"
+                >
+                  {editSaving ? "保存中..." : "保存"}
+                </button>
+              </div>
+            </div>
+
+            {/* iOSホームバー用余白 */}
+            <div className="pb-safe-bottom" />
+          </div>
+        </>
       )}
     </div>
   );
