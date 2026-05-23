@@ -35,10 +35,30 @@ const tabs: { id: Tab; label: string; icon: React.ElementType }[] = [
   { id: "ai", label: "AI", icon: Bot },
 ];
 
+const STATUS_OPTIONS: { value: BookStatus; label: string }[] = [
+  { value: "want", label: "積読" },
+  { value: "reading", label: "読中" },
+  { value: "done", label: "読了" },
+];
+
 export default function BookDetail({ book, initialQuotes, initialPhotos, initialChat }: Props) {
   const [activeTab, setActiveTab] = useState<Tab>("quotes");
   const [deleting, setDeleting] = useState(false);
+  const [status, setStatus] = useState<BookStatus>(book.status as BookStatus);
+  const [updatingStatus, setUpdatingStatus] = useState(false);
   const router = useRouter();
+
+  async function handleStatusChange(newStatus: BookStatus) {
+    if (newStatus === status || updatingStatus) return;
+    setUpdatingStatus(true);
+    setStatus(newStatus);
+    await fetch(`/api/books/${book.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status: newStatus }),
+    });
+    setUpdatingStatus(false);
+  }
 
   async function handleDelete() {
     if (!confirm(`「${book.title}」を削除しますか？`)) return;
@@ -74,10 +94,22 @@ export default function BookDetail({ book, initialQuotes, initialPhotos, initial
             <p className="text-sm text-slate-500">{book.author ?? "著者不明"}</p>
             {book.publisher && <p className="text-xs text-slate-400">{book.publisher}{book.publishedDate && ` · ${book.publishedDate}`}</p>}
           </div>
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className={cn("text-xs px-2 py-0.5 rounded-full font-medium", STATUS_COLORS[book.status as BookStatus])}>
-              {STATUS_LABELS[book.status]}
-            </span>
+          <div className="flex items-center gap-1.5 flex-wrap">
+            {STATUS_OPTIONS.map(({ value, label }) => (
+              <button
+                key={value}
+                onClick={() => handleStatusChange(value)}
+                disabled={updatingStatus}
+                className={cn(
+                  "text-xs px-2.5 py-0.5 rounded-full font-medium transition-colors",
+                  status === value
+                    ? STATUS_COLORS[value]
+                    : "bg-slate-100 text-slate-400 hover:bg-slate-200"
+                )}
+              >
+                {label}
+              </button>
+            ))}
             {book.genre && <span className="text-xs text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full">{book.genre}</span>}
           </div>
           {book.rating && (
