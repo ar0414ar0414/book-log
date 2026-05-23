@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { BookOpen, Quote, LayoutDashboard, LogOut } from "lucide-react";
+import { BookOpen, Quote, LayoutDashboard, LogOut, BarChart2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import type { User } from "@supabase/supabase-js";
@@ -12,6 +12,7 @@ const navItems = [
   { href: "/dashboard", icon: LayoutDashboard, label: "ホーム" },
   { href: "/books", icon: BookOpen, label: "本棚" },
   { href: "/quotes", icon: Quote, label: "引用" },
+  { href: "/stats", icon: BarChart2, label: "統計" },
 ];
 
 export default function NavBar({ user }: { user: User }) {
