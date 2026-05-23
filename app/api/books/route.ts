@@ -45,6 +45,8 @@ export async function POST(request: Request) {
     rating: body.rating || null,
     memo: body.memo || null,
     pageCount: body.pageCount || null,
+    startedAt: body.startedAt ? new Date(body.startedAt) : null,
+    finishedAt: body.finishedAt ? new Date(body.finishedAt) : null,
   }).returning();
 
   return NextResponse.json(book);

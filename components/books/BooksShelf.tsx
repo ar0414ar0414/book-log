@@ -282,13 +282,18 @@ function GridView({ books }: { books: Book[] }) {
           <div className="p-3 flex-1 flex flex-col gap-1">
             <p className="font-medium text-slate-900 text-sm leading-tight line-clamp-2">{book.title}</p>
             <p className="text-xs text-slate-500 truncate">{book.author ?? "著者不明"}</p>
-            {book.rating != null && (
-              <div className="flex items-center gap-0.5 text-amber-500 mt-auto">
-                {Array.from({ length: 5 }).map((_, i) => (
-                  <Star key={i} className={cn("w-3 h-3", i < book.rating! ? "fill-current" : "text-slate-200")} />
-                ))}
-              </div>
-            )}
+            <div className="flex items-center justify-between mt-auto">
+              {book.rating != null ? (
+                <div className="flex items-center gap-0.5 text-amber-500">
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <Star key={i} className={cn("w-3 h-3", i < book.rating! ? "fill-current" : "text-slate-200")} />
+                  ))}
+                </div>
+              ) : <span />}
+              {book.pageCount && (
+                <span className="text-xs text-slate-400">{book.pageCount}p</span>
+              )}
+            </div>
           </div>
         </Link>
       ))}

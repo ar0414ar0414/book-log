@@ -21,7 +21,7 @@ export default async function QuotesPage() {
   const reversed = [...allQuotes].reverse();
 
   return (
-    <div className="pb-20 sm:pb-6 space-y-4">
+    <div className="pb-nav-safe sm:pb-6 space-y-4">
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-bold text-slate-900">引用一覧</h1>
         <span className="text-sm text-slate-500">{allQuotes.length}件</span>

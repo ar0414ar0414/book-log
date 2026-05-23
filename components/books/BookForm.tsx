@@ -38,6 +38,8 @@ export default function BookForm() {
     status: "want",
     rating: 0,
     memo: "",
+    startedAt: "",
+    finishedAt: "",
   });
 
   async function handleSearch() {
@@ -93,7 +95,12 @@ export default function BookForm() {
       const res = await fetch("/api/books", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...form, pageCount: form.pageCount ? parseInt(form.pageCount) : null }),
+        body: JSON.stringify({
+          ...form,
+          pageCount: form.pageCount ? parseInt(form.pageCount) : null,
+          startedAt: form.startedAt || null,
+          finishedAt: form.finishedAt || null,
+        }),
       });
       if (res.ok) {
         const book = await res.json();
@@ -222,6 +229,31 @@ export default function BookForm() {
             ))}
           </div>
         </div>
+
+        {(form.status === "reading" || form.status === "done") && (
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="text-sm font-medium text-slate-700">読み始め</label>
+              <input
+                type="date"
+                value={form.startedAt}
+                onChange={(e) => setForm((f) => ({ ...f, startedAt: e.target.value }))}
+                className="mt-1 w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-indigo-400"
+              />
+            </div>
+            {form.status === "done" && (
+              <div>
+                <label className="text-sm font-medium text-slate-700">読了日</label>
+                <input
+                  type="date"
+                  value={form.finishedAt}
+                  onChange={(e) => setForm((f) => ({ ...f, finishedAt: e.target.value }))}
+                  className="mt-1 w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-indigo-400"
+                />
+              </div>
+            )}
+          </div>
+        )}
 
         <div>
           <label className="text-sm font-medium text-slate-700">評価</label>

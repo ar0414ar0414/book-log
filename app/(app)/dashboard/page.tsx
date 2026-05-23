@@ -23,11 +23,12 @@ export default async function DashboardPage() {
     done: allBooks.filter((b) => b.status === "done").length,
   };
 
+  const readingBooks = allBooks.filter((b) => b.status === "reading");
   const recentBooks = allBooks.slice(-4).reverse();
   const favoriteQuotes = allQuotes.filter((q) => q.isFavorite).slice(-3).reverse();
 
   return (
-    <div className="pb-20 sm:pb-6 space-y-6">
+    <div className="pb-nav-safe sm:pb-6 space-y-6">
       <div>
         <h1 className="text-xl font-bold text-slate-900">
           {user.user_metadata?.name ?? "ようこそ"}さんの本棚
@@ -69,6 +70,48 @@ export default async function DashboardPage() {
           引用を見る
         </Link>
       </div>
+
+      {/* 読中の本 */}
+      {readingBooks.length > 0 && (
+        <section>
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="font-semibold text-slate-800 flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              今読んでいる本
+            </h2>
+            <span className="text-xs text-slate-400">{readingBooks.length}冊</span>
+          </div>
+          <div className="space-y-2">
+            {readingBooks.map((book) => (
+              <Link
+                key={book.id}
+                href={`/books/${book.id}`}
+                className="flex items-center gap-4 bg-gradient-to-r from-indigo-50 to-white rounded-xl p-3 border border-indigo-100 hover:border-indigo-300 hover:shadow-sm transition-all"
+              >
+                <div className="w-12 h-17 flex-shrink-0 rounded-lg overflow-hidden shadow-sm">
+                  {book.coverUrl ? (
+                    <img src={book.coverUrl} alt={book.title} className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="w-full h-full bg-indigo-100 flex items-center justify-center">
+                      <BookOpen className="w-5 h-5 text-indigo-300" />
+                    </div>
+                  )}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-semibold text-slate-900 truncate">{book.title}</p>
+                  <p className="text-sm text-slate-500 truncate mt-0.5">{book.author ?? "著者不明"}</p>
+                  {book.startedAt && (
+                    <p className="text-xs text-indigo-500 mt-1">
+                      {new Date(book.startedAt).toLocaleDateString("ja-JP", { month: "long", day: "numeric" })} 〜
+                    </p>
+                  )}
+                </div>
+                <div className="flex-shrink-0 w-1.5 self-stretch rounded-full bg-indigo-400" />
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* recent books */}
       {recentBooks.length > 0 && (
