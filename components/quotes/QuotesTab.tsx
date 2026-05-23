@@ -113,6 +113,7 @@ export default function QuotesTab({
   }
 
   async function handleDelete(id: string) {
+    if (!confirm("この引用を削除しますか？")) return;
     await fetch(`/api/quotes/${id}`, { method: "DELETE" });
     setQuoteList((q) => q.filter((item) => item.id !== id));
   }
