@@ -234,7 +234,7 @@ export default function BookDetail({ book, initialQuotes, initialPhotos, initial
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <Link href="/books" className="p-2 hover:bg-slate-100 rounded-lg transition-colors">
+        <Link href="/books" className="p-2 hover:bg-slate-100 rounded-lg transition-colors active:scale-90 active:opacity-60">
           <ArrowLeft className="w-5 h-5 text-slate-600" />
         </Link>
         <button onClick={handleDelete} disabled={deleting} className="p-2 hover:bg-red-50 text-red-400 hover:text-red-600 rounded-lg transition-colors">

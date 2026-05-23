@@ -259,7 +259,7 @@ function GridView({ books }: { books: Book[] }) {
         <Link
           key={book.id}
           href={`/books/${book.id}`}
-          className="bg-white rounded-xl border border-slate-100 overflow-hidden hover:border-indigo-200 hover:shadow-md transition-all flex flex-col"
+          className="bg-white rounded-xl border border-slate-100 overflow-hidden hover:border-indigo-200 hover:shadow-md transition-all flex flex-col active:scale-95 active:opacity-70"
         >
           <div className="aspect-[2/3] bg-indigo-50 relative">
             {book.coverUrl ? (
@@ -305,7 +305,7 @@ function ListView({ books }: { books: Book[] }) {
         <Link
           key={book.id}
           href={`/books/${book.id}`}
-          className="flex items-center gap-3 bg-white rounded-xl border border-slate-100 p-3 hover:border-indigo-200 hover:shadow-sm transition-all"
+          className="flex items-center gap-3 bg-white rounded-xl border border-slate-100 p-3 hover:border-indigo-200 hover:shadow-sm transition-all active:scale-95 active:opacity-70"
         >
           <div className="w-10 h-14 bg-indigo-50 rounded-md overflow-hidden flex-shrink-0">
             {book.coverUrl ? (

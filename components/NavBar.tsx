@@ -50,7 +50,7 @@ export default function NavBar({ user }: { user: User }) {
             key={href}
             href={href}
             className={cn(
-              "flex-1 flex flex-col items-center justify-center py-2 gap-0.5 text-xs transition-colors",
+              "flex-1 flex flex-col items-center justify-center py-2 gap-0.5 text-xs transition-colors active:scale-95 active:opacity-60",
               pathname === href || (href !== "/dashboard" && pathname.startsWith(href))
                 ? "text-indigo-600"
                 : "text-slate-400"
@@ -69,7 +69,7 @@ export default function NavBar({ user }: { user: User }) {
             key={href}
             href={href}
             className={cn(
-              "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
+              "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors active:scale-95 active:opacity-60",
               pathname === href || (href !== "/dashboard" && pathname.startsWith(href))
                 ? "bg-indigo-50 text-indigo-700"
                 : "text-slate-600 hover:bg-slate-50"
