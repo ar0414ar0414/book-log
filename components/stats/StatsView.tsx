@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { BookOpen, Star, FileText, TrendingUp } from "lucide-react";
+import { BookOpen, Star, FileText, TrendingUp, User } from "lucide-react";
 import type { Book } from "@/types";
 
 const MONTH_LABELS = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"];
@@ -56,7 +56,26 @@ export default function StatsView({ books }: { books: Book[] }) {
       count: books.filter((b) => Math.round(b.rating ?? 0) === r).length,
     }));
 
-    return { doneThisYear, totalPages, avgRating, monthly, genreSorted, ratingDist };
+    // 著者別冊数（年フィルタ連動・著者不明除外・上位8名）
+    const authorMap = new Map<string, { count: number; ratingSum: number; ratingCount: number }>();
+    addedThisYear.forEach((b) => {
+      const a = b.author?.trim();
+      if (!a) return;
+      const entry = authorMap.get(a) ?? { count: 0, ratingSum: 0, ratingCount: 0 };
+      entry.count += 1;
+      if (b.rating != null) { entry.ratingSum += b.rating; entry.ratingCount += 1; }
+      authorMap.set(a, entry);
+    });
+    const authorSorted = [...authorMap.entries()]
+      .sort((a, b) => b[1].count - a[1].count)
+      .slice(0, 8)
+      .map(([name, { count, ratingSum, ratingCount }]) => ({
+        name,
+        count,
+        avgRating: ratingCount > 0 ? ratingSum / ratingCount : null,
+      }));
+
+    return { doneThisYear, totalPages, avgRating, monthly, genreSorted, ratingDist, authorSorted };
   }, [books, year]);
 
   const maxMonthly = Math.max(...stats.monthly, 1);
@@ -174,6 +193,44 @@ export default function StatsView({ books }: { books: Book[] }) {
                 </span>
               </div>
             ))}
+          </div>
+        </section>
+      )}
+
+      {/* 著者別冊数 */}
+      {stats.authorSorted.length > 0 && (
+        <section className="bg-white rounded-2xl border border-slate-100 p-4">
+          <h2 className="text-sm font-semibold text-slate-700 mb-4 flex items-center gap-2">
+            <User className="w-4 h-4 text-indigo-500" />
+            著者別（{year}年追加）
+          </h2>
+          <div className="space-y-2.5">
+            {stats.authorSorted.map(({ name, count, avgRating }, i) => {
+              const maxCount = stats.authorSorted[0].count;
+              return (
+                <div key={name} className="flex items-center gap-3">
+                  <span className="text-xs text-slate-600 w-24 truncate flex-shrink-0">{name}</span>
+                  <div className="flex-1 bg-slate-100 rounded-full h-2 overflow-hidden">
+                    <div
+                      className="h-full rounded-full transition-all"
+                      style={{
+                        width: `${(count / maxCount) * 100}%`,
+                        backgroundColor: COLORS[i % COLORS.length],
+                      }}
+                    />
+                  </div>
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    <span className="text-xs font-medium text-slate-500 w-8 text-right">{count}冊</span>
+                    {avgRating != null && (
+                      <span className="text-xs text-amber-500 flex items-center gap-0.5 w-10">
+                        <Star className="w-3 h-3 fill-amber-400" />
+                        {avgRating.toFixed(1)}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </section>
       )}
