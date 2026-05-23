@@ -286,23 +286,6 @@ export default function BookDetail({ book, initialQuotes, initialPhotos, initial
               </button>
             )}
           </div>
-          <div className="flex items-center gap-1.5 flex-wrap">
-            {STATUS_OPTIONS.map(({ value, label }) => (
-              <button
-                key={value}
-                onClick={() => handleStatusChange(value)}
-                disabled={updatingStatus}
-                className={cn(
-                  "text-xs px-2.5 py-0.5 rounded-full font-medium transition-colors",
-                  status === value
-                    ? STATUS_COLORS[value]
-                    : "bg-slate-100 text-slate-400 hover:bg-slate-200"
-                )}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
           {book.genre && <span className="text-xs text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full w-fit">{localizeGenre(book.genre)}</span>}
           <div className="flex gap-0.5">
             {Array.from({ length: 5 }).map((_, i) => (
@@ -325,6 +308,25 @@ export default function BookDetail({ book, initialQuotes, initialPhotos, initial
             {book.finishedAt && <p>読了: {formatDate(book.finishedAt)}</p>}
           </div>
         </div>
+      </div>
+
+      {/* ステータス */}
+      <div className="flex gap-2">
+        {STATUS_OPTIONS.map(({ value, label }) => (
+          <button
+            key={value}
+            onClick={() => handleStatusChange(value)}
+            disabled={updatingStatus}
+            className={cn(
+              "flex-1 py-2.5 rounded-xl text-sm font-medium border transition-colors",
+              status === value
+                ? STATUS_COLORS[value] + " border-transparent"
+                : "bg-white text-slate-400 border-slate-200 hover:border-slate-300"
+            )}
+          >
+            {label}
+          </button>
+        ))}
       </div>
 
       {editingMemo ? (
