@@ -6,7 +6,7 @@ export interface GoogleBookInfo {
   description: string;
   isbn: string;
   coverUrl: string;
-  pageCount: number;
+  pageCount: number | null;
   genre: string;
 }
 
@@ -34,7 +34,7 @@ export async function searchGoogleBooks(query: string): Promise<GoogleBookInfo[]
       description: info.description ?? "",
       isbn,
       coverUrl: info.imageLinks?.thumbnail?.replace("http://", "https://") ?? "",
-      pageCount: info.pageCount ?? 0,
+      pageCount: info.pageCount ?? null,
       genre: info.categories?.[0] ?? "",
     };
   });

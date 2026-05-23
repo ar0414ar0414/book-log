@@ -85,8 +85,22 @@ export default function BookDetail({ book, initialQuotes, initialPhotos, initial
   const [postDraft, setPostDraft] = useState("");
   const [reflectionSaving, setReflectionSaving] = useState(false);
   const [showPostPopup, setShowPostPopup] = useState(false);
+  const [pageCount, setPageCount] = useState<number | null>(book.pageCount ?? null);
+  const [editingPageCount, setEditingPageCount] = useState(false);
+  const [pageCountDraft, setPageCountDraft] = useState("");
   const { provider } = useAiProvider();
   const router = useRouter();
+
+  async function savePageCount() {
+    const val = pageCountDraft.trim() ? parseInt(pageCountDraft) : null;
+    setPageCount(val);
+    setEditingPageCount(false);
+    await fetch(`/api/books/${book.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ pageCount: val }),
+    });
+  }
 
   async function handleRatingChange(newRating: number) {
     const next = newRating === rating ? 0 : newRating;
@@ -201,6 +215,29 @@ export default function BookDetail({ book, initialQuotes, initialPhotos, initial
             <p className="font-semibold text-slate-900 text-base leading-tight">{book.title}</p>
             <p className="text-sm text-slate-500">{book.author ?? "著者不明"}</p>
             {book.publisher && <p className="text-xs text-slate-400">{book.publisher}{book.publishedDate && ` · ${book.publishedDate}`}</p>}
+            {editingPageCount ? (
+              <div className="flex items-center gap-1 mt-0.5">
+                <input
+                  type="number"
+                  min={1}
+                  autoFocus
+                  value={pageCountDraft}
+                  onChange={(e) => setPageCountDraft(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === "Enter") savePageCount(); if (e.key === "Escape") setEditingPageCount(false); }}
+                  placeholder="ページ数"
+                  className="w-24 border border-indigo-300 rounded-lg px-2 py-0.5 text-xs focus:outline-none"
+                />
+                <button onClick={savePageCount} className="text-xs text-indigo-600 hover:text-indigo-800">保存</button>
+                <button onClick={() => setEditingPageCount(false)} className="text-xs text-slate-400">×</button>
+              </div>
+            ) : (
+              <button
+                onClick={() => { setPageCountDraft(pageCount?.toString() ?? ""); setEditingPageCount(true); }}
+                className="text-xs text-slate-400 hover:text-indigo-500 transition-colors mt-0.5 text-left"
+              >
+                {pageCount ? `${pageCount}ページ` : "+ ページ数を追加"}
+              </button>
+            )}
           </div>
           <div className="flex items-center gap-1.5 flex-wrap">
             {STATUS_OPTIONS.map(({ value, label }) => (

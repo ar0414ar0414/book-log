@@ -82,7 +82,7 @@ export default function BookForm() {
       publishedDate: book.publishedDate,
       genre: book.genre,
       description: book.description,
-      pageCount: book.pageCount.toString(),
+      pageCount: book.pageCount?.toString() ?? "",
     }));
     setResults([]);
     setQuery("");
@@ -200,13 +200,26 @@ export default function BookForm() {
           />
         </div>
 
-        <div>
-          <label className="text-sm font-medium text-slate-700">著者</label>
-          <input
-            value={form.author}
-            onChange={(e) => setForm((f) => ({ ...f, author: e.target.value }))}
-            className="mt-1 w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-indigo-400"
-          />
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label className="text-sm font-medium text-slate-700">著者</label>
+            <input
+              value={form.author}
+              onChange={(e) => setForm((f) => ({ ...f, author: e.target.value }))}
+              className="mt-1 w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-indigo-400"
+            />
+          </div>
+          <div>
+            <label className="text-sm font-medium text-slate-700">ページ数</label>
+            <input
+              type="number"
+              min={1}
+              value={form.pageCount}
+              onChange={(e) => setForm((f) => ({ ...f, pageCount: e.target.value }))}
+              placeholder="例: 320"
+              className="mt-1 w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-indigo-400"
+            />
+          </div>
         </div>
 
         <div>
