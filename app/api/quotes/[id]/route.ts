@@ -17,6 +17,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     .where(and(eq(quotes.id, id), eq(quotes.userId, user.id)))
     .returning();
 
+  if (!quote) return NextResponse.json({ error: "Not found" }, { status: 404 });
   return NextResponse.json(quote);
 }
 

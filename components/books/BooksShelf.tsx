@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useMemo } from "react";
 import Link from "next/link";
 import {
-  BookOpen, Star, Search, LayoutGrid, List, Plus, ChevronDown, X, Check,
+  BookOpen, Star, Search, LayoutGrid, List, Plus, ArrowUpDown, X, Check,
 } from "lucide-react";
 import { cn, STATUS_LABELS, STATUS_COLORS } from "@/lib/utils";
 import type { Book, BookStatus } from "@/types";
@@ -145,28 +145,25 @@ export default function BooksShelf({
               <Search className="w-4 h-4" />
             </button>
 
-            {/* ソートチップ */}
-            <div ref={sortRef} className="relative flex-1 min-w-0">
+            {/* ソートアイコン */}
+            <div ref={sortRef} className="relative flex-shrink-0">
               <button
                 onClick={() => setSortOpen((v) => !v)}
+                aria-label="並び替え"
                 className={cn(
-                  "w-full flex items-center justify-between gap-1.5 bg-white border rounded-full px-3.5 py-2 text-sm font-medium transition-all shadow-sm",
+                  "w-9 h-9 flex items-center justify-center rounded-full border transition-colors shadow-sm",
                   sortOpen
-                    ? "border-indigo-400 text-indigo-600 shadow-indigo-100"
-                    : "border-slate-200 text-slate-600 hover:border-slate-300"
+                    ? "bg-indigo-600 border-indigo-600 text-white"
+                    : sortKey !== "createdAt_desc"
+                      ? "bg-indigo-50 border-indigo-300 text-indigo-600"
+                      : "bg-white border-slate-200 text-slate-500 hover:border-indigo-300 hover:text-indigo-500"
                 )}
               >
-                <span className="truncate text-xs">{currentSort.label}</span>
-                <ChevronDown
-                  className={cn(
-                    "w-3.5 h-3.5 flex-shrink-0 transition-transform duration-200",
-                    sortOpen && "rotate-180"
-                  )}
-                />
+                <ArrowUpDown className="w-4 h-4" />
               </button>
 
               {sortOpen && (
-                <div className="absolute top-full left-0 right-0 mt-1.5 bg-white border border-slate-100 rounded-2xl shadow-xl z-20 py-1.5 overflow-hidden">
+                <div className="absolute top-full right-0 mt-1.5 w-52 bg-white border border-slate-100 rounded-2xl shadow-xl z-20 py-1.5 overflow-hidden">
                   {SORT_OPTIONS.map((opt) => (
                     <button
                       key={opt.value}

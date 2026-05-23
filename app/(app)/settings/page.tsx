@@ -31,7 +31,10 @@ export default function SettingsPage() {
   const [saved, setSaved] = useState(false);
 
   useEffect(() => {
-    fetch("/api/ai/providers").then((r) => r.json()).then(setAvailability);
+    fetch("/api/ai/providers")
+      .then((r) => r.json())
+      .then(setAvailability)
+      .catch(() => setAvailability({ gemini: false, claude: false }));
   }, []);
 
   function handleSelect(p: AiProvider) {

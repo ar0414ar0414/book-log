@@ -1,3 +1,6 @@
+import { geminiClient } from "@/lib/gemini/client";
+import { claudeClient } from "@/lib/claude/client";
+
 export type AiProvider = "gemini" | "claude";
 
 export interface ChatMessage {
@@ -31,10 +34,5 @@ export function classifyAiError(e: unknown): { code: "quota_exceeded" | "api_err
 }
 
 export function getAiClient(provider: AiProvider): AiClient {
-  if (provider === "claude") {
-    const { claudeClient } = require("@/lib/claude/client");
-    return claudeClient;
-  }
-  const { geminiClient } = require("@/lib/gemini/client");
-  return geminiClient;
+  return provider === "claude" ? claudeClient : geminiClient;
 }

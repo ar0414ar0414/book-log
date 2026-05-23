@@ -17,7 +17,7 @@ interface Props {
   book: {
     id: string; title: string; author: string | null; coverUrl: string | null;
     genre: string | null; status: string; rating: number | null; memo: string | null;
-    startedAt: Date | null; finishedAt: Date | null; publisher: string | null;
+    startedAt: Date | null; finishedAt: Date | null; updatedAt: Date; publisher: string | null;
     publishedDate: string | null; description: string | null; pageCount: number | null;
   };
   initialQuotes: {

@@ -148,7 +148,7 @@ export default function AiChatTab({ bookId, initialChat }: { bookId: string; ini
       </div>
 
       {/* input */}
-      <form onSubmit={handleSend} className="flex gap-2 sticky bottom-20 sm:bottom-4 bg-slate-50 pt-2">
+      <form onSubmit={handleSend} className="flex gap-2 sticky bottom-14 sm:bottom-0 bg-slate-50 pt-2">
         <input
           value={input}
           onChange={(e) => setInput(e.target.value)}

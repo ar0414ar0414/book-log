@@ -24,6 +24,15 @@ body {
   padding-bottom: calc(3.5rem + env(safe-area-inset-bottom, 0px));
 }
 
+/* スクロールバー非表示 */
+.scrollbar-hide {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
 /* バーコードスキャナー用 */
 .pt-safe-top {
   padding-top: env(safe-area-inset-top, 0px);
