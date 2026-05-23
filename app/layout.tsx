@@ -5,13 +5,13 @@ import "./globals.css";
 const noto = Noto_Sans_JP({ subsets: ["latin"], weight: ["400", "500", "700"] });
 
 export const metadata: Metadata = {
-  title: "ReadLog - 読書記録",
+  title: "Folio – 読書記録",
   description: "読んだ本の記録・引用保存・AI読書サポートアプリ",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "ReadLog",
+    title: "Folio",
   },
 };
 

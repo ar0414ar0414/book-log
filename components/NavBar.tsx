@@ -30,7 +30,7 @@ export default function NavBar({ user }: { user: User }) {
       <header className="sticky top-0 z-50 bg-white border-b border-slate-100 px-4 h-14 flex items-center justify-between">
         <Link href="/dashboard" className="flex items-center gap-2 font-bold text-indigo-600">
           <BookOpen className="w-5 h-5" />
-          ReadLog
+          Folio
         </Link>
         <button
           onClick={signOut}

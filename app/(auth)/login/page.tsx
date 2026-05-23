@@ -23,7 +23,7 @@ export default function LoginPage() {
             <BookOpen className="w-7 h-7 text-white" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-slate-900">ReadLog</h1>
+            <h1 className="text-2xl font-bold text-slate-900">Folio</h1>
             <p className="text-sm text-slate-500">読書記録アプリ</p>
           </div>
         </div>

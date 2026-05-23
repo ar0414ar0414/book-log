@@ -1,6 +1,6 @@
 {
-  "name": "ReadLog - 読書記録",
-  "short_name": "ReadLog",
+  "name": "Folio – 読書記録",
+  "short_name": "Folio",
   "description": "読んだ本の記録・引用保存・AI読書サポートアプリ",
   "start_url": "/dashboard",
   "display": "standalone",
