@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { Send, Bot, User, Loader2, Sparkles, AlertCircle } from "lucide-react";
 import { useAiProvider } from "@/hooks/useAiProvider";
 import { cn } from "@/lib/utils";
+import ReactMarkdown from "react-markdown";
 
 interface Message {
   id: string; role: string; content: string; createdAt: Date;
@@ -98,7 +99,18 @@ export default function AiChatTab({ bookId, initialChat }: { bookId: string; ini
             <Sparkles className="w-4 h-4 text-indigo-600" />
             <p className="text-sm font-semibold text-indigo-700">AI要約・考察</p>
           </div>
-          <p className="text-sm text-slate-700 leading-relaxed whitespace-pre-wrap">{summary}</p>
+          <ReactMarkdown
+            components={{
+              h1: ({ children }) => <p className="font-bold text-base mb-1">{children}</p>,
+              h2: ({ children }) => <p className="font-bold mb-1">{children}</p>,
+              p: ({ children }) => <p className="text-sm text-slate-700 mb-2 last:mb-0">{children}</p>,
+              ul: ({ children }) => <ul className="list-disc list-inside space-y-0.5 mb-2 text-sm text-slate-700">{children}</ul>,
+              ol: ({ children }) => <ol className="list-decimal list-inside space-y-0.5 mb-2 text-sm text-slate-700">{children}</ol>,
+              strong: ({ children }) => <strong className="font-semibold">{children}</strong>,
+            }}
+          >
+            {summary}
+          </ReactMarkdown>
           <button onClick={() => setSummary(null)} className="mt-2 text-xs text-indigo-400 hover:text-indigo-600">閉じる</button>
         </div>
       )}
@@ -125,7 +137,25 @@ export default function AiChatTab({ bookId, initialChat }: { bookId: string; ini
                 ? "bg-indigo-600 text-white rounded-br-sm"
                 : "bg-white border border-slate-100 text-slate-800 rounded-bl-sm"
             )}>
-              <p className="whitespace-pre-wrap">{msg.content}</p>
+              {msg.role === "user" ? (
+                <p className="whitespace-pre-wrap">{msg.content}</p>
+              ) : (
+                <ReactMarkdown
+                  components={{
+                    h1: ({ children }) => <p className="font-bold text-base mb-1">{children}</p>,
+                    h2: ({ children }) => <p className="font-bold mb-1">{children}</p>,
+                    h3: ({ children }) => <p className="font-semibold mb-0.5">{children}</p>,
+                    p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
+                    ul: ({ children }) => <ul className="list-disc list-inside space-y-0.5 mb-2">{children}</ul>,
+                    ol: ({ children }) => <ol className="list-decimal list-inside space-y-0.5 mb-2">{children}</ol>,
+                    li: ({ children }) => <li className="text-sm">{children}</li>,
+                    strong: ({ children }) => <strong className="font-semibold">{children}</strong>,
+                    hr: () => <hr className="my-2 border-slate-200" />,
+                  }}
+                >
+                  {msg.content}
+                </ReactMarkdown>
+              )}
             </div>
             {msg.role === "user" && (
               <div className="w-7 h-7 bg-slate-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
