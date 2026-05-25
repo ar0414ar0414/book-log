@@ -384,12 +384,31 @@ export default function BookDetail({ book, initialQuotes, initialPhotos, initial
                   <button onClick={() => setEditingCurrentPage(false)} className="text-slate-400 dark:text-slate-500 text-sm">×</button>
                 </div>
               ) : (
-                <button
-                  onClick={() => { setCurrentPageDraft(currentPage?.toString() ?? ""); setEditingCurrentPage(true); }}
-                  className="w-full py-2 border border-dashed border-indigo-200 dark:border-indigo-700 rounded-xl text-sm text-indigo-500 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/50 transition-colors"
-                >
-                  {currentPage ? "ページを更新" : "現在のページを入力"}
-                </button>
+                <div className="flex items-center gap-2">
+                  {([10, 25, 50] as const).map((n) => (
+                    <button
+                      key={n}
+                      onClick={async () => {
+                        const next = Math.min((currentPage ?? 0) + n, pageCount ?? Infinity);
+                        setCurrentPage(next);
+                        await fetch(`/api/books/${book.id}`, {
+                          method: "PATCH",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({ currentPage: next }),
+                        });
+                      }}
+                      className="flex-1 py-2 text-sm font-medium bg-indigo-50 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 rounded-xl hover:bg-indigo-100 dark:hover:bg-indigo-900 active:scale-95 transition-all"
+                    >
+                      +{n}p
+                    </button>
+                  ))}
+                  <button
+                    onClick={() => { setCurrentPageDraft(currentPage?.toString() ?? ""); setEditingCurrentPage(true); }}
+                    className="flex-1 py-2 border border-dashed border-indigo-200 dark:border-indigo-700 rounded-xl text-sm text-indigo-500 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/50 transition-colors"
+                  >
+                    {currentPage ? "直接入力" : "入力"}
+                  </button>
+                </div>
               )}
             </>
           ) : (

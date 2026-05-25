@@ -6,6 +6,7 @@ import Link from "next/link";
 import { BookOpen, Quote, Star, Plus } from "lucide-react";
 import { STATUS_LABELS, STATUS_COLORS, cn } from "@/lib/utils";
 import type { BookStatus } from "@/types";
+import ReadingBooksWidget from "@/components/books/ReadingBooksWidget";
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -72,46 +73,14 @@ export default async function DashboardPage() {
       </div>
 
       {/* 読中の本 */}
-      {readingBooks.length > 0 && (
-        <section>
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="font-semibold text-slate-800 dark:text-slate-200 flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              今読んでいる本
-            </h2>
-            <span className="text-xs text-slate-400 dark:text-slate-500">{readingBooks.length}冊</span>
-          </div>
-          <div className="space-y-2">
-            {readingBooks.map((book) => (
-              <Link
-                key={book.id}
-                href={`/books/${book.id}`}
-                className="flex items-center gap-4 bg-gradient-to-r from-indigo-50 dark:from-indigo-950/50 to-white dark:to-slate-800 rounded-xl p-3 border border-indigo-100 dark:border-indigo-800 hover:border-indigo-300 dark:hover:border-indigo-600 hover:shadow-sm transition-all"
-              >
-                <div className="w-12 h-17 flex-shrink-0 rounded-lg overflow-hidden shadow-sm">
-                  {book.coverUrl ? (
-                    <img src={book.coverUrl} alt={book.title} className="w-full h-full object-cover" />
-                  ) : (
-                    <div className="w-full h-full bg-indigo-100 dark:bg-indigo-900 flex items-center justify-center">
-                      <BookOpen className="w-5 h-5 text-indigo-300 dark:text-indigo-500" />
-                    </div>
-                  )}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-slate-900 dark:text-slate-100 truncate">{book.title}</p>
-                  <p className="text-sm text-slate-500 dark:text-slate-400 truncate mt-0.5">{book.author ?? "著者不明"}</p>
-                  {book.startedAt && (
-                    <p className="text-xs text-indigo-500 dark:text-indigo-400 mt-1">
-                      {new Date(book.startedAt).toLocaleDateString("ja-JP", { month: "long", day: "numeric" })} 〜
-                    </p>
-                  )}
-                </div>
-                <div className="flex-shrink-0 w-1.5 self-stretch rounded-full bg-indigo-400 dark:bg-indigo-500" />
-              </Link>
-            ))}
-          </div>
-        </section>
-      )}
+      <ReadingBooksWidget books={readingBooks.map((b) => ({
+        id: b.id,
+        title: b.title,
+        author: b.author,
+        coverUrl: b.coverUrl,
+        currentPage: b.currentPage,
+        pageCount: b.pageCount,
+      }))} />
 
       {/* recent books */}
       {recentBooks.length > 0 && (
