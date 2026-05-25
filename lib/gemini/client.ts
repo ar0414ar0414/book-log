@@ -3,8 +3,8 @@ import type { AiClient, ChatMessage } from "@/lib/ai/provider";
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 
-export const geminiModel = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
-export const geminiVisionModel = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+export const geminiModel = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+export const geminiVisionModel = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
 export const geminiClient: AiClient = {
   async generateText(prompt) {
