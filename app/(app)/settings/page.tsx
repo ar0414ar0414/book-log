@@ -13,7 +13,7 @@ const PROVIDERS: { id: AiProvider; name: string; model: string; description: str
   {
     id: "gemini",
     name: "Gemini",
-    model: "gemini-2.0-flash",
+    model: "gemini-2.5-flash",
     description: "Google AI Studio。高速・低コスト。",
     color: "#4285f4",
   },
