@@ -19,6 +19,7 @@ export interface Book {
   preMemo: string | null;
   postMemo: string | null;
   aiRecord: string | null;
+  aiSummary: string | null;
   currentPage: number | null;
   pageCount: number | null;
   createdAt: Date;

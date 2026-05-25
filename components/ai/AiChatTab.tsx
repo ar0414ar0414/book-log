@@ -10,12 +10,12 @@ interface Message {
   id: string; role: string; content: string; createdAt: Date;
 }
 
-export default function AiChatTab({ bookId, initialChat }: { bookId: string; initialChat: Message[] }) {
+export default function AiChatTab({ bookId, initialChat, initialSummary }: { bookId: string; initialChat: Message[]; initialSummary: string | null }) {
   const [messages, setMessages] = useState(initialChat);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [summaryLoading, setSummaryLoading] = useState(false);
-  const [summary, setSummary] = useState<string | null>(null);
+  const [summary, setSummary] = useState<string | null>(initialSummary);
   const [error, setError] = useState<string | null>(null);
   const [confirmClear, setConfirmClear] = useState(false);
   const [clearLoading, setClearLoading] = useState(false);

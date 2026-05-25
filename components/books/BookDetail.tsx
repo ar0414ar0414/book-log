@@ -18,7 +18,7 @@ interface Props {
   book: {
     id: string; title: string; author: string | null; coverUrl: string | null;
     genre: string | null; status: string; rating: number | null; memo: string | null;
-    preMemo: string | null; postMemo: string | null; aiRecord: string | null;
+    preMemo: string | null; postMemo: string | null; aiRecord: string | null; aiSummary: string | null;
     currentPage: number | null;
     startedAt: Date | null; finishedAt: Date | null; updatedAt: Date; publisher: string | null;
     publishedDate: string | null; description: string | null; pageCount: number | null;
@@ -662,7 +662,7 @@ export default function BookDetail({ book, initialQuotes, initialPhotos, initial
       <div onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
         {activeTab === "quotes" && <QuotesTab bookId={book.id} initialQuotes={initialQuotes} initialTags={initialTags} />}
         {activeTab === "photos" && <PhotosTab bookId={book.id} initialPhotos={initialPhotos} />}
-        {activeTab === "ai" && <AiChatTab bookId={book.id} initialChat={initialChat} />}
+        {activeTab === "ai" && <AiChatTab bookId={book.id} initialChat={initialChat} initialSummary={book.aiSummary ?? null} />}
       </div>
     </div>
   );

@@ -23,6 +23,7 @@ export async function POST(request: Request) {
     const prompt = buildSummaryPrompt(book as Book, bookQuotes as Quote[]);
     const client = getAiClient(provider as AiProvider);
     const summary = await client.generateText(prompt);
+    await db.update(books).set({ aiSummary: summary, updatedAt: new Date() }).where(and(eq(books.id, bookId), eq(books.userId, user.id)));
     return NextResponse.json({ summary });
   } catch (e) {
     const { code, message } = classifyAiError(e);
