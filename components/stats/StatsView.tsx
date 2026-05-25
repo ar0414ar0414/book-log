@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { BookOpen, Star, FileText, TrendingUp, User } from "lucide-react";
+import { BookOpen, Star, FileText, TrendingUp, User, Clock, Zap } from "lucide-react";
 import type { Book } from "@/types";
 import { localizeGenre } from "@/lib/utils";
 
@@ -73,7 +73,36 @@ export default function StatsView({ books }: { books: Book[] }) {
         avgRating: ratingCount > 0 ? ratingSum / ratingCount : null,
       }));
 
-    return { doneThisYear, totalPages, avgRating, monthly, genreSorted, ratingDist, authorSorted };
+    // 平均読了日数（startedAt と finishedAt が両方ある本のみ）
+    const booksWithDuration = doneThisYear.filter(
+      (b) => b.startedAt != null && b.finishedAt != null
+    );
+    const avgDays =
+      booksWithDuration.length > 0
+        ? Math.round(
+            booksWithDuration.reduce((sum, b) => {
+              const days = Math.max(
+                1,
+                Math.round(
+                  (new Date(b.finishedAt!).getTime() - new Date(b.startedAt!).getTime()) /
+                    86400000
+                )
+              );
+              return sum + days;
+            }, 0) / booksWithDuration.length
+          )
+        : null;
+
+    // 月平均ペース・年間予測
+    const monthsElapsed = year === currentYear ? new Date().getMonth() + 1 : 12;
+    const monthlyPace =
+      doneThisYear.length > 0
+        ? Math.round((doneThisYear.length / monthsElapsed) * 10) / 10
+        : 0;
+    const projectedAnnual =
+      year === currentYear && monthlyPace > 0 ? Math.round(monthlyPace * 12) : null;
+
+    return { doneThisYear, totalPages, avgRating, monthly, genreSorted, ratingDist, authorSorted, avgDays, monthlyPace, projectedAnnual, booksWithDurationCount: booksWithDuration.length };
   }, [books, year]);
 
   const maxMonthly = Math.max(...stats.monthly, 1);
@@ -123,6 +152,26 @@ export default function StatsView({ books }: { books: Book[] }) {
           unit={stats.totalPages > 0 ? "p" : ""}
         />
       </div>
+
+      {/* ペース・読了日数カード */}
+      {(stats.avgDays !== null || stats.monthlyPace > 0) && (
+        <div className="grid grid-cols-2 gap-3">
+          <SummaryCard
+            icon={<Clock className="w-4 h-4 text-purple-500 dark:text-purple-400" />}
+            label="平均読了日数"
+            value={stats.avgDays ?? "—"}
+            unit={stats.avgDays ? "日" : ""}
+            sub={stats.avgDays ? `${stats.booksWithDurationCount}冊から算出` : undefined}
+          />
+          <SummaryCard
+            icon={<Zap className="w-4 h-4 text-orange-500 dark:text-orange-400" />}
+            label="月平均ペース"
+            value={stats.monthlyPace > 0 ? stats.monthlyPace : "—"}
+            unit={stats.monthlyPace > 0 ? "冊/月" : ""}
+            sub={stats.projectedAnnual ? `年間 ${stats.projectedAnnual} 冊ペース` : undefined}
+          />
+        </div>
+      )}
 
       {/* 月別読了数 */}
       <section className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 p-4">
@@ -278,11 +327,13 @@ function SummaryCard({
   label,
   value,
   unit,
+  sub,
 }: {
   icon: React.ReactNode;
   label: string;
   value: string | number;
   unit: string;
+  sub?: string;
 }) {
   return (
     <div className="bg-white dark:bg-slate-800 rounded-xl p-3 border border-slate-100 dark:border-slate-700 flex flex-col gap-1.5">
@@ -294,6 +345,7 @@ function SummaryCard({
         <span className="text-xl font-bold text-slate-900 dark:text-slate-100">{value}</span>
         {unit && <span className="text-xs text-slate-400 dark:text-slate-500">{unit}</span>}
       </div>
+      {sub && <p className="text-xs text-slate-400 dark:text-slate-500">{sub}</p>}
     </div>
   );
 }
