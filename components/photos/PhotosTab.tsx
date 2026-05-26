@@ -12,8 +12,29 @@ interface PhotoItem {
   id: string; url: string; caption: string | null; extractedText: string | null; createdAt: Date;
 }
 
+const SS_KEY = "folio_deleted_photos";
+
+function getDeletedIds(): Set<string> {
+  try { return new Set(JSON.parse(sessionStorage.getItem(SS_KEY) || "[]")); }
+  catch { return new Set(); }
+}
+function addDeletedId(id: string) {
+  try {
+    const ids = getDeletedIds(); ids.add(id);
+    sessionStorage.setItem(SS_KEY, JSON.stringify([...ids]));
+  } catch {}
+}
+function clearDeletedIds() {
+  try { sessionStorage.removeItem(SS_KEY); } catch {}
+}
+
 export default function PhotosTab({ bookId, initialPhotos, onOcrToQuote }: { bookId: string; initialPhotos: PhotoItem[]; onOcrToQuote?: (text: string) => void }) {
-  const [photoList, setPhotoList] = useState(initialPhotos);
+  // sessionStorage に保存した削除済みIDをフィルターすることでマウント時のフラッシュを防ぐ
+  const [photoList, setPhotoList] = useState(() => {
+    if (typeof window === "undefined") return initialPhotos;
+    const deleted = getDeletedIds();
+    return deleted.size > 0 ? initialPhotos.filter((p) => !deleted.has(p.id)) : initialPhotos;
+  });
   const [uploading, setUploading] = useState(false);
   const [ocrLoading, setOcrLoading] = useState<string | null>(null);
   const [ocrError, setOcrError] = useState<string | null>(null);
@@ -29,11 +50,14 @@ export default function PhotosTab({ bookId, initialPhotos, onOcrToQuote }: { boo
   const inputRef = useRef<HTMLInputElement>(null);
   const deletingRef = useRef(false);
 
-  // マウント時にサーバーから最新の写真一覧を取得（Router Cache が古くても正しい状態に同期）
+  // マウント時にサーバーから最新の写真一覧を取得し、sessionStorage の削除済みIDもクリア
   useEffect(() => {
     fetch(`/api/photos?bookId=${bookId}`)
       .then((r) => r.json())
-      .then((fresh) => setPhotoList(fresh as PhotoItem[]))
+      .then((fresh) => {
+        setPhotoList(fresh as PhotoItem[]);
+        clearDeletedIds();
+      })
       .catch(() => {});
   }, [bookId]);
 
@@ -126,7 +150,8 @@ export default function PhotosTab({ bookId, initialPhotos, onOcrToQuote }: { boo
     setDeleting(true);
     try {
       await fetch(`/api/photos/${id}`, { method: "DELETE" });
-      // API完了後にUIを更新 → router.refresh()が現在ページで確実に実行される
+      // 削除IDをsessionStorageに記録 → 次回マウント時に initialPhotos からフィルターされる
+      addDeletedId(id);
       setPhotoList((p) => p.filter((item) => item.id !== id));
       setSelectedPhoto(null);
       setConfirmingDelete(false);
