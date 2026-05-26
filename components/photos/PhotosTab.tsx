@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { Camera, Upload, Trash2, FileText, Loader2, Image as ImageIcon, MessageSquare, X, AlertCircle, Check, Quote } from "lucide-react";
 import { useRouter } from "next/navigation";
+import ReactMarkdown from "react-markdown";
 import AutoResizeTextarea from "@/components/ui/AutoResizeTextarea";
 import { useAiProvider } from "@/hooks/useAiProvider";
 
@@ -276,7 +277,20 @@ export default function PhotosTab({ bookId, initialPhotos, onOcrToQuote }: { boo
                   <p className="text-xs font-medium text-slate-500 dark:text-slate-400 flex items-center gap-1">
                     <FileText className="w-3 h-3" />抽出テキスト
                   </p>
-                  <p className="text-sm text-slate-700 dark:text-slate-300 whitespace-pre-wrap">{selectedPhoto.extractedText}</p>
+                  <div className="text-sm text-slate-700 dark:text-slate-300">
+                    <ReactMarkdown
+                      components={{
+                        p: ({ children }) => <p className="leading-relaxed mb-1 last:mb-0">{children}</p>,
+                        h1: ({ children }) => <p className="font-bold text-base mb-1">{children}</p>,
+                        h2: ({ children }) => <p className="font-bold mb-1">{children}</p>,
+                        h3: ({ children }) => <p className="font-semibold mb-0.5">{children}</p>,
+                        ul: ({ children }) => <ul className="list-disc list-inside space-y-0.5 mb-1">{children}</ul>,
+                        ol: ({ children }) => <ol className="list-decimal list-inside space-y-0.5 mb-1">{children}</ol>,
+                        strong: ({ children }) => <strong className="font-semibold">{children}</strong>,
+                        hr: () => <hr className="my-1 border-slate-200 dark:border-slate-600" />,
+                      }}
+                    >{selectedPhoto.extractedText}</ReactMarkdown>
+                  </div>
                   {onOcrToQuote && (
                     <button
                       onClick={() => { onOcrToQuote(selectedPhoto.extractedText!); setSelectedPhoto(null); }}

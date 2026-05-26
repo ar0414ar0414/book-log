@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Plus, Star, Trash2, Quote, Tag, X, Edit2, Camera, Loader2 } from "lucide-react";
+import ReactMarkdown from "react-markdown";
 import AutoResizeTextarea from "@/components/ui/AutoResizeTextarea";
 import { cn } from "@/lib/utils";
 import { useAiProvider } from "@/hooks/useAiProvider";
@@ -349,7 +350,20 @@ export default function QuotesTab({
                     : "border-l-indigo-200 dark:border-l-indigo-700 border-slate-100 dark:border-slate-700"
                 )}
               >
-                <p className="text-slate-800 dark:text-slate-200 text-sm leading-relaxed">「{q.text}」</p>
+                <div className="text-slate-800 dark:text-slate-200 text-sm leading-relaxed prose prose-sm dark:prose-invert max-w-none prose-p:my-0.5 prose-headings:my-1 prose-ul:my-0.5 prose-ol:my-0.5 prose-li:my-0">
+                  <ReactMarkdown
+                    components={{
+                      p: ({ children }) => <p className="leading-relaxed">{children}</p>,
+                      h1: ({ children }) => <p className="font-bold text-base">{children}</p>,
+                      h2: ({ children }) => <p className="font-bold">{children}</p>,
+                      h3: ({ children }) => <p className="font-semibold">{children}</p>,
+                      ul: ({ children }) => <ul className="list-disc list-inside space-y-0.5">{children}</ul>,
+                      ol: ({ children }) => <ol className="list-decimal list-inside space-y-0.5">{children}</ol>,
+                      strong: ({ children }) => <strong className="font-semibold">{children}</strong>,
+                      hr: () => <hr className="my-1 border-slate-200 dark:border-slate-600" />,
+                    }}
+                  >{q.text}</ReactMarkdown>
+                </div>
 
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex flex-wrap gap-1.5">
