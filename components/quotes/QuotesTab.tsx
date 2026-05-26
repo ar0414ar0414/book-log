@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, Star, Trash2, Quote, Tag, X, Edit2, Camera, Loader2 } from "lucide-react";
+import { Plus, Star, Trash2, Quote, Tag, X, Edit2, Camera, Loader2, MoreHorizontal } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import AutoResizeTextarea from "@/components/ui/AutoResizeTextarea";
 import { cn } from "@/lib/utils";
@@ -50,6 +50,7 @@ export default function QuotesTab({
   const [editingQuote, setEditingQuote] = useState<QuoteItem | null>(null);
   const [editForm, setEditForm] = useState({ text: "", pageNumber: "", chapter: "", memo: "" });
   const [editSaving, setEditSaving] = useState(false);
+  const [actionSheetQuote, setActionSheetQuote] = useState<QuoteItem | null>(null);
   const pickerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -395,17 +396,12 @@ export default function QuotesTab({
                       タグ
                     </button>
                   </div>
-                  <div className="flex items-center gap-1 flex-shrink-0">
-                    <button onClick={() => openEdit(q)} className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-300 dark:text-slate-600 hover:text-slate-600 dark:hover:text-slate-300 rounded-lg transition-colors">
-                      <Edit2 className="w-4 h-4" />
-                    </button>
-                    <button onClick={() => toggleFavorite(q.id, q.isFavorite)} className="p-1.5 hover:bg-amber-50 dark:hover:bg-amber-950/30 rounded-lg transition-colors">
-                      <Star className={cn("w-4 h-4", q.isFavorite ? "fill-amber-400 text-amber-400" : "text-slate-300 dark:text-slate-600")} />
-                    </button>
-                    <button onClick={() => handleDelete(q.id)} className="p-1.5 hover:bg-red-50 dark:hover:bg-red-950/30 text-red-300 dark:text-red-700 hover:text-red-500 dark:hover:text-red-400 rounded-lg transition-colors">
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
+                  <button
+                    onClick={() => setActionSheetQuote(q)}
+                    className="p-2 -mr-1 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors flex-shrink-0"
+                  >
+                    <MoreHorizontal className="w-5 h-5" />
+                  </button>
                 </div>
 
                 {q.memo && <p className="text-xs text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-700 rounded-lg px-3 py-2">{q.memo}</p>}
@@ -478,6 +474,68 @@ export default function QuotesTab({
             );
           })}
         </div>
+      )}
+
+      {/* アクションシート */}
+      {actionSheetQuote && (
+        <>
+          <div
+            className="fixed inset-0 bg-black/50 z-40 backdrop-blur-sm"
+            onClick={() => setActionSheetQuote(null)}
+          />
+          <div className="fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-slate-800 rounded-t-2xl shadow-2xl max-w-lg mx-auto">
+            <div className="flex justify-center pt-3 pb-2">
+              <div className="w-10 h-1 rounded-full bg-slate-200 dark:bg-slate-600" />
+            </div>
+
+            {/* 引用プレビュー */}
+            <p className="px-5 pb-4 text-xs text-slate-400 dark:text-slate-500 line-clamp-2 leading-relaxed">
+              {actionSheetQuote.text.replace(/[#*`_>]/g, "").slice(0, 80)}
+              {actionSheetQuote.text.length > 80 ? "…" : ""}
+            </p>
+
+            <div className="px-4 pb-3 space-y-2">
+              {/* 編集 */}
+              <button
+                onClick={() => { openEdit(actionSheetQuote); setActionSheetQuote(null); }}
+                className="w-full flex items-center gap-4 px-4 py-4 rounded-2xl bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-slate-200 text-sm font-medium active:scale-[0.98] transition-all"
+              >
+                <Edit2 className="w-5 h-5 text-indigo-500 dark:text-indigo-400 flex-shrink-0" />
+                編集する
+              </button>
+
+              {/* お気に入り */}
+              <button
+                onClick={() => { toggleFavorite(actionSheetQuote.id, actionSheetQuote.isFavorite); setActionSheetQuote(null); }}
+                className="w-full flex items-center gap-4 px-4 py-4 rounded-2xl bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-slate-200 text-sm font-medium active:scale-[0.98] transition-all"
+              >
+                <Star className={cn("w-5 h-5 flex-shrink-0", actionSheetQuote.isFavorite ? "fill-amber-400 text-amber-400" : "text-amber-400")} />
+                {actionSheetQuote.isFavorite ? "お気に入りを解除" : "お気に入りに追加"}
+              </button>
+
+              {/* 削除 */}
+              <button
+                onClick={() => { handleDelete(actionSheetQuote.id); setActionSheetQuote(null); }}
+                className="w-full flex items-center gap-4 px-4 py-4 rounded-2xl bg-red-50 dark:bg-red-950/30 text-red-600 dark:text-red-400 text-sm font-medium active:scale-[0.98] transition-all"
+              >
+                <Trash2 className="w-5 h-5 flex-shrink-0" />
+                削除する
+              </button>
+            </div>
+
+            {/* キャンセル */}
+            <div className="px-4 pb-4">
+              <button
+                onClick={() => setActionSheetQuote(null)}
+                className="w-full py-4 rounded-2xl bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-400 text-sm font-semibold active:scale-[0.98] transition-all"
+              >
+                キャンセル
+              </button>
+            </div>
+
+            <div className="pb-safe-bottom" />
+          </div>
+        </>
       )}
 
       {/* 編集ボトムシート */}
