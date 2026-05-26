@@ -6,6 +6,22 @@ import { eq, and } from "drizzle-orm";
 import { getAiClient, classifyAiError, type AiProvider } from "@/lib/ai/provider";
 import { randomUUID } from "crypto";
 
+export async function GET(request: Request) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  const { searchParams } = new URL(request.url);
+  const bookId = searchParams.get("bookId");
+  if (!bookId) return NextResponse.json({ error: "bookId required" }, { status: 400 });
+
+  const messages = await db.select().from(aiConversations)
+    .where(and(eq(aiConversations.bookId, bookId), eq(aiConversations.userId, user.id)))
+    .orderBy(aiConversations.createdAt);
+
+  return NextResponse.json(messages);
+}
+
 export async function DELETE(request: Request) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();

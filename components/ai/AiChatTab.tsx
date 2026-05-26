@@ -23,6 +23,13 @@ export default function AiChatTab({ bookId, initialChat, initialSummary }: { boo
   const { provider } = useAiProvider();
 
   useEffect(() => {
+    fetch(`/api/ai/chat?bookId=${bookId}`)
+      .then((r) => r.json())
+      .then((fresh: Message[]) => setMessages(fresh))
+      .catch(() => {});
+  }, [bookId]);
+
+  useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
