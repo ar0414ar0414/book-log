@@ -13,6 +13,17 @@ const TAG_COLORS = [
   "#10b981", "#f59e0b", "#ef4444", "#ec4899",
 ];
 
+const PRESET_TAGS = [
+  { name: "名言",           color: "#6366f1" },
+  { name: "学び",           color: "#0ea5e9" },
+  { name: "人生",           color: "#8b5cf6" },
+  { name: "感動",           color: "#f59e0b" },
+  { name: "仕事",           color: "#10b981" },
+  { name: "哲学",           color: "#64748b" },
+  { name: "モチベーション", color: "#ef4444" },
+  { name: "読書メモ",       color: "#ec4899" },
+];
+
 interface TagItem { id: string; name: string; color: string }
 interface QuoteItem {
   id: string; text: string; pageNumber: number | null; chapter: string | null;
@@ -211,6 +222,17 @@ export default function QuotesTab({
   async function handleCreateAndAdd(quoteId: string) {
     const tag = await createTag();
     if (tag) await addTagToQuote(quoteId, tag.id);
+  }
+
+  async function handleAddPreset(quoteId: string, preset: { name: string; color: string }) {
+    const res = await fetch("/api/tags", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: preset.name, color: preset.color }),
+    });
+    const tag: TagItem = await res.json();
+    setUserTags((t) => [...t, tag]);
+    await addTagToQuote(quoteId, tag.id);
   }
 
   const filtered = tagFilter
@@ -436,6 +458,31 @@ export default function QuotesTab({
                         </div>
                       </div>
                     )}
+
+                    {/* 提案タグ（未作成のプリセット） */}
+                    {(() => {
+                      const existing = new Set(userTags.map((t) => t.name));
+                      const suggestions = PRESET_TAGS.filter((p) => !existing.has(p.name));
+                      if (suggestions.length === 0) return null;
+                      return (
+                        <div>
+                          <p className="text-xs text-slate-500 dark:text-slate-400 mb-1.5">提案タグ</p>
+                          <div className="flex flex-wrap gap-1.5">
+                            {suggestions.map((preset) => (
+                              <button
+                                key={preset.name}
+                                onClick={() => handleAddPreset(q.id, preset)}
+                                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium text-white/90 border border-white/30 hover:opacity-90 transition-opacity"
+                                style={{ backgroundColor: preset.color }}
+                              >
+                                <Plus className="w-3 h-3" />
+                                {preset.name}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      );
+                    })()}
 
                     <div>
                       <p className="text-xs text-slate-500 dark:text-slate-400 mb-1.5">新しいタグを作成</p>
