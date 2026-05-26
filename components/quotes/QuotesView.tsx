@@ -18,6 +18,7 @@ interface QuoteItem {
 export default function QuotesView({ items }: { items: QuoteItem[] }) {
   const [favOnly, setFavOnly] = useState(false);
   const [selectedBook, setSelectedBook] = useState<string | null>(null);
+  const [selectedTag, setSelectedTag] = useState<string | null>(null);
   const [query, setQuery] = useState("");
   const [searchOpen, setSearchOpen] = useState(false);
   const [sharingId, setSharingId] = useState<string | null>(null);
@@ -58,10 +59,17 @@ export default function QuotesView({ items }: { items: QuoteItem[] }) {
     return [...map.values()].sort((a, b) => a.title.localeCompare(b.title, "ja"));
   }, [items]);
 
+  const allTags = useMemo(() => {
+    const map = new Map<string, { id: string; name: string; color: string }>();
+    items.forEach(({ tags }) => tags.forEach((t) => map.set(t.id, t)));
+    return [...map.values()].sort((a, b) => a.name.localeCompare(b.name, "ja"));
+  }, [items]);
+
   const filtered = useMemo(() => {
     let result = [...items].reverse();
     if (favOnly) result = result.filter((i) => i.quote.isFavorite);
     if (selectedBook) result = result.filter((i) => i.book.id === selectedBook);
+    if (selectedTag) result = result.filter((i) => i.tags.some((t) => t.id === selectedTag));
     if (query.trim()) {
       const q = query.trim().toLowerCase();
       result = result.filter(
@@ -71,9 +79,9 @@ export default function QuotesView({ items }: { items: QuoteItem[] }) {
       );
     }
     return result;
-  }, [items, favOnly, selectedBook, query]);
+  }, [items, favOnly, selectedBook, selectedTag, query]);
 
-  const hasFilter = favOnly || selectedBook !== null || query.trim() !== "";
+  const hasFilter = favOnly || selectedBook !== null || selectedTag !== null || query.trim() !== "";
 
   return (
     <div className="pb-nav-safe sm:pb-6 space-y-4">
@@ -133,7 +141,7 @@ export default function QuotesView({ items }: { items: QuoteItem[] }) {
 
               {hasFilter && (
                 <button
-                  onClick={() => { setFavOnly(false); setSelectedBook(null); setQuery(""); }}
+                  onClick={() => { setFavOnly(false); setSelectedBook(null); setSelectedTag(null); setQuery(""); }}
                   className="ml-auto flex items-center gap-1 text-xs text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
                 >
                   <X className="w-3 h-3" />
@@ -163,6 +171,30 @@ export default function QuotesView({ items }: { items: QuoteItem[] }) {
                   <BookOpen className="w-3.5 h-3.5 flex-shrink-0" />
                 )}
                 <span className="max-w-[120px] truncate">{book.title}</span>
+              </button>
+            ))}
+          </div>
+        )}
+
+        {!searchOpen && allTags.length > 0 && (
+          <div className="flex gap-1.5 overflow-x-auto pb-0.5 scrollbar-hide">
+            {allTags.map((tag) => (
+              <button
+                key={tag.id}
+                onClick={() => setSelectedTag((v) => v === tag.id ? null : tag.id)}
+                className={cn(
+                  "flex-shrink-0 flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium border transition-colors",
+                  selectedTag === tag.id
+                    ? "text-white border-transparent"
+                    : "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-400 hover:border-slate-400 dark:hover:border-slate-500"
+                )}
+                style={selectedTag === tag.id ? { backgroundColor: tag.color, borderColor: tag.color } : {}}
+              >
+                <span
+                  className="w-1.5 h-1.5 rounded-full flex-shrink-0"
+                  style={{ backgroundColor: selectedTag === tag.id ? "white" : tag.color }}
+                />
+                {tag.name}
               </button>
             ))}
           </div>
