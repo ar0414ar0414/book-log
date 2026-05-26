@@ -179,11 +179,11 @@ export default function PhotosTab({ bookId, initialPhotos }: { bookId: string; i
           onClick={closeModal}
         >
           <div
-            className="bg-white dark:bg-slate-800 rounded-2xl w-full max-w-lg overflow-hidden"
+            className="bg-white dark:bg-slate-800 rounded-2xl w-full max-w-lg flex flex-col max-h-[90vh]"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* ヘッダー */}
-            <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100 dark:border-slate-700">
+            {/* ヘッダー（常に表示） */}
+            <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100 dark:border-slate-700 flex-shrink-0">
               <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">写真詳細</p>
               <div className="flex items-center gap-1">
                 <button
@@ -203,6 +203,8 @@ export default function PhotosTab({ bookId, initialPhotos }: { bookId: string; i
               </div>
             </div>
 
+            {/* スクロール可能エリア */}
+            <div className="overflow-y-auto flex-1 rounded-b-2xl">
             {/* 画像 */}
             <img src={selectedPhoto.url} alt="" className="w-full max-h-64 object-contain bg-black" />
 
@@ -260,6 +262,7 @@ export default function PhotosTab({ bookId, initialPhotos }: { bookId: string; i
                 </button>
               )}
             </div>
+            </div>{/* /overflow-y-auto */}
           </div>
         </div>
       )}
