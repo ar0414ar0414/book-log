@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { Camera, Upload, Trash2, FileText, Loader2, Image as ImageIcon, MessageSquare, X, AlertCircle, Check, Quote } from "lucide-react";
 import { useRouter } from "next/navigation";
 import ReactMarkdown from "react-markdown";
+import imageCompression from "browser-image-compression";
 import AutoResizeTextarea from "@/components/ui/AutoResizeTextarea";
 import { useAiProvider } from "@/hooks/useAiProvider";
 
@@ -39,8 +40,13 @@ export default function PhotosTab({ bookId, initialPhotos, onOcrToQuote }: { boo
     setUploading(true);
     try {
       for (const file of Array.from(files)) {
+        const compressed = await imageCompression(file, {
+          maxSizeMB: 1,
+          maxWidthOrHeight: 1920,
+          useWebWorker: true,
+        });
         const formData = new FormData();
-        formData.append("file", file);
+        formData.append("file", compressed, file.name);
         formData.append("bookId", bookId);
         const res = await fetch("/api/photos", { method: "POST", body: formData });
         if (!res.ok) continue;
