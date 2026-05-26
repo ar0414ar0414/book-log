@@ -15,7 +15,7 @@ interface QuoteItem {
   tags: { id: string; name: string; color: string }[];
 }
 
-export default function QuotesView({ items }: { items: QuoteItem[] }) {
+export default function QuotesView({ items, allUserTags = [] }: { items: QuoteItem[]; allUserTags?: { id: string; name: string; color: string }[] }) {
   const [favOnly, setFavOnly] = useState(false);
   const [selectedBook, setSelectedBook] = useState<string | null>(null);
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
@@ -60,10 +60,11 @@ export default function QuotesView({ items }: { items: QuoteItem[] }) {
   }, [items]);
 
   const allTags = useMemo(() => {
+    if (allUserTags.length > 0) return [...allUserTags].sort((a, b) => a.name.localeCompare(b.name, "ja"));
     const map = new Map<string, { id: string; name: string; color: string }>();
     items.forEach(({ tags }) => tags.forEach((t) => map.set(t.id, t)));
     return [...map.values()].sort((a, b) => a.name.localeCompare(b.name, "ja"));
-  }, [items]);
+  }, [items, allUserTags]);
 
   const filtered = useMemo(() => {
     let result = [...items].reverse();

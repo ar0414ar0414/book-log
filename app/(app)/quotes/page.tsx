@@ -39,5 +39,5 @@ export default async function QuotesPage() {
     tags: tagsForQuote.get(quote.id) ?? [],
   }));
 
-  return <QuotesView items={items} />;
+  return <QuotesView items={items} allUserTags={userTags.map((t) => ({ id: t.id, name: t.name, color: t.color ?? "#6366f1" }))} />;
 }
