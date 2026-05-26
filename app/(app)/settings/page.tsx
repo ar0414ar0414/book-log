@@ -39,7 +39,7 @@ const PROVIDERS: { id: AiProvider; name: string; model: string; description: str
     name: "Claude",
     model: "claude-haiku-4-5",
     description: "Anthropic。日本語の精度が高い。",
-    color: "#7c3aed",
+    color: "#D97757",
     Icon: AnthropicIcon,
   },
 ];
