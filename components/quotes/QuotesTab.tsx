@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, Star, Trash2, Quote, Tag, X, Edit2, Camera, Loader2, MoreHorizontal } from "lucide-react";
+import { Plus, Star, Trash2, Quote, Tag, X, Edit2, Camera, Loader2, MoreHorizontal, Pencil, Check } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import AutoResizeTextarea from "@/components/ui/AutoResizeTextarea";
 import { cn } from "@/lib/utils";
@@ -74,6 +74,7 @@ export default function QuotesTab({
   const [ocrLoading, setOcrLoading] = useState(false);
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const [openPickerId, setOpenPickerId] = useState<string | null>(null);
+  const [tagEditMode, setTagEditMode] = useState(false);
   const [newTagName, setNewTagName] = useState("");
   const [newTagColor, setNewTagColor] = useState(TAG_COLORS[0]);
   const [editingQuote, setEditingQuote] = useState<QuoteItem | null>(null);
@@ -94,6 +95,7 @@ export default function QuotesTab({
     function onClickOutside(e: MouseEvent) {
       if (pickerRef.current && !pickerRef.current.contains(e.target as Node)) {
         setOpenPickerId(null);
+        setTagEditMode(false);
       }
     }
     document.addEventListener("mousedown", onClickOutside);
@@ -263,6 +265,12 @@ export default function QuotesTab({
     const tag: TagItem = await res.json();
     setUserTags((t) => [...t, tag]);
     await addTagToQuote(quoteId, tag.id);
+  }
+
+  async function handleDeleteTag(tagId: string) {
+    await fetch(`/api/tags/${tagId}`, { method: "DELETE" });
+    setUserTags((t) => t.filter((tag) => tag.id !== tagId));
+    setQuoteList((list) => list.map((q) => ({ ...q, tags: q.tags.filter((t) => t.id !== tagId) })));
   }
 
   const filtered = tagFilter
@@ -470,21 +478,49 @@ export default function QuotesTab({
                 {/* タグピッカー */}
                 {isPickerOpen && (
                   <div className="border border-indigo-100 dark:border-indigo-800 rounded-xl bg-indigo-50/50 dark:bg-indigo-950/30 p-3 space-y-2.5">
-                    {availableTags.length > 0 && (
+                    {userTags.length > 0 && (
                       <div>
-                        <p className="text-xs text-slate-500 dark:text-slate-400 mb-1.5">タグを追加</p>
+                        <div className="flex items-center justify-between mb-1.5">
+                          <p className="text-xs text-slate-500 dark:text-slate-400">
+                            {tagEditMode ? "タグを削除" : "タグを追加"}
+                          </p>
+                          <button
+                            onClick={() => setTagEditMode((v) => !v)}
+                            className={cn(
+                              "flex items-center gap-1 text-xs px-2 py-0.5 rounded-full transition-colors",
+                              tagEditMode
+                                ? "bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-400"
+                                : "text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300"
+                            )}
+                          >
+                            {tagEditMode ? <><Check className="w-3 h-3" />完了</> : <><Pencil className="w-3 h-3" />管理</>}
+                          </button>
+                        </div>
                         <div className="flex flex-wrap gap-1.5">
-                          {availableTags.map((tag) => (
-                            <button
-                              key={tag.id}
-                              onClick={() => addTagToQuote(q.id, tag.id)}
-                              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium text-white transition-opacity hover:opacity-80"
-                              style={{ backgroundColor: tag.color }}
-                            >
-                              <Plus className="w-3 h-3" />
-                              {tag.name}
-                            </button>
-                          ))}
+                          {tagEditMode
+                            ? userTags.map((tag) => (
+                                <button
+                                  key={tag.id}
+                                  onClick={() => handleDeleteTag(tag.id)}
+                                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium text-white transition-opacity hover:opacity-80"
+                                  style={{ backgroundColor: tag.color }}
+                                >
+                                  {tag.name}
+                                  <X className="w-3 h-3 opacity-80" />
+                                </button>
+                              ))
+                            : availableTags.map((tag) => (
+                                <button
+                                  key={tag.id}
+                                  onClick={() => addTagToQuote(q.id, tag.id)}
+                                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium text-white transition-opacity hover:opacity-80"
+                                  style={{ backgroundColor: tag.color }}
+                                >
+                                  <Plus className="w-3 h-3" />
+                                  {tag.name}
+                                </button>
+                              ))
+                          }
                         </div>
                       </div>
                     )}

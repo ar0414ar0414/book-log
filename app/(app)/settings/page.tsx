@@ -1,13 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Sparkles, Check, AlertCircle, Sun, Moon, Tag, X, Loader2 } from "lucide-react";
+import { Sparkles, Check, AlertCircle, Sun, Moon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAiProvider } from "@/hooks/useAiProvider";
 import { useTheme } from "@/hooks/useTheme";
 import type { AiProvider } from "@/lib/ai/provider";
-
-interface TagItem { id: string; name: string; color: string }
 
 interface ProviderAvailability { gemini: boolean; claude: boolean }
 
@@ -51,8 +49,6 @@ export default function SettingsPage() {
   const { theme, setTheme } = useTheme();
   const [availability, setAvailability] = useState<ProviderAvailability | null>(null);
   const [saved, setSaved] = useState(false);
-  const [tagList, setTagList] = useState<TagItem[]>([]);
-  const [deletingTagId, setDeletingTagId] = useState<string | null>(null);
 
   useEffect(() => {
     fetch("/api/ai/providers")
@@ -60,23 +56,6 @@ export default function SettingsPage() {
       .then(setAvailability)
       .catch(() => setAvailability({ gemini: false, claude: false }));
   }, []);
-
-  useEffect(() => {
-    fetch("/api/tags")
-      .then((r) => r.json())
-      .then(setTagList)
-      .catch(() => {});
-  }, []);
-
-  async function handleDeleteTag(id: string) {
-    setDeletingTagId(id);
-    try {
-      await fetch(`/api/tags/${id}`, { method: "DELETE" });
-      setTagList((t) => t.filter((tag) => tag.id !== id));
-    } finally {
-      setDeletingTagId(null);
-    }
-  }
 
   function handleSelect(p: AiProvider) {
     if (!availability) return;
@@ -196,42 +175,6 @@ export default function SettingsPage() {
         </div>
       </section>
 
-      {/* タグ管理 */}
-      <section className="space-y-3">
-        <h2 className="font-semibold text-slate-800 dark:text-slate-200 flex items-center gap-2">
-          <Tag className="w-4 h-4 text-indigo-500 dark:text-indigo-400" />
-          タグ管理
-        </h2>
-        {tagList.length === 0 ? (
-          <p className="text-sm text-slate-400 dark:text-slate-500">タグがありません</p>
-        ) : (
-          <div className="flex flex-wrap gap-2">
-            {tagList.map((tag) => (
-              <span
-                key={tag.id}
-                className="inline-flex items-center gap-1.5 pl-3 pr-1.5 py-1.5 rounded-full text-sm font-medium text-white"
-                style={{ backgroundColor: tag.color }}
-              >
-                {tag.name}
-                <button
-                  onClick={() => handleDeleteTag(tag.id)}
-                  disabled={deletingTagId === tag.id}
-                  className="w-5 h-5 rounded-full bg-black/20 hover:bg-black/40 flex items-center justify-center transition-colors disabled:opacity-50 flex-shrink-0"
-                  aria-label={`${tag.name}を削除`}
-                >
-                  {deletingTagId === tag.id
-                    ? <Loader2 className="w-3 h-3 animate-spin" />
-                    : <X className="w-3 h-3" />
-                  }
-                </button>
-              </span>
-            ))}
-          </div>
-        )}
-        <p className="text-xs text-slate-400 dark:text-slate-500">
-          タグを削除すると、そのタグが付いた引用からも取り除かれます。
-        </p>
-      </section>
     </div>
   );
 }
