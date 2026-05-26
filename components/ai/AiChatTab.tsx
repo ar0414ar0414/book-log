@@ -222,7 +222,7 @@ export default function AiChatTab({ bookId, initialChat, initialSummary }: { boo
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder="この本について質問や感想を..."
-          className="flex-1 border border-slate-200 dark:border-slate-600 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-indigo-400 dark:focus:border-indigo-500 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500"
+          className="flex-1 min-w-0 border border-slate-200 dark:border-slate-600 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-indigo-400 dark:focus:border-indigo-500 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500"
         />
         <button
           type="submit"
