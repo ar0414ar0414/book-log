@@ -23,6 +23,7 @@ export default function PhotosTab({ bookId, initialPhotos, onOcrToQuote }: { boo
   const [captionSaved, setCaptionSaved] = useState(false);
   const [fullscreenPhoto, setFullscreenPhoto] = useState<string | null>(null);
   const [confirmingDelete, setConfirmingDelete] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const { provider } = useAiProvider();
   const router = useRouter();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -114,15 +115,17 @@ export default function PhotosTab({ bookId, initialPhotos, onOcrToQuote }: { boo
 
   async function handleDelete(id: string) {
     deletingRef.current = true;
-    // 楽観的更新: API完了を待たず即座にUIへ反映
-    setPhotoList((p) => p.filter((item) => item.id !== id));
-    setSelectedPhoto(null);
-    setConfirmingDelete(false);
+    setDeleting(true);
     try {
       await fetch(`/api/photos/${id}`, { method: "DELETE" });
+      // API完了後にUIを更新 → router.refresh()が現在ページで確実に実行される
+      setPhotoList((p) => p.filter((item) => item.id !== id));
+      setSelectedPhoto(null);
+      setConfirmingDelete(false);
       router.refresh();
     } finally {
       deletingRef.current = false;
+      setDeleting(false);
     }
   }
 
@@ -232,10 +235,11 @@ export default function PhotosTab({ bookId, initialPhotos, onOcrToQuote }: { boo
                       キャンセル
                     </button>
                     <button
-                      onClick={() => { setConfirmingDelete(false); handleDelete(selectedPhoto.id); }}
-                      className="px-3 py-1.5 text-xs font-medium text-white bg-red-500 hover:bg-red-600 rounded-lg transition-colors"
+                      onClick={() => handleDelete(selectedPhoto.id)}
+                      disabled={deleting}
+                      className="px-3 py-1.5 text-xs font-medium text-white bg-red-500 hover:bg-red-600 rounded-lg transition-colors disabled:opacity-60 flex items-center gap-1"
                     >
-                      削除する
+                      {deleting ? <Loader2 className="w-3 h-3 animate-spin" /> : "削除する"}
                     </button>
                   </div>
                 </>
