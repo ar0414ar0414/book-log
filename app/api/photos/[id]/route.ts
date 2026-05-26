@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { db } from "@/lib/db";
 import { photos } from "@/db/schema";
@@ -32,6 +33,7 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
   if (photo) {
     await supabase.storage.from("book-photos").remove([photo.storagePath]);
     await db.delete(photos).where(eq(photos.id, id));
+    revalidatePath(`/books/${photo.bookId}`);
   }
 
   return NextResponse.json({ ok: true });

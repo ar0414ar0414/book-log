@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { db } from "@/lib/db";
 import { photos } from "@/db/schema";
@@ -52,5 +53,6 @@ export async function POST(request: Request) {
     caption: caption || null,
   }).returning();
 
+  revalidatePath(`/books/${bookId}`);
   return NextResponse.json(photo);
 }

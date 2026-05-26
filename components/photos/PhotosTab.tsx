@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { Camera, Upload, Trash2, FileText, Loader2, Image as ImageIcon, MessageSquare, X, AlertCircle, Check } from "lucide-react";
+import { useRouter } from "next/navigation";
 import AutoResizeTextarea from "@/components/ui/AutoResizeTextarea";
 import { useAiProvider } from "@/hooks/useAiProvider";
 
@@ -19,6 +20,7 @@ export default function PhotosTab({ bookId, initialPhotos }: { bookId: string; i
   const [captionSaving, setCaptionSaving] = useState(false);
   const [captionSaved, setCaptionSaved] = useState(false);
   const { provider } = useAiProvider();
+  const router = useRouter();
   const inputRef = useRef<HTMLInputElement>(null);
   const deletingRef = useRef(false);
 
@@ -43,6 +45,7 @@ export default function PhotosTab({ bookId, initialPhotos }: { bookId: string; i
         const photo = await res.json();
         setPhotoList((p) => [...p, photo]);
       }
+      router.refresh();
     } finally {
       setUploading(false);
     }
@@ -106,6 +109,7 @@ export default function PhotosTab({ bookId, initialPhotos }: { bookId: string; i
     setPhotoList((p) => p.filter((item) => item.id !== id));
     setSelectedPhoto(null);
     deletingRef.current = false;
+    router.refresh();
   }
 
   function closeModal() {
