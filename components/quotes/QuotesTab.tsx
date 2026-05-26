@@ -8,6 +8,20 @@ import AutoResizeTextarea from "@/components/ui/AutoResizeTextarea";
 import { cn } from "@/lib/utils";
 import { useAiProvider } from "@/hooks/useAiProvider";
 
+const SS_KEY = "folio_deleted_quotes";
+function getDeletedIds(): Set<string> {
+  try { return new Set(JSON.parse(sessionStorage.getItem(SS_KEY) ?? "[]")); } catch { return new Set(); }
+}
+function addDeletedId(id: string) {
+  try {
+    const s = getDeletedIds(); s.add(id);
+    sessionStorage.setItem(SS_KEY, JSON.stringify([...s]));
+  } catch {}
+}
+function clearDeletedIds() {
+  try { sessionStorage.removeItem(SS_KEY); } catch {}
+}
+
 const TAG_COLORS = [
   "#6366f1", "#8b5cf6", "#3b82f6", "#06b6d4",
   "#10b981", "#f59e0b", "#ef4444", "#ec4899",
@@ -47,7 +61,11 @@ export default function QuotesTab({
 }) {
   const router = useRouter();
   const { provider } = useAiProvider();
-  const [quoteList, setQuoteList] = useState(initialQuotes);
+  const [quoteList, setQuoteList] = useState(() => {
+    if (typeof window === "undefined") return initialQuotes;
+    const deleted = getDeletedIds();
+    return deleted.size > 0 ? initialQuotes.filter((q) => !deleted.has(q.id)) : initialQuotes;
+  });
   const [userTags, setUserTags] = useState(initialTags);
   const [tagFilter, setTagFilter] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
@@ -81,6 +99,17 @@ export default function QuotesTab({
     document.addEventListener("mousedown", onClickOutside);
     return () => document.removeEventListener("mousedown", onClickOutside);
   }, []);
+
+  useEffect(() => {
+    fetch(`/api/quotes?bookId=${bookId}`)
+      .then((r) => r.json())
+      .then((fresh: { id: string }[]) => {
+        const freshIds = new Set(fresh.map((q) => q.id));
+        setQuoteList((list) => list.filter((q) => freshIds.has(q.id)));
+        clearDeletedIds();
+      })
+      .catch(() => {});
+  }, [bookId]);
 
   function openEdit(q: QuoteItem) {
     setEditingQuote(q);
@@ -172,6 +201,7 @@ export default function QuotesTab({
   }
 
   async function handleDelete(id: string) {
+    addDeletedId(id);
     setQuoteList((q) => q.filter((item) => item.id !== id));
     setActionSheetQuote(null);
     try {
