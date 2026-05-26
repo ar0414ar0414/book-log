@@ -2,9 +2,10 @@
 
 import { useState, useMemo } from "react";
 import Link from "next/link";
-import { Quote, Star, BookOpen, Search, X } from "lucide-react";
+import { Quote, Star, BookOpen, Search, X, Share2, Loader2 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { cn } from "@/lib/utils";
+import { generateQuoteImage, shareQuoteImage } from "@/lib/quote-image";
 
 interface QuoteItem {
   quote: {
@@ -20,6 +21,20 @@ export default function QuotesView({ items }: { items: QuoteItem[] }) {
   const [selectedBook, setSelectedBook] = useState<string | null>(null);
   const [query, setQuery] = useState("");
   const [searchOpen, setSearchOpen] = useState(false);
+  const [sharingId, setSharingId] = useState<string | null>(null);
+
+  async function handleShare(quote: QuoteItem["quote"], book: QuoteItem["book"], author?: string | null) {
+    if (sharingId) return;
+    setSharingId(quote.id);
+    try {
+      const blob = await generateQuoteImage(quote.text, book.title, author ?? null);
+      await shareQuoteImage(blob, book.title);
+    } catch {
+      // share cancelled or unsupported — no-op
+    } finally {
+      setSharingId(null);
+    }
+  }
 
   const books = useMemo(() => {
     const map = new Map<string, { id: string; title: string; coverUrl: string | null }>();
@@ -180,17 +195,28 @@ export default function QuotesView({ items }: { items: QuoteItem[] }) {
                 >{quote.text}</ReactMarkdown>
               </div>
               <div className="flex items-center justify-between">
-                <Link href={`/books/${book.id}`} className="flex items-center gap-2 hover:opacity-70 transition-opacity">
+                <Link href={`/books/${book.id}`} className="flex items-center gap-2 hover:opacity-70 transition-opacity min-w-0 flex-1 mr-2">
                   {book.coverUrl ? (
-                    <img src={book.coverUrl} alt={book.title} className="w-6 h-8 object-cover rounded" />
+                    <img src={book.coverUrl} alt={book.title} className="w-6 h-8 object-cover rounded flex-shrink-0" />
                   ) : (
-                    <BookOpen className="w-4 h-4 text-indigo-300 dark:text-indigo-600" />
+                    <BookOpen className="w-4 h-4 text-indigo-300 dark:text-indigo-600 flex-shrink-0" />
                   )}
-                  <span className="text-sm text-slate-500 dark:text-slate-400 truncate max-w-[200px]">{book.title}</span>
+                  <span className="text-sm text-slate-500 dark:text-slate-400 truncate">{book.title}</span>
                 </Link>
-                <div className="flex items-center gap-1 text-xs text-slate-400 dark:text-slate-500">
-                  {quote.pageNumber && <span>p.{quote.pageNumber}</span>}
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  {quote.pageNumber && <span className="text-xs text-slate-400 dark:text-slate-500">p.{quote.pageNumber}</span>}
                   {quote.isFavorite && <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />}
+                  <button
+                    onClick={() => handleShare(quote, book)}
+                    disabled={sharingId === quote.id}
+                    className="p-1.5 rounded-lg text-slate-300 dark:text-slate-600 hover:text-indigo-500 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/30 transition-colors disabled:opacity-50"
+                    title="シェア"
+                  >
+                    {sharingId === quote.id
+                      ? <Loader2 className="w-4 h-4 animate-spin" />
+                      : <Share2 className="w-4 h-4" />
+                    }
+                  </button>
                 </div>
               </div>
               {tags.length > 0 && (
