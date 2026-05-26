@@ -1,7 +1,4 @@
-const CACHE = "folio-v1";
-
-// キャッシュしない（常にネットワーク優先）パターン
-const NETWORK_ONLY = ["/api/", "/auth/"];
+const CACHE = "folio-v2";
 
 self.addEventListener("install", (e) => {
   self.skipWaiting();
@@ -23,11 +20,16 @@ self.addEventListener("fetch", (e) => {
   // 別オリジン・非GETは素通し
   if (url.origin !== self.location.origin || request.method !== "GET") return;
 
-  // API・認証は常にネットワーク
-  if (NETWORK_ONLY.some((p) => url.pathname.startsWith(p))) return;
+  // ページナビゲーション（HTMLドキュメント）は常にネットワーク
+  // → キャッシュするとアップロード・削除後に古いデータが表示されてしまう
+  if (request.mode === "navigate") return;
 
-  // 画像は Cache-first（Supabase CDN 画像も含む）
-  if (request.destination === "image" || url.hostname.includes("supabase")) {
+  // API・認証は常にネットワーク
+  if (url.pathname.startsWith("/api/") || url.pathname.startsWith("/auth/")) return;
+
+  // Next.js の静的アセット（/_next/static/ 以下はコンテンツハッシュ付きで不変）
+  // → 長期間 Cache-first で問題なし
+  if (url.pathname.startsWith("/_next/static/")) {
     e.respondWith(
       caches.open(CACHE).then((cache) =>
         cache.match(request).then(
@@ -43,16 +45,22 @@ self.addEventListener("fetch", (e) => {
     return;
   }
 
-  // その他（JS/CSS/フォント/ページ）は Stale-while-revalidate
-  e.respondWith(
-    caches.open(CACHE).then((cache) =>
-      cache.match(request).then((cached) => {
-        const fresh = fetch(request).then((res) => {
-          if (res.ok) cache.put(request, res.clone());
-          return res;
-        });
-        return cached ?? fresh;
-      })
-    )
-  );
+  // 同一オリジンの画像アセット（publicフォルダ等）は Cache-first
+  if (request.destination === "image") {
+    e.respondWith(
+      caches.open(CACHE).then((cache) =>
+        cache.match(request).then(
+          (cached) =>
+            cached ??
+            fetch(request).then((res) => {
+              if (res.ok) cache.put(request, res.clone());
+              return res;
+            })
+        )
+      )
+    );
+    return;
+  }
+
+  // その他（フォント・マニフェスト等）は素通し（キャッシュしない）
 });
