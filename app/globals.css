@@ -32,6 +32,11 @@ body {
   padding-bottom: calc(3.5rem + env(safe-area-inset-bottom, 0px));
 }
 
+/* iOS Safari の自動ズーム防止 (font-size < 16px でズームが起きる) */
+input, textarea, select {
+  font-size: max(16px, 1em);
+}
+
 /* スクロールバー非表示 */
 .scrollbar-hide {
   scrollbar-width: none;
