@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useEffect, useLayoutEffect, useRef, useMemo } from "react";
 import Link from "next/link";
 import {
   BookOpen, Star, Search, LayoutGrid, List, Plus, ArrowUpDown, X, Check,
@@ -54,7 +54,7 @@ export default function BooksShelf({
   const searchInputRef = useRef<HTMLInputElement>(null);
   const sortRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const saved = localStorage.getItem("folio_view_mode") as ViewMode | null;
     if (saved === "grid" || saved === "list") setViewMode(saved);
   }, []);
