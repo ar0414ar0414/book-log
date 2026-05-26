@@ -67,6 +67,12 @@ function parseRecord(text: string): { heading: string; body: string }[] {
 
 export default function BookDetail({ book, initialQuotes, initialPhotos, initialChat, initialTags, prevId, nextId }: Props) {
   const [activeTab, setActiveTab] = useState<Tab>("quotes");
+  const [ocrDraft, setOcrDraft] = useState<string | null>(null);
+
+  function handleOcrToQuote(text: string) {
+    setOcrDraft(text);
+    setActiveTab("quotes");
+  }
   const [deleting, setDeleting] = useState(false);
   const [status, setStatus] = useState<BookStatus>(book.status as BookStatus);
   const [updatingStatus, setUpdatingStatus] = useState(false);
@@ -660,8 +666,8 @@ export default function BookDetail({ book, initialQuotes, initialPhotos, initial
       </div>
 
       <div onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
-        {activeTab === "quotes" && <QuotesTab bookId={book.id} initialQuotes={initialQuotes} initialTags={initialTags} />}
-        {activeTab === "photos" && <PhotosTab bookId={book.id} initialPhotos={initialPhotos} />}
+        {activeTab === "quotes" && <QuotesTab bookId={book.id} initialQuotes={initialQuotes} initialTags={initialTags} ocrDraft={ocrDraft} onOcrDraftConsumed={() => setOcrDraft(null)} />}
+        {activeTab === "photos" && <PhotosTab bookId={book.id} initialPhotos={initialPhotos} onOcrToQuote={handleOcrToQuote} />}
         {activeTab === "ai" && <AiChatTab bookId={book.id} initialChat={initialChat} initialSummary={book.aiSummary ?? null} />}
       </div>
     </div>

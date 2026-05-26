@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Camera, Upload, Trash2, FileText, Loader2, Image as ImageIcon, MessageSquare, X, AlertCircle, Check } from "lucide-react";
+import { Camera, Upload, Trash2, FileText, Loader2, Image as ImageIcon, MessageSquare, X, AlertCircle, Check, Quote } from "lucide-react";
 import { useRouter } from "next/navigation";
 import AutoResizeTextarea from "@/components/ui/AutoResizeTextarea";
 import { useAiProvider } from "@/hooks/useAiProvider";
@@ -10,7 +10,7 @@ interface PhotoItem {
   id: string; url: string; caption: string | null; extractedText: string | null; createdAt: Date;
 }
 
-export default function PhotosTab({ bookId, initialPhotos }: { bookId: string; initialPhotos: PhotoItem[] }) {
+export default function PhotosTab({ bookId, initialPhotos, onOcrToQuote }: { bookId: string; initialPhotos: PhotoItem[]; onOcrToQuote?: (text: string) => void }) {
   const [photoList, setPhotoList] = useState(initialPhotos);
   const [uploading, setUploading] = useState(false);
   const [ocrLoading, setOcrLoading] = useState<string | null>(null);
@@ -272,11 +272,20 @@ export default function PhotosTab({ bookId, initialPhotos }: { bookId: string; i
 
               {/* OCR */}
               {selectedPhoto.extractedText ? (
-                <div className="bg-slate-50 dark:bg-slate-700 rounded-xl p-3">
-                  <p className="text-xs font-medium text-slate-500 dark:text-slate-400 mb-1 flex items-center gap-1">
+                <div className="bg-slate-50 dark:bg-slate-700 rounded-xl p-3 space-y-2">
+                  <p className="text-xs font-medium text-slate-500 dark:text-slate-400 flex items-center gap-1">
                     <FileText className="w-3 h-3" />抽出テキスト
                   </p>
                   <p className="text-sm text-slate-700 dark:text-slate-300 whitespace-pre-wrap">{selectedPhoto.extractedText}</p>
+                  {onOcrToQuote && (
+                    <button
+                      onClick={() => { onOcrToQuote(selectedPhoto.extractedText!); setSelectedPhoto(null); }}
+                      className="w-full flex items-center justify-center gap-1.5 text-xs text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-700 rounded-lg py-1.5 hover:bg-indigo-50 dark:hover:bg-indigo-950/30 transition-colors"
+                    >
+                      <Quote className="w-3 h-3" />
+                      引用として追加
+                    </button>
+                  )}
                 </div>
               ) : (
                 <button

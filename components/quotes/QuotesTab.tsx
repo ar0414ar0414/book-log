@@ -2,9 +2,10 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, Star, Trash2, Quote, Tag, X, Edit2 } from "lucide-react";
+import { Plus, Star, Trash2, Quote, Tag, X, Edit2, Camera, Loader2 } from "lucide-react";
 import AutoResizeTextarea from "@/components/ui/AutoResizeTextarea";
 import { cn } from "@/lib/utils";
+import { useAiProvider } from "@/hooks/useAiProvider";
 
 const TAG_COLORS = [
   "#6366f1", "#8b5cf6", "#3b82f6", "#06b6d4",
@@ -23,18 +24,25 @@ export default function QuotesTab({
   bookId,
   initialQuotes,
   initialTags,
+  ocrDraft,
+  onOcrDraftConsumed,
 }: {
   bookId: string;
   initialQuotes: QuoteItem[];
   initialTags: TagItem[];
+  ocrDraft?: string | null;
+  onOcrDraftConsumed?: () => void;
 }) {
   const router = useRouter();
+  const { provider } = useAiProvider();
   const [quoteList, setQuoteList] = useState(initialQuotes);
   const [userTags, setUserTags] = useState(initialTags);
   const [tagFilter, setTagFilter] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({ text: "", pageNumber: "", chapter: "", memo: "" });
   const [saving, setSaving] = useState(false);
+  const [ocrLoading, setOcrLoading] = useState(false);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
   const [openPickerId, setOpenPickerId] = useState<string | null>(null);
   const [newTagName, setNewTagName] = useState("");
   const [newTagColor, setNewTagColor] = useState(TAG_COLORS[0]);
@@ -42,6 +50,14 @@ export default function QuotesTab({
   const [editForm, setEditForm] = useState({ text: "", pageNumber: "", chapter: "", memo: "" });
   const [editSaving, setEditSaving] = useState(false);
   const pickerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (ocrDraft) {
+      setForm((f) => ({ ...f, text: ocrDraft }));
+      setShowForm(true);
+      onOcrDraftConsumed?.();
+    }
+  }, [ocrDraft]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     function onClickOutside(e: MouseEvent) {
@@ -83,6 +99,29 @@ export default function QuotesTab({
       router.refresh();
     } finally {
       setEditSaving(false);
+    }
+  }
+
+  async function handleCameraOcr(file: File) {
+    setOcrLoading(true);
+    try {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = async () => {
+        const base64 = (reader.result as string).split(",")[1];
+        const res = await fetch("/api/ai/ocr", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ imageBase64: base64, mimeType: file.type, provider }),
+        });
+        const data = await res.json();
+        if (res.ok && data.text) {
+          setForm((f) => ({ ...f, text: f.text ? f.text + "\n" + data.text : data.text }));
+        }
+        setOcrLoading(false);
+      };
+    } catch {
+      setOcrLoading(false);
     }
   }
 
@@ -225,14 +264,34 @@ export default function QuotesTab({
       {/* 追加フォーム */}
       {showForm && (
         <form onSubmit={handleAdd} className="bg-white dark:bg-slate-800 rounded-xl border border-indigo-200 dark:border-indigo-700 p-4 space-y-3">
-          <AutoResizeTextarea
-            value={form.text}
-            onChange={(e) => setForm((f) => ({ ...f, text: e.target.value }))}
-            placeholder="引用したいテキストを入力..."
-            rows={4}
-            className={cn(inputCls, "w-full")}
-            autoFocus
-          />
+          <div className="relative">
+            <AutoResizeTextarea
+              value={form.text}
+              onChange={(e) => setForm((f) => ({ ...f, text: e.target.value }))}
+              placeholder="引用したいテキストを入力..."
+              rows={4}
+              className={cn(inputCls, "w-full pr-10")}
+              autoFocus
+              disabled={ocrLoading}
+            />
+            <button
+              type="button"
+              onClick={() => cameraInputRef.current?.click()}
+              disabled={ocrLoading}
+              className="absolute top-2 right-2 p-1.5 text-slate-400 hover:text-indigo-500 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/30 rounded-lg transition-colors disabled:opacity-50"
+              title="カメラで撮影してOCR"
+            >
+              {ocrLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Camera className="w-4 h-4" />}
+            </button>
+            <input
+              ref={cameraInputRef}
+              type="file"
+              accept="image/*"
+              capture="environment"
+              className="hidden"
+              onChange={(e) => { const f = e.target.files?.[0]; if (f) handleCameraOcr(f); e.target.value = ""; }}
+            />
+          </div>
           <div className="grid grid-cols-2 gap-2">
             <input
               type="number"
