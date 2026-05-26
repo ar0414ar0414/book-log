@@ -3,6 +3,7 @@ import { Noto_Sans_JP } from "next/font/google";
 import "./globals.css";
 import ProgressBar from "@/components/ProgressBar";
 import ThemeProvider from "@/components/ThemeProvider";
+import ServiceWorkerRegistrar from "@/components/ServiceWorkerRegistrar";
 
 const noto = Noto_Sans_JP({ subsets: ["latin"], weight: ["400", "500", "700"] });
 
@@ -35,6 +36,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <ThemeProvider>
           <ProgressBar />
           {children}
+          <ServiceWorkerRegistrar />
         </ThemeProvider>
       </body>
     </html>
