@@ -161,10 +161,14 @@ export default function QuotesTab({
   }
 
   async function handleDelete(id: string) {
-    if (!confirm("この引用を削除しますか？")) return;
-    await fetch(`/api/quotes/${id}`, { method: "DELETE" });
     setQuoteList((q) => q.filter((item) => item.id !== id));
-    router.refresh();
+    setActionSheetQuote(null);
+    try {
+      await fetch(`/api/quotes/${id}`, { method: "DELETE" });
+      router.refresh();
+    } catch {
+      // 失敗時は再取得で復元される
+    }
   }
 
   async function createTag(): Promise<TagItem | null> {
