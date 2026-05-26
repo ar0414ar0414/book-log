@@ -29,6 +29,14 @@ export default function PhotosTab({ bookId, initialPhotos, onOcrToQuote }: { boo
   const inputRef = useRef<HTMLInputElement>(null);
   const deletingRef = useRef(false);
 
+  // マウント時にサーバーから最新の写真一覧を取得（Router Cache が古くても正しい状態に同期）
+  useEffect(() => {
+    fetch(`/api/photos?bookId=${bookId}`)
+      .then((r) => r.json())
+      .then((fresh) => setPhotoList(fresh as PhotoItem[]))
+      .catch(() => {});
+  }, [bookId]);
+
   // 写真が切り替わったらキャプションをリセット
   useEffect(() => {
     if (selectedPhoto) {

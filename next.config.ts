@@ -7,6 +7,12 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "*.supabase.co" },
     ],
   },
+  experimental: {
+    staleTimes: {
+      dynamic: 0,   // 動的ページを Router Cache に保持しない
+      static: 300,  // 静的ページはデフォルトのまま
+    },
+  },
 };
 
 export default nextConfig;
