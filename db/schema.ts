@@ -1,4 +1,4 @@
-import { pgTable, text, integer, timestamp, boolean, real, uuid } from "drizzle-orm/pg-core";
+import { pgTable, text, integer, timestamp, boolean, real, uuid, primaryKey } from "drizzle-orm/pg-core";
 
 export const users = pgTable("users", {
   id: uuid("id").primaryKey(),
@@ -57,7 +57,7 @@ export const tags = pgTable("tags", {
 export const quoteTags = pgTable("quote_tags", {
   quoteId: uuid("quote_id").notNull().references(() => quotes.id, { onDelete: "cascade" }),
   tagId: uuid("tag_id").notNull().references(() => tags.id, { onDelete: "cascade" }),
-});
+}, (t) => [primaryKey({ columns: [t.quoteId, t.tagId] })]);
 
 export const photos = pgTable("photos", {
   id: uuid("id").primaryKey().defaultRandom(),
