@@ -90,7 +90,7 @@ export default function QuotesTab({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           text: editForm.text,
-          pageNumber: editForm.pageNumber ? parseInt(editForm.pageNumber) : null,
+          pageNumber: editForm.pageNumber ? (Number.isFinite(parseInt(editForm.pageNumber, 10)) ? parseInt(editForm.pageNumber, 10) : null) : null,
           chapter: editForm.chapter || null,
           memo: editForm.memo || null,
         }),
@@ -137,7 +137,7 @@ export default function QuotesTab({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           bookId, text: form.text,
-          pageNumber: form.pageNumber ? parseInt(form.pageNumber) : null,
+          pageNumber: form.pageNumber ? (Number.isFinite(parseInt(form.pageNumber, 10)) ? parseInt(form.pageNumber, 10) : null) : null,
           chapter: form.chapter || null, memo: form.memo || null,
         }),
       });

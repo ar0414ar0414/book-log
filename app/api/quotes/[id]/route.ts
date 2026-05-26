@@ -13,8 +13,19 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   const { id } = await params;
   const body = await request.json();
 
+  // 更新を許可するフィールドのみ抽出（userId/bookId 等の書き換えを防ぐ）
+  const allowed: Record<string, unknown> = {};
+  if (body.text !== undefined)       allowed.text        = body.text;
+  if (body.pageNumber !== undefined) allowed.pageNumber  = body.pageNumber;
+  if (body.chapter !== undefined)    allowed.chapter     = body.chapter;
+  if (body.memo !== undefined)       allowed.memo        = body.memo;
+  if (body.isFavorite !== undefined) allowed.isFavorite  = body.isFavorite;
+
+  if (Object.keys(allowed).length === 0)
+    return NextResponse.json({ error: "No valid fields" }, { status: 400 });
+
   const [quote] = await db.update(quotes)
-    .set(body)
+    .set(allowed)
     .where(and(eq(quotes.id, id), eq(quotes.userId, user.id)))
     .returning();
 
