@@ -2,10 +2,9 @@
 
 import { useState, useMemo } from "react";
 import Link from "next/link";
-import { Quote, Star, BookOpen, Search, X, Share2, Loader2 } from "lucide-react";
+import { Quote, Star, BookOpen, Search, X, Share2, Loader2, Check } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { cn } from "@/lib/utils";
-import { generateQuoteImage, shareQuoteImage } from "@/lib/quote-image";
 
 interface QuoteItem {
   quote: {
@@ -22,15 +21,32 @@ export default function QuotesView({ items }: { items: QuoteItem[] }) {
   const [query, setQuery] = useState("");
   const [searchOpen, setSearchOpen] = useState(false);
   const [sharingId, setSharingId] = useState<string | null>(null);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
 
-  async function handleShare(quote: QuoteItem["quote"], book: QuoteItem["book"], author?: string | null) {
+  function stripMd(text: string): string {
+    return text
+      .replace(/\*\*(.*?)\*\*/g, "$1")
+      .replace(/\*(.*?)\*/g, "$1")
+      .replace(/^#{1,6}\s+/gm, "")
+      .replace(/^[-*+]\s/gm, "・")
+      .replace(/\n{3,}/g, "\n\n")
+      .trim();
+  }
+
+  async function handleShare(quote: QuoteItem["quote"], book: QuoteItem["book"]) {
     if (sharingId) return;
     setSharingId(quote.id);
+    const text = `${stripMd(quote.text)}\n\n── 『${book.title}』`;
     try {
-      const blob = await generateQuoteImage(quote.text, book.title, author ?? null);
-      await shareQuoteImage(blob, book.title);
+      if (navigator.share) {
+        await navigator.share({ text, title: `引用 — ${book.title}` });
+      } else {
+        await navigator.clipboard.writeText(text);
+        setCopiedId(quote.id);
+        setTimeout(() => setCopiedId(null), 2000);
+      }
     } catch {
-      // share cancelled or unsupported — no-op
+      // share cancelled or clipboard unavailable — no-op
     } finally {
       setSharingId(null);
     }
@@ -210,10 +226,12 @@ export default function QuotesView({ items }: { items: QuoteItem[] }) {
                     onClick={() => handleShare(quote, book)}
                     disabled={sharingId === quote.id}
                     className="p-1.5 rounded-lg text-slate-300 dark:text-slate-600 hover:text-indigo-500 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/30 transition-colors disabled:opacity-50"
-                    title="シェア"
+                    title={copiedId === quote.id ? "コピーしました" : "シェア"}
                   >
                     {sharingId === quote.id
                       ? <Loader2 className="w-4 h-4 animate-spin" />
+                      : copiedId === quote.id
+                      ? <Check className="w-4 h-4 text-emerald-500" />
                       : <Share2 className="w-4 h-4" />
                     }
                   </button>
