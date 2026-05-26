@@ -86,7 +86,7 @@ export default function QuotesView({ items }: { items: QuoteItem[] }) {
         <div className="flex items-center gap-2">
           {searchOpen ? (
             <>
-              <div className="flex-1 flex items-center gap-2 bg-white dark:bg-slate-800 border border-indigo-300 dark:border-indigo-600 rounded-full px-3.5 py-2 shadow-sm">
+              <div className="flex-1 min-w-0 flex items-center gap-2 bg-white dark:bg-slate-800 border border-indigo-300 dark:border-indigo-600 rounded-full px-3.5 py-2 shadow-sm">
                 <Search className="w-4 h-4 text-indigo-400 flex-shrink-0" />
                 <input
                   autoFocus
@@ -94,7 +94,7 @@ export default function QuotesView({ items }: { items: QuoteItem[] }) {
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   placeholder="引用・メモを検索..."
-                  className="flex-1 text-sm bg-transparent focus:outline-none text-slate-700 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500"
+                  className="flex-1 min-w-0 text-sm bg-transparent focus:outline-none text-slate-700 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500"
                 />
                 {query && (
                   <button onClick={() => setQuery("")} className="text-slate-300 dark:text-slate-600 hover:text-slate-500 dark:hover:text-slate-400 transition-colors">
