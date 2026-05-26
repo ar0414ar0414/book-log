@@ -31,9 +31,13 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
   const [photo] = await db.select().from(photos).where(and(eq(photos.id, id), eq(photos.userId, user.id)));
 
   if (photo) {
-    await supabase.storage.from("book-photos").remove([photo.storagePath]);
     await db.delete(photos).where(eq(photos.id, id));
     revalidatePath(`/books/${photo.bookId}`);
+    try {
+      await supabase.storage.from("book-photos").remove([photo.storagePath]);
+    } catch {
+      // storage cleanup failure is non-critical; DB record is already deleted
+    }
   }
 
   return NextResponse.json({ ok: true });
