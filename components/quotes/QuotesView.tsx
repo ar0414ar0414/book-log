@@ -3,6 +3,7 @@
 import { useState, useMemo } from "react";
 import Link from "next/link";
 import { Quote, Star, BookOpen, Search, X } from "lucide-react";
+import ReactMarkdown from "react-markdown";
 import { cn } from "@/lib/utils";
 
 interface QuoteItem {
@@ -164,7 +165,20 @@ export default function QuotesView({ items }: { items: QuoteItem[] }) {
                   : "border-l-indigo-200 dark:border-l-indigo-700 border-slate-100 dark:border-slate-700"
               )}
             >
-              <p className="text-slate-800 dark:text-slate-200 leading-relaxed">「{quote.text}」</p>
+              <div className="text-slate-800 dark:text-slate-200 text-sm leading-relaxed prose prose-sm dark:prose-invert max-w-none prose-p:my-0.5 prose-headings:my-1 prose-ul:my-0.5 prose-ol:my-0.5 prose-li:my-0">
+                <ReactMarkdown
+                  components={{
+                    p: ({ children }) => <p className="leading-relaxed">{children}</p>,
+                    h1: ({ children }) => <p className="font-bold text-base">{children}</p>,
+                    h2: ({ children }) => <p className="font-bold">{children}</p>,
+                    h3: ({ children }) => <p className="font-semibold">{children}</p>,
+                    ul: ({ children }) => <ul className="list-disc list-inside space-y-0.5">{children}</ul>,
+                    ol: ({ children }) => <ol className="list-decimal list-inside space-y-0.5">{children}</ol>,
+                    strong: ({ children }) => <strong className="font-semibold">{children}</strong>,
+                    hr: () => <hr className="my-1 border-slate-200 dark:border-slate-600" />,
+                  }}
+                >{quote.text}</ReactMarkdown>
+              </div>
               <div className="flex items-center justify-between">
                 <Link href={`/books/${book.id}`} className="flex items-center gap-2 hover:opacity-70 transition-opacity">
                   {book.coverUrl ? (
