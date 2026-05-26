@@ -22,6 +22,7 @@ export default function PhotosTab({ bookId, initialPhotos, onOcrToQuote }: { boo
   const [captionSaving, setCaptionSaving] = useState(false);
   const [captionSaved, setCaptionSaved] = useState(false);
   const [fullscreenPhoto, setFullscreenPhoto] = useState<string | null>(null);
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
   const { provider } = useAiProvider();
   const router = useRouter();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -123,6 +124,7 @@ export default function PhotosTab({ bookId, initialPhotos, onOcrToQuote }: { boo
   function closeModal() {
     if (selectedPhoto) saveCaption(selectedPhoto.id);
     setSelectedPhoto(null);
+    setConfirmingDelete(false);
   }
 
   return (
@@ -212,24 +214,48 @@ export default function PhotosTab({ bookId, initialPhotos, onOcrToQuote }: { boo
             onClick={(e) => e.stopPropagation()}
           >
             {/* ヘッダー（常に表示） */}
-            <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100 dark:border-slate-700 flex-shrink-0">
-              <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">写真詳細</p>
-              <div className="flex items-center gap-1">
-                <button
-                  onClick={() => handleDelete(selectedPhoto.id)}
-                  className="p-2 text-red-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-lg transition-colors"
-                  title="削除"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
-                <button
-                  onClick={closeModal}
-                  className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
-                  title="閉じる"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
+            <div className="flex items-center justify-between px-4 py-2.5 border-b border-slate-100 dark:border-slate-700 flex-shrink-0 min-h-[52px]">
+              {confirmingDelete ? (
+                /* 削除確認UI */
+                <>
+                  <p className="text-sm font-medium text-red-600 dark:text-red-400">削除しますか？</p>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => setConfirmingDelete(false)}
+                      className="px-3 py-1.5 text-xs font-medium text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-700 rounded-lg transition-colors"
+                    >
+                      キャンセル
+                    </button>
+                    <button
+                      onClick={() => { setConfirmingDelete(false); handleDelete(selectedPhoto.id); }}
+                      className="px-3 py-1.5 text-xs font-medium text-white bg-red-500 hover:bg-red-600 rounded-lg transition-colors"
+                    >
+                      削除する
+                    </button>
+                  </div>
+                </>
+              ) : (
+                /* 通常UI */
+                <>
+                  <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">写真詳細</p>
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={() => setConfirmingDelete(true)}
+                      className="p-2.5 text-red-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-xl transition-colors"
+                      title="削除"
+                    >
+                      <Trash2 className="w-5 h-5" />
+                    </button>
+                    <button
+                      onClick={closeModal}
+                      className="p-2.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-xl transition-colors"
+                      title="閉じる"
+                    >
+                      <X className="w-5 h-5" />
+                    </button>
+                  </div>
+                </>
+              )}
             </div>
 
             {/* スクロール可能エリア */}
