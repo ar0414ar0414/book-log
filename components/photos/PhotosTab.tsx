@@ -114,11 +114,16 @@ export default function PhotosTab({ bookId, initialPhotos, onOcrToQuote }: { boo
 
   async function handleDelete(id: string) {
     deletingRef.current = true;
-    await fetch(`/api/photos/${id}`, { method: "DELETE" });
+    // 楽観的更新: API完了を待たず即座にUIへ反映
     setPhotoList((p) => p.filter((item) => item.id !== id));
     setSelectedPhoto(null);
-    deletingRef.current = false;
-    router.refresh();
+    setConfirmingDelete(false);
+    try {
+      await fetch(`/api/photos/${id}`, { method: "DELETE" });
+      router.refresh();
+    } finally {
+      deletingRef.current = false;
+    }
   }
 
   function closeModal() {
