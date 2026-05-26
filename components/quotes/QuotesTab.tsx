@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Plus, Star, Trash2, Quote, Tag, X, Edit2 } from "lucide-react";
 import AutoResizeTextarea from "@/components/ui/AutoResizeTextarea";
 import { cn } from "@/lib/utils";
@@ -27,6 +28,7 @@ export default function QuotesTab({
   initialQuotes: QuoteItem[];
   initialTags: TagItem[];
 }) {
+  const router = useRouter();
   const [quoteList, setQuoteList] = useState(initialQuotes);
   const [userTags, setUserTags] = useState(initialTags);
   const [tagFilter, setTagFilter] = useState<string | null>(null);
@@ -78,6 +80,7 @@ export default function QuotesTab({
       const updated = await res.json();
       setQuoteList((list) => list.map((q) => q.id === editingQuote.id ? { ...q, ...updated } : q));
       setEditingQuote(null);
+      router.refresh();
     } finally {
       setEditSaving(false);
     }
@@ -101,6 +104,7 @@ export default function QuotesTab({
       setQuoteList((q) => [...q, { ...newQuote, tags: [] }]);
       setForm({ text: "", pageNumber: "", chapter: "", memo: "" });
       setShowForm(false);
+      router.refresh();
     } finally { setSaving(false); }
   }
 
@@ -112,12 +116,14 @@ export default function QuotesTab({
     });
     const updated = await res.json();
     setQuoteList((q) => q.map((item) => item.id === id ? { ...item, ...updated } : item));
+    router.refresh();
   }
 
   async function handleDelete(id: string) {
     if (!confirm("この引用を削除しますか？")) return;
     await fetch(`/api/quotes/${id}`, { method: "DELETE" });
     setQuoteList((q) => q.filter((item) => item.id !== id));
+    router.refresh();
   }
 
   async function createTag(): Promise<TagItem | null> {
@@ -146,6 +152,7 @@ export default function QuotesTab({
         ? { ...q, tags: [...q.tags, tag] }
         : q
     ));
+    router.refresh();
   }
 
   async function removeTagFromQuote(quoteId: string, tagId: string) {
@@ -153,6 +160,7 @@ export default function QuotesTab({
     setQuoteList((list) => list.map((q) =>
       q.id === quoteId ? { ...q, tags: q.tags.filter((t) => t.id !== tagId) } : q
     ));
+    router.refresh();
   }
 
   async function handleCreateAndAdd(quoteId: string) {

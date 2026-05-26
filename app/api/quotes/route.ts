@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { db } from "@/lib/db";
 import { quotes } from "@/db/schema";
@@ -38,5 +39,7 @@ export async function POST(request: Request) {
   }).returning();
 
   if (!quote) return NextResponse.json({ error: "Insert failed" }, { status: 500 });
+  revalidatePath(`/books/${body.bookId}`);
+  revalidatePath("/quotes");
   return NextResponse.json(quote);
 }

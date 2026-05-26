@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { db } from "@/lib/db";
 import { quotes } from "@/db/schema";
@@ -18,6 +19,8 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     .returning();
 
   if (!quote) return NextResponse.json({ error: "Not found" }, { status: 404 });
+  revalidatePath(`/books/${quote.bookId}`);
+  revalidatePath("/quotes");
   return NextResponse.json(quote);
 }
 
@@ -27,6 +30,11 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { id } = await params;
+  const [quote] = await db.select().from(quotes).where(and(eq(quotes.id, id), eq(quotes.userId, user.id)));
   await db.delete(quotes).where(and(eq(quotes.id, id), eq(quotes.userId, user.id)));
+  if (quote) {
+    revalidatePath(`/books/${quote.bookId}`);
+    revalidatePath("/quotes");
+  }
   return NextResponse.json({ ok: true });
 }

@@ -1,13 +1,14 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { db } from "@/lib/db";
 import { quoteTags, quotes } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
 
-async function authorize(userId: string, quoteId: string) {
+async function getQuote(userId: string, quoteId: string) {
   const [quote] = await db.select().from(quotes)
     .where(and(eq(quotes.id, quoteId), eq(quotes.userId, userId)));
-  return !!quote;
+  return quote ?? null;
 }
 
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -16,11 +17,13 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { id: quoteId } = await params;
-  if (!await authorize(user.id, quoteId))
-    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  const quote = await getQuote(user.id, quoteId);
+  if (!quote) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
   const { tagId } = await request.json();
   await db.insert(quoteTags).values({ quoteId, tagId }).onConflictDoNothing();
+  revalidatePath(`/books/${quote.bookId}`);
+  revalidatePath("/quotes");
   return NextResponse.json({ ok: true });
 }
 
@@ -30,12 +33,14 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { id: quoteId } = await params;
-  if (!await authorize(user.id, quoteId))
-    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  const quote = await getQuote(user.id, quoteId);
+  if (!quote) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
   const tagId = new URL(request.url).searchParams.get("tagId");
   if (!tagId) return NextResponse.json({ error: "tagId required" }, { status: 400 });
 
   await db.delete(quoteTags).where(and(eq(quoteTags.quoteId, quoteId), eq(quoteTags.tagId, tagId)));
+  revalidatePath(`/books/${quote.bookId}`);
+  revalidatePath("/quotes");
   return NextResponse.json({ ok: true });
 }
