@@ -75,6 +75,7 @@ export default function QuotesTab({
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const [openPickerId, setOpenPickerId] = useState<string | null>(null);
   const [tagEditMode, setTagEditMode] = useState(false);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const [newTagName, setNewTagName] = useState("");
   const [newTagColor, setNewTagColor] = useState(TAG_COLORS[0]);
   const [editingQuote, setEditingQuote] = useState<QuoteItem | null>(null);
@@ -100,6 +101,12 @@ export default function QuotesTab({
     document.addEventListener("mousedown", onClickOutside);
     return () => document.removeEventListener("mousedown", onClickOutside);
   }, []);
+
+  useEffect(() => {
+    if (!confirmDeleteId) return;
+    const t = setTimeout(() => setConfirmDeleteId(null), 3000);
+    return () => clearTimeout(t);
+  }, [confirmDeleteId]);
 
   useEffect(() => {
     fetch(`/api/quotes?bookId=${bookId}`)
@@ -407,13 +414,19 @@ export default function QuotesTab({
               <div
                 key={q.id}
                 className={cn(
-                  "bg-white dark:bg-slate-800 rounded-xl border p-4 space-y-2.5 border-l-4",
+                  "relative bg-white dark:bg-slate-800 rounded-xl border p-4 space-y-2.5 border-l-4",
                   q.isFavorite
                     ? "border-l-amber-400 border-amber-100 dark:border-amber-800"
                     : "border-l-indigo-200 dark:border-l-indigo-700 border-slate-100 dark:border-slate-700"
                 )}
               >
-                <div className="text-slate-800 dark:text-slate-200 text-sm leading-relaxed prose prose-sm dark:prose-invert max-w-none prose-p:my-0.5 prose-headings:my-1 prose-ul:my-0.5 prose-ol:my-0.5 prose-li:my-0">
+                <button
+                  onClick={() => toggleFavorite(q.id, q.isFavorite)}
+                  className="absolute top-3 right-3 p-1 rounded-lg transition-colors hover:bg-amber-50 dark:hover:bg-amber-950/30"
+                >
+                  <Star className={cn("w-4 h-4", q.isFavorite ? "fill-amber-400 text-amber-400" : "text-slate-300 dark:text-slate-600")} />
+                </button>
+                <div className="pr-7 text-slate-800 dark:text-slate-200 text-sm leading-relaxed prose prose-sm dark:prose-invert max-w-none prose-p:my-0.5 prose-headings:my-1 prose-ul:my-0.5 prose-ol:my-0.5 prose-li:my-0">
                   <ReactMarkdown
                     components={{
                       p: ({ children }) => <p className="leading-relaxed">{children}</p>,
@@ -460,23 +473,27 @@ export default function QuotesTab({
                   </div>
                   <div className="flex items-center gap-0.5 flex-shrink-0 -mr-1">
                     <button
-                      onClick={() => toggleFavorite(q.id, q.isFavorite)}
-                      className="p-1.5 rounded-lg transition-colors hover:bg-amber-50 dark:hover:bg-amber-950/30"
-                    >
-                      <Star className={cn("w-4 h-4", q.isFavorite ? "fill-amber-400 text-amber-400" : "text-slate-300 dark:text-slate-600")} />
-                    </button>
-                    <button
                       onClick={() => openEdit(q)}
                       className="p-1.5 rounded-lg text-slate-300 dark:text-slate-600 hover:text-indigo-500 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/30 transition-colors"
                     >
                       <Edit2 className="w-4 h-4" />
                     </button>
-                    <button
-                      onClick={() => handleDelete(q.id)}
-                      className="p-1.5 rounded-lg text-slate-300 dark:text-slate-600 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
+                    {confirmDeleteId === q.id ? (
+                      <button
+                        onClick={() => { handleDelete(q.id); setConfirmDeleteId(null); }}
+                        className="flex items-center gap-1 px-2 py-1 rounded-lg bg-red-500 text-white text-xs font-medium transition-colors"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                        削除
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => setConfirmDeleteId(q.id)}
+                        className="p-1.5 rounded-lg text-slate-300 dark:text-slate-600 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    )}
                   </div>
                 </div>
 
