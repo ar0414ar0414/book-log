@@ -19,6 +19,7 @@ export default function PhotosTab({ bookId, initialPhotos }: { bookId: string; i
   const [captionDraft, setCaptionDraft] = useState("");
   const [captionSaving, setCaptionSaving] = useState(false);
   const [captionSaved, setCaptionSaved] = useState(false);
+  const [fullscreenPhoto, setFullscreenPhoto] = useState<string | null>(null);
   const { provider } = useAiProvider();
   const router = useRouter();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -172,6 +173,27 @@ export default function PhotosTab({ bookId, initialPhotos }: { bookId: string; i
         </div>
       )}
 
+      {/* fullscreen image viewer */}
+      {fullscreenPhoto && (
+        <div
+          className="fixed inset-0 z-[60] bg-black flex items-center justify-center"
+          onClick={() => setFullscreenPhoto(null)}
+        >
+          <button
+            className="absolute top-4 right-4 p-2 text-white/70 hover:text-white bg-black/40 rounded-full"
+            onClick={() => setFullscreenPhoto(null)}
+          >
+            <X className="w-5 h-5" />
+          </button>
+          <img
+            src={fullscreenPhoto}
+            alt=""
+            className="max-w-full max-h-full object-contain"
+            onClick={(e) => e.stopPropagation()}
+          />
+        </div>
+      )}
+
       {/* photo modal */}
       {selectedPhoto && (
         <div
@@ -205,8 +227,13 @@ export default function PhotosTab({ bookId, initialPhotos }: { bookId: string; i
 
             {/* スクロール可能エリア */}
             <div className="overflow-y-auto flex-1 rounded-b-2xl">
-            {/* 画像 */}
-            <img src={selectedPhoto.url} alt="" className="w-full max-h-64 object-contain bg-black" />
+            {/* 画像（タップで拡大） */}
+            <img
+              src={selectedPhoto.url}
+              alt=""
+              className="w-full max-h-64 object-contain bg-black cursor-zoom-in"
+              onClick={() => setFullscreenPhoto(selectedPhoto.url)}
+            />
 
             {/* コンテンツ */}
             <div className="p-4 space-y-3">
