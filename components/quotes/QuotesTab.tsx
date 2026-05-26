@@ -291,7 +291,7 @@ export default function QuotesTab({
         <p className="text-sm text-slate-500 dark:text-slate-400">{quoteList.length}件の引用</p>
         <button
           onClick={() => setShowForm(!showForm)}
-          className="flex items-center gap-1.5 text-sm text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 font-medium"
+          className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 hover:bg-indigo-50 dark:hover:bg-indigo-950/30 font-medium transition-colors"
         >
           <Plus className="w-4 h-4" />
           引用を追加
@@ -422,9 +422,9 @@ export default function QuotesTab({
               >
                 <button
                   onClick={() => toggleFavorite(q.id, q.isFavorite)}
-                  className="absolute top-3 right-3 p-1 rounded-lg transition-colors hover:bg-amber-50 dark:hover:bg-amber-950/30"
+                  className="absolute top-2.5 right-2.5 p-1.5 rounded-lg transition-colors hover:bg-amber-50 dark:hover:bg-amber-950/30"
                 >
-                  <Star className={cn("w-4 h-4", q.isFavorite ? "fill-amber-400 text-amber-400" : "text-slate-300 dark:text-slate-600")} />
+                  <Star className={cn("w-5 h-5", q.isFavorite ? "fill-amber-400 text-amber-400" : "text-slate-300 dark:text-slate-600")} />
                 </button>
                 <div className="pr-7 text-slate-800 dark:text-slate-200 text-sm leading-relaxed prose prose-sm dark:prose-invert max-w-none prose-p:my-0.5 prose-headings:my-1 prose-ul:my-0.5 prose-ol:my-0.5 prose-li:my-0">
                   <ReactMarkdown
@@ -471,7 +471,7 @@ export default function QuotesTab({
                       タグ
                     </button>
                   </div>
-                  <div className="flex items-center gap-0.5 flex-shrink-0 -mr-1">
+                  <div className="flex items-center gap-1.5 flex-shrink-0 -mr-1">
                     <button
                       onClick={() => openEdit(q)}
                       className="p-1.5 rounded-lg text-slate-300 dark:text-slate-600 hover:text-indigo-500 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/30 transition-colors"
