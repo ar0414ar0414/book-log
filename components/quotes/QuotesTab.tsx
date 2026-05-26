@@ -571,7 +571,7 @@ export default function QuotesTab({
                           onChange={(e) => setNewTagName(e.target.value)}
                           onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), handleCreateAndAdd(q.id))}
                           placeholder="タグ名..."
-                          className="flex-1 text-xs border border-slate-200 dark:border-slate-600 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-indigo-400 dark:focus:border-indigo-500 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500"
+                          className="flex-1 min-w-0 text-xs border border-slate-200 dark:border-slate-600 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-indigo-400 dark:focus:border-indigo-500 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500"
                         />
                         <button
                           type="button"
