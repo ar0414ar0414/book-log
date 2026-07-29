@@ -28,11 +28,15 @@ export async function updateSession(request: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser();
 
   const isAuthPage = request.nextUrl.pathname.startsWith("/login");
+  const isApiPath = request.nextUrl.pathname.startsWith("/api/");
   const isPublicPath =
     request.nextUrl.pathname === "/" ||
     request.nextUrl.pathname.startsWith("/auth/");
 
-  if (!user && !isAuthPage && !isPublicPath) {
+  // API ルートは各ハンドラが自前で認証チェックして 401 JSON を返す設計のため、
+  // ここで /login へリダイレクトすると Cron 等の Cookie を持たないリクエストが
+  // HTML を受け取ってしまう。API は素通しする。
+  if (!user && !isAuthPage && !isPublicPath && !isApiPath) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     return NextResponse.redirect(url);
