@@ -6,7 +6,7 @@ import {
   BookOpen, Star, Search, LayoutGrid, List, Plus, ArrowUpDown, X, Check,
 } from "lucide-react";
 import { cn, STATUS_LABELS, STATUS_COLORS } from "@/lib/utils";
-import type { Book, BookStatus } from "@/types";
+import type { BookListItem, BookStatus } from "@/types";
 
 type SortKey = "createdAt_desc" | "createdAt_asc" | "title_asc" | "rating_desc" | "finishedAt_desc";
 type ViewMode = "grid" | "list";
@@ -19,7 +19,7 @@ const SORT_OPTIONS: { value: SortKey; label: string }[] = [
   { value: "finishedAt_desc", label: "読了日（新しい順）" },
 ];
 
-function sortBooks(books: Book[], key: SortKey): Book[] {
+function sortBooks(books: BookListItem[], key: SortKey): BookListItem[] {
   return [...books].sort((a, b) => {
     switch (key) {
       case "createdAt_desc":
@@ -43,7 +43,7 @@ export default function BooksShelf({
   books,
   statusFilter,
 }: {
-  books: Book[];
+  books: BookListItem[];
   statusFilter?: string;
 }) {
   const [query, setQuery] = useState("");
@@ -246,7 +246,7 @@ export default function BooksShelf({
   );
 }
 
-function GridView({ books }: { books: Book[] }) {
+function GridView({ books }: { books: BookListItem[] }) {
   return (
     <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
       {books.map((book) => (
@@ -300,7 +300,7 @@ function GridView({ books }: { books: Book[] }) {
   );
 }
 
-function ListView({ books }: { books: Book[] }) {
+function ListView({ books }: { books: BookListItem[] }) {
   return (
     <div className="space-y-2">
       {books.map((book) => (

@@ -26,6 +26,24 @@ export interface Book {
   updatedAt: Date;
 }
 
+/** 一覧・統計向けの軽量な本の情報（db/schema.ts の bookListColumns に対応） */
+export type BookListItem = Pick<
+  Book,
+  | "id"
+  | "title"
+  | "author"
+  | "coverUrl"
+  | "genre"
+  | "status"
+  | "rating"
+  | "startedAt"
+  | "finishedAt"
+  | "currentPage"
+  | "pageCount"
+  | "createdAt"
+  | "updatedAt"
+>;
+
 export interface Quote {
   id: string;
   bookId: string;

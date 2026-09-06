@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { db } from "@/lib/db";
-import { books } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { books, bookListColumns } from "@/db/schema";
+import { eq, desc } from "drizzle-orm";
 import Link from "next/link";
 import { Plus } from "lucide-react";
 import { STATUS_LABELS, cn } from "@/lib/utils";
@@ -17,10 +17,12 @@ export default async function BooksPage({
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return null;
 
+  // 一覧に不要な長文カラム（description / memo / AI 生成テキスト等）は取得しない
   const allBooks = await db
-    .select()
+    .select(bookListColumns)
     .from(books)
-    .where(eq(books.userId, user.id));
+    .where(eq(books.userId, user.id))
+    .orderBy(desc(books.updatedAt), desc(books.id));
 
   return (
     <div className="space-y-4">
@@ -58,7 +60,7 @@ export default async function BooksPage({
         ))}
       </div>
 
-      <BooksShelf books={allBooks as import("@/types").Book[]} statusFilter={status} />
+      <BooksShelf books={allBooks as import("@/types").BookListItem[]} statusFilter={status} />
     </div>
   );
 }

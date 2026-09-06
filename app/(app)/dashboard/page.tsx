@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { db } from "@/lib/db";
-import { books, quotes } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { books, quotes, bookListColumns } from "@/db/schema";
+import { eq, and, desc, count } from "drizzle-orm";
 import Link from "next/link";
 import { BookOpen, Quote, Star, Plus } from "lucide-react";
 import { STATUS_LABELS, STATUS_COLORS, cn } from "@/lib/utils";
@@ -13,20 +13,47 @@ export default async function DashboardPage() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return null;
 
-  const [allBooks, allQuotes] = await Promise.all([
-    db.select().from(books).where(eq(books.userId, user.id)).orderBy(books.updatedAt),
-    db.select().from(quotes).where(eq(quotes.userId, user.id)).orderBy(quotes.createdAt),
+  // 画面に出す分だけを SQL 側で絞る（以前は本と引用を全件取得していた）
+  const [statusRows, readingBooks, recentBooks, favoriteQuotes] = await Promise.all([
+    db
+      .select({ status: books.status, n: count() })
+      .from(books)
+      .where(eq(books.userId, user.id))
+      .groupBy(books.status),
+    db
+      .select({
+        id: books.id,
+        title: books.title,
+        author: books.author,
+        coverUrl: books.coverUrl,
+        currentPage: books.currentPage,
+        pageCount: books.pageCount,
+      })
+      .from(books)
+      .where(and(eq(books.userId, user.id), eq(books.status, "reading")))
+      .orderBy(books.updatedAt),
+    db
+      .select(bookListColumns)
+      .from(books)
+      .where(eq(books.userId, user.id))
+      .orderBy(desc(books.updatedAt))
+      .limit(4),
+    db
+      .select({ id: quotes.id, text: quotes.text })
+      .from(quotes)
+      .where(and(eq(quotes.userId, user.id), eq(quotes.isFavorite, true)))
+      .orderBy(desc(quotes.createdAt))
+      .limit(3),
   ]);
 
   const statusCount = {
-    want: allBooks.filter((b) => b.status === "want").length,
-    reading: allBooks.filter((b) => b.status === "reading").length,
-    done: allBooks.filter((b) => b.status === "done").length,
-  };
+    want: 0,
+    reading: 0,
+    done: 0,
+    ...Object.fromEntries(statusRows.map((r) => [r.status, r.n])),
+  } as Record<BookStatus, number>;
 
-  const readingBooks = allBooks.filter((b) => b.status === "reading");
-  const recentBooks = allBooks.slice(-4).reverse();
-  const favoriteQuotes = allQuotes.filter((q) => q.isFavorite).slice(-3).reverse();
+  const totalBooks = statusRows.reduce((sum, r) => sum + r.n, 0);
 
   return (
     <div className="pb-nav-safe sm:pb-6 space-y-6">
@@ -73,14 +100,7 @@ export default async function DashboardPage() {
       </div>
 
       {/* 読中の本 */}
-      <ReadingBooksWidget books={readingBooks.map((b) => ({
-        id: b.id,
-        title: b.title,
-        author: b.author,
-        coverUrl: b.coverUrl,
-        currentPage: b.currentPage,
-        pageCount: b.pageCount,
-      }))} />
+      <ReadingBooksWidget books={readingBooks} />
 
       {/* recent books */}
       {recentBooks.length > 0 && (
@@ -147,7 +167,7 @@ export default async function DashboardPage() {
         </section>
       )}
 
-      {allBooks.length === 0 && (
+      {totalBooks === 0 && (
         <div className="text-center py-16">
           <BookOpen className="w-12 h-12 text-slate-200 dark:text-slate-700 mx-auto mb-3" />
           <p className="text-slate-500 dark:text-slate-400 font-medium">まだ本が登録されていません</p>

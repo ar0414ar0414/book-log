@@ -2,7 +2,7 @@ import { Suspense } from "react";
 import { createClient } from "@/lib/supabase/server";
 import { db } from "@/lib/db";
 import { books, quotes, photos, aiConversations, tags, quoteTags } from "@/db/schema";
-import { eq, and, inArray, desc } from "drizzle-orm";
+import { eq, and, inArray, desc, sql } from "drizzle-orm";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, BookOpen, Loader2 } from "lucide-react";
@@ -24,8 +24,36 @@ type BookRow = {
 async function BookDetailData({ bookId, userId, book }: { bookId: string; userId: string; book: BookRow }) {
   type TagItem = { id: string; name: string; color: string };
 
-  const [allBooks, [bookQuotes, bookPhotos, chatHistory, userTags]] = await Promise.all([
-    db.select({ id: books.id }).from(books).where(eq(books.userId, userId)).orderBy(desc(books.updatedAt)),
+  // 本棚と同じ並び（updated_at DESC, id DESC）における前後の1件だけを引く。
+  // 以前は全件取得して findIndex していたため、冊数に比例して重くなっていた。
+  //
+  // カーソルは JS の Date を渡さずサブクエリで DB 側の値と直接比較する。
+  // timestamp はマイクロ秒精度だが Date はミリ秒までしか持てないため、
+  // 値を往復させると丸めで自分自身が「前の本」として引っかかる。
+  const cursor = sql`(SELECT b2.updated_at, b2.id FROM books b2 WHERE b2.id = ${bookId})`;
+  const [prevRow, nextRow, [bookQuotes, bookPhotos, chatHistory, userTags]] = await Promise.all([
+    db
+      .select({ id: books.id })
+      .from(books)
+      .where(
+        and(
+          eq(books.userId, userId),
+          sql`(${books.updatedAt}, ${books.id}) > ${cursor}`
+        )
+      )
+      .orderBy(books.updatedAt, books.id)
+      .limit(1),
+    db
+      .select({ id: books.id })
+      .from(books)
+      .where(
+        and(
+          eq(books.userId, userId),
+          sql`(${books.updatedAt}, ${books.id}) < ${cursor}`
+        )
+      )
+      .orderBy(desc(books.updatedAt), desc(books.id))
+      .limit(1),
     Promise.all([
       db.select().from(quotes).where(and(eq(quotes.bookId, bookId), eq(quotes.userId, userId))).orderBy(quotes.createdAt),
       db.select().from(photos).where(and(eq(photos.bookId, bookId), eq(photos.userId, userId))).orderBy(photos.createdAt),
@@ -34,9 +62,8 @@ async function BookDetailData({ bookId, userId, book }: { bookId: string; userId
     ]),
   ]);
 
-  const currentIdx = allBooks.findIndex((b) => b.id === bookId);
-  const prevId = currentIdx > 0 ? allBooks[currentIdx - 1].id : null;
-  const nextId = currentIdx < allBooks.length - 1 ? allBooks[currentIdx + 1].id : null;
+  const prevId = prevRow[0]?.id ?? null;
+  const nextId = nextRow[0]?.id ?? null;
 
   const quoteIds = bookQuotes.map((q) => q.id);
   const qtRows = quoteIds.length > 0
