@@ -68,7 +68,6 @@ export interface Photo {
   id: string;
   bookId: string;
   userId: string;
-  url: string;
   storagePath: string;
   caption: string | null;
   extractedText: string | null;

@@ -9,6 +9,7 @@ import { ArrowLeft, BookOpen, Loader2 } from "lucide-react";
 import { STATUS_LABELS, STATUS_COLORS, cn } from "@/lib/utils";
 import type { BookStatus } from "@/types";
 import BookDetail from "@/components/books/BookDetail";
+import { withSignedUrls } from "@/lib/supabase/photo-urls";
 
 type BookRow = {
   id: string; title: string; author: string | null; coverUrl: string | null;
@@ -23,6 +24,8 @@ type BookRow = {
 // タブデータ（重い）を取得して BookDetail をレンダリング
 async function BookDetailData({ bookId, userId, book }: { bookId: string; userId: string; book: BookRow }) {
   type TagItem = { id: string; name: string; color: string };
+
+  const supabase = await createClient();
 
   // 本棚と同じ並び（updated_at DESC, id DESC）における前後の1件だけを引く。
   // 以前は全件取得して findIndex していたため、冊数に比例して重くなっていた。
@@ -80,13 +83,16 @@ async function BookDetailData({ bookId, userId, book }: { bookId: string; userId
   });
 
   const quotesWithTags = bookQuotes.map((q) => ({ ...q, tags: tagsForQuote.get(q.id) ?? [] }));
+
+  // 写真は保存済みの公開 URL ではなく、都度発行する署名付き URL で渡す
+  const photosWithUrls = await withSignedUrls(supabase, bookPhotos);
   const normalizedTags: TagItem[] = userTags.map((t) => ({ id: t.id, name: t.name, color: t.color ?? "#6366f1" }));
 
   return (
     <BookDetail
       book={book}
       initialQuotes={quotesWithTags}
-      initialPhotos={bookPhotos}
+      initialPhotos={photosWithUrls}
       initialChat={chatHistory}
       initialTags={normalizedTags}
       prevId={prevId}

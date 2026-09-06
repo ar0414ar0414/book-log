@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { db } from "@/lib/db";
 import { photos } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
+import { PHOTO_BUCKET } from "@/lib/supabase/photo-urls";
 
 export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const supabase = await createClient();
@@ -35,7 +36,7 @@ export async function DELETE(_request: Request, { params }: { params: Promise<{ 
     await db.delete(photos).where(eq(photos.id, id));
     revalidatePath(`/books/${photo.bookId}`);
     try {
-      await supabase.storage.from("book-photos").remove([photo.storagePath]);
+      await supabase.storage.from(PHOTO_BUCKET).remove([photo.storagePath]);
     } catch {
       // storage cleanup failure is non-critical; DB record is already deleted
     }

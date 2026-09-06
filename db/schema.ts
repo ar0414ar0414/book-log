@@ -73,7 +73,6 @@ export const photos = pgTable("photos", {
   id: uuid("id").primaryKey().defaultRandom(),
   bookId: uuid("book_id").notNull().references(() => books.id, { onDelete: "cascade" }),
   userId: uuid("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
-  url: text("url").notNull(),
   storagePath: text("storage_path").notNull(),
   caption: text("caption"),
   extractedText: text("extracted_text"),

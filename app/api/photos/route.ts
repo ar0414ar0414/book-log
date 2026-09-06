@@ -5,6 +5,7 @@ import { db } from "@/lib/db";
 import { photos } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
 import { randomUUID } from "crypto";
+import { PHOTO_BUCKET, withSignedUrls, signOne } from "@/lib/supabase/photo-urls";
 
 export async function GET(request: Request) {
   const supabase = await createClient();
@@ -18,7 +19,7 @@ export async function GET(request: Request) {
     ? await db.select().from(photos).where(and(eq(photos.userId, user.id), eq(photos.bookId, bookId))).orderBy(photos.createdAt)
     : await db.select().from(photos).where(eq(photos.userId, user.id)).orderBy(photos.createdAt);
 
-  return NextResponse.json(result);
+  return NextResponse.json(await withSignedUrls(supabase, result));
 }
 
 export async function POST(request: Request) {
@@ -37,22 +38,21 @@ export async function POST(request: Request) {
   const arrayBuffer = await file.arrayBuffer();
 
   const { error: uploadError } = await supabase.storage
-    .from("book-photos")
+    .from(PHOTO_BUCKET)
     .upload(storagePath, arrayBuffer, { contentType: file.type });
 
   if (uploadError) return NextResponse.json({ error: uploadError.message }, { status: 500 });
-
-  const { data: { publicUrl } } = supabase.storage.from("book-photos").getPublicUrl(storagePath);
 
   const [photo] = await db.insert(photos).values({
     id: randomUUID(),
     userId: user.id,
     bookId,
-    url: publicUrl,
     storagePath,
     caption: caption || null,
   }).returning();
 
+  if (!photo) return NextResponse.json({ error: "Insert failed" }, { status: 500 });
+
   revalidatePath(`/books/${bookId}`);
-  return NextResponse.json(photo);
+  return NextResponse.json({ ...photo, url: await signOne(supabase, storagePath) });
 }
