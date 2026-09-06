@@ -1,4 +1,4 @@
-import { pgTable, text, integer, timestamp, boolean, real, uuid, primaryKey } from "drizzle-orm/pg-core";
+import { pgTable, text, integer, timestamp, boolean, real, uuid, primaryKey, index } from "drizzle-orm/pg-core";
 
 export const users = pgTable("users", {
   id: uuid("id").primaryKey(),
@@ -32,7 +32,9 @@ export const books = pgTable("books", {
   pageCount: integer("page_count"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
-});
+}, (t) => [
+  index("books_user_id_updated_at_idx").on(t.userId, t.updatedAt.desc()),
+]);
 
 export const quotes = pgTable("quotes", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -44,7 +46,10 @@ export const quotes = pgTable("quotes", {
   memo: text("memo"),
   isFavorite: boolean("is_favorite").default(false).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
-});
+}, (t) => [
+  index("quotes_user_id_created_at_idx").on(t.userId, t.createdAt),
+  index("quotes_book_id_created_at_idx").on(t.bookId, t.createdAt),
+]);
 
 export const tags = pgTable("tags", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -52,12 +57,17 @@ export const tags = pgTable("tags", {
   name: text("name").notNull(),
   color: text("color").default("#6366f1"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
-});
+}, (t) => [
+  index("tags_user_id_created_at_idx").on(t.userId, t.createdAt),
+]);
 
 export const quoteTags = pgTable("quote_tags", {
   quoteId: uuid("quote_id").notNull().references(() => quotes.id, { onDelete: "cascade" }),
   tagId: uuid("tag_id").notNull().references(() => tags.id, { onDelete: "cascade" }),
-}, (t) => [primaryKey({ columns: [t.quoteId, t.tagId] })]);
+}, (t) => [
+  primaryKey({ columns: [t.quoteId, t.tagId] }),
+  index("quote_tags_tag_id_idx").on(t.tagId),
+]);
 
 export const photos = pgTable("photos", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -68,7 +78,10 @@ export const photos = pgTable("photos", {
   caption: text("caption"),
   extractedText: text("extracted_text"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
-});
+}, (t) => [
+  index("photos_book_id_created_at_idx").on(t.bookId, t.createdAt),
+  index("photos_user_id_idx").on(t.userId),
+]);
 
 export const aiConversations = pgTable("ai_conversations", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -77,4 +90,27 @@ export const aiConversations = pgTable("ai_conversations", {
   role: text("role").notNull(), // user / assistant
   content: text("content").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
-});
+}, (t) => [
+  index("ai_conversations_book_id_created_at_idx").on(t.bookId, t.createdAt),
+]);
+
+/**
+ * 一覧・統計で使う軽量な列セット。
+ * description / memo / preMemo / postMemo / aiRecord / aiSummary といった
+ * 長文カラムを含めないことで、一覧表示のたびに巨大テキストを転送するのを防ぐ。
+ */
+export const bookListColumns = {
+  id: books.id,
+  title: books.title,
+  author: books.author,
+  coverUrl: books.coverUrl,
+  genre: books.genre,
+  status: books.status,
+  rating: books.rating,
+  startedAt: books.startedAt,
+  finishedAt: books.finishedAt,
+  currentPage: books.currentPage,
+  pageCount: books.pageCount,
+  createdAt: books.createdAt,
+  updatedAt: books.updatedAt,
+} as const;
