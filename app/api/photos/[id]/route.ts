@@ -5,6 +5,7 @@ import { db } from "@/lib/db";
 import { photos } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
 import { PHOTO_BUCKET } from "@/lib/supabase/photo-urls";
+import { parseJsonBody, photoUpdateSchema, uuidSchema } from "@/lib/validation";
 
 export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const supabase = await createClient();
@@ -12,10 +13,14 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { id } = await params;
-  const { caption } = await request.json();
+  if (!uuidSchema.safeParse(id).success)
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+
+  const { data, error } = await parseJsonBody(request, photoUpdateSchema);
+  if (error) return error;
 
   const [photo] = await db.update(photos)
-    .set({ caption: caption ?? null })
+    .set({ caption: data.caption ?? null })
     .where(and(eq(photos.id, id), eq(photos.userId, user.id)))
     .returning();
 
@@ -30,6 +35,9 @@ export async function DELETE(_request: Request, { params }: { params: Promise<{ 
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { id } = await params;
+  if (!uuidSchema.safeParse(id).success)
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+
   const [photo] = await db.select().from(photos).where(and(eq(photos.id, id), eq(photos.userId, user.id)));
 
   if (photo) {

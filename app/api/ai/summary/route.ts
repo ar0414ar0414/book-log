@@ -3,7 +3,8 @@ import { createClient } from "@/lib/supabase/server";
 import { db } from "@/lib/db";
 import { books, quotes } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
-import { getAiClient, classifyAiError, type AiProvider } from "@/lib/ai/provider";
+import { getAiClient, classifyAiError } from "@/lib/ai/provider";
+import { aiBookSchema, parseJsonBody } from "@/lib/validation";
 import { buildSummaryPrompt } from "@/lib/gemini/prompts";
 import type { Book, Quote } from "@/types";
 
@@ -12,7 +13,9 @@ export async function POST(request: Request) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { bookId, provider = "gemini" } = await request.json();
+  const { data, error: badRequest } = await parseJsonBody(request, aiBookSchema);
+  if (badRequest) return badRequest;
+  const { bookId, provider } = data;
 
   const [book] = await db.select().from(books).where(and(eq(books.id, bookId), eq(books.userId, user.id)));
   if (!book) return NextResponse.json({ error: "Not found" }, { status: 404 });
@@ -21,7 +24,7 @@ export async function POST(request: Request) {
 
   try {
     const prompt = buildSummaryPrompt(book as Book, bookQuotes as Quote[]);
-    const client = getAiClient(provider as AiProvider);
+    const client = getAiClient(provider);
     const summary = await client.generateText(prompt);
     await db.update(books).set({ aiSummary: summary, updatedAt: new Date() }).where(and(eq(books.id, bookId), eq(books.userId, user.id)));
     return NextResponse.json({ summary });

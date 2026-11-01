@@ -4,6 +4,7 @@ import { db } from "@/lib/db";
 import { tags } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { randomUUID } from "crypto";
+import { parseJsonBody, tagCreateSchema } from "@/lib/validation";
 
 export async function GET() {
   const supabase = await createClient();
@@ -19,14 +20,14 @@ export async function POST(request: Request) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { name, color } = await request.json();
-  if (!name?.trim()) return NextResponse.json({ error: "name required" }, { status: 400 });
+  const { data, error } = await parseJsonBody(request, tagCreateSchema);
+  if (error) return error;
 
   const [tag] = await db.insert(tags).values({
     id: randomUUID(),
     userId: user.id,
-    name: name.trim(),
-    color: color ?? "#6366f1",
+    name: data.name,
+    color: data.color ?? "#6366f1",
   }).returning();
 
   if (!tag) return NextResponse.json({ error: "Insert failed" }, { status: 500 });

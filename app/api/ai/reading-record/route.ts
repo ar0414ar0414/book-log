@@ -3,7 +3,8 @@ import { createClient } from "@/lib/supabase/server";
 import { db } from "@/lib/db";
 import { books, quotes, photos } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
-import { getAiClient, classifyAiError, type AiProvider } from "@/lib/ai/provider";
+import { getAiClient, classifyAiError } from "@/lib/ai/provider";
+import { aiBookSchema, parseJsonBody } from "@/lib/validation";
 import { buildReadingRecordPrompt } from "@/lib/gemini/prompts";
 import type { Book, Quote } from "@/types";
 
@@ -12,7 +13,9 @@ export async function POST(request: Request) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { bookId, provider = "gemini" } = await request.json();
+  const { data, error: badRequest } = await parseJsonBody(request, aiBookSchema);
+  if (badRequest) return badRequest;
+  const { bookId, provider } = data;
 
   const [[book], bookQuotes, bookPhotos] = await Promise.all([
     db.select().from(books).where(and(eq(books.id, bookId), eq(books.userId, user.id))),
@@ -25,7 +28,7 @@ export async function POST(request: Request) {
   try {
     const photoTexts = bookPhotos.filter((p) => p.extractedText).map((p) => p.extractedText as string);
     const prompt = buildReadingRecordPrompt(book as Book, bookQuotes as Quote[], photoTexts);
-    const client = getAiClient(provider as AiProvider);
+    const client = getAiClient(provider);
     const record = await client.generateText(prompt);
     await db.update(books).set({ aiRecord: record, updatedAt: new Date() }).where(and(eq(books.id, bookId), eq(books.userId, user.id)));
     return NextResponse.json({ record });

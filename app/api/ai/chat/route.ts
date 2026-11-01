@@ -3,8 +3,9 @@ import { createClient } from "@/lib/supabase/server";
 import { db } from "@/lib/db";
 import { aiConversations, books, quotes } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
-import { getAiClient, classifyAiError, type AiProvider } from "@/lib/ai/provider";
+import { getAiClient, classifyAiError } from "@/lib/ai/provider";
 import { randomUUID } from "crypto";
+import { aiChatSchema, parseJsonBody, uuidSchema } from "@/lib/validation";
 
 export async function GET(request: Request) {
   const supabase = await createClient();
@@ -13,7 +14,8 @@ export async function GET(request: Request) {
 
   const { searchParams } = new URL(request.url);
   const bookId = searchParams.get("bookId");
-  if (!bookId) return NextResponse.json({ error: "bookId required" }, { status: 400 });
+  if (!bookId || !uuidSchema.safeParse(bookId).success)
+    return NextResponse.json({ error: "bookId required" }, { status: 400 });
 
   const messages = await db.select().from(aiConversations)
     .where(and(eq(aiConversations.bookId, bookId), eq(aiConversations.userId, user.id)))
@@ -29,7 +31,8 @@ export async function DELETE(request: Request) {
 
   const { searchParams } = new URL(request.url);
   const bookId = searchParams.get("bookId");
-  if (!bookId) return NextResponse.json({ error: "bookId required" }, { status: 400 });
+  if (!bookId || !uuidSchema.safeParse(bookId).success)
+    return NextResponse.json({ error: "bookId required" }, { status: 400 });
 
   await db.delete(aiConversations).where(
     and(eq(aiConversations.bookId, bookId), eq(aiConversations.userId, user.id))
@@ -43,7 +46,9 @@ export async function POST(request: Request) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { bookId, message, provider = "gemini" } = await request.json();
+  const { data, error: badRequest } = await parseJsonBody(request, aiChatSchema);
+  if (badRequest) return badRequest;
+  const { bookId, message, provider } = data;
 
   const [book] = await db.select().from(books).where(and(eq(books.id, bookId), eq(books.userId, user.id)));
   if (!book) return NextResponse.json({ error: "Book not found" }, { status: 404 });
@@ -66,7 +71,7 @@ ${bookQuotes.length > 0 ? `\n保存した引用:\n${bookQuotes.map((q) => `・�
 上記の情報をもとに、読者の質問・感想に日本語で丁寧に回答してください。`;
 
   try {
-    const client = getAiClient(provider as AiProvider);
+    const client = getAiClient(provider);
     const chatHistory = history.map((m) => ({ role: m.role as "user" | "assistant", content: m.content }));
     const aiReply = await client.chatWithHistory(systemPrompt, chatHistory, message);
 

@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { db } from "@/lib/db";
 import { tags } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
+import { uuidSchema } from "@/lib/validation";
 
 export async function DELETE(_req: Request, { params }: { params: Promise<{ id: string }> }) {
   const supabase = await createClient();
@@ -10,6 +11,9 @@ export async function DELETE(_req: Request, { params }: { params: Promise<{ id: 
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { id } = await params;
+  if (!uuidSchema.safeParse(id).success)
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+
   await db.delete(tags).where(and(eq(tags.id, id), eq(tags.userId, user.id)));
   return NextResponse.json({ ok: true });
 }

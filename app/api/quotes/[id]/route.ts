@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { db } from "@/lib/db";
 import { quotes } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
+import { definedOnly, parseJsonBody, quoteUpdateSchema, uuidSchema } from "@/lib/validation";
 
 export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const supabase = await createClient();
@@ -11,16 +12,14 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { id } = await params;
-  const body = await request.json();
+  if (!uuidSchema.safeParse(id).success)
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
 
   // 更新を許可するフィールドのみ抽出（userId/bookId 等の書き換えを防ぐ）
-  const allowed: Record<string, unknown> = {};
-  if (body.text !== undefined)       allowed.text        = body.text;
-  if (body.pageNumber !== undefined) allowed.pageNumber  = body.pageNumber;
-  if (body.chapter !== undefined)    allowed.chapter     = body.chapter;
-  if (body.memo !== undefined)       allowed.memo        = body.memo;
-  if (body.isFavorite !== undefined) allowed.isFavorite  = body.isFavorite;
+  const { data, error } = await parseJsonBody(request, quoteUpdateSchema);
+  if (error) return error;
 
+  const allowed = definedOnly(data);
   if (Object.keys(allowed).length === 0)
     return NextResponse.json({ error: "No valid fields" }, { status: 400 });
 
@@ -41,6 +40,9 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { id } = await params;
+  if (!uuidSchema.safeParse(id).success)
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+
   const [quote] = await db.select().from(quotes).where(and(eq(quotes.id, id), eq(quotes.userId, user.id)));
   await db.delete(quotes).where(and(eq(quotes.id, id), eq(quotes.userId, user.id)));
   if (quote) {

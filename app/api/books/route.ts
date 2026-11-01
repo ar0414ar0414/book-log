@@ -4,6 +4,7 @@ import { db } from "@/lib/db";
 import { books, users } from "@/db/schema";
 import { eq, desc } from "drizzle-orm";
 import { randomUUID } from "crypto";
+import { bookCreateSchema, parseJsonBody } from "@/lib/validation";
 
 export async function GET() {
   const supabase = await createClient();
@@ -27,7 +28,9 @@ export async function POST(request: Request) {
     avatarUrl: user.user_metadata?.avatar_url ?? null,
   }).onConflictDoNothing();
 
-  const body = await request.json();
+  const { data: body, error } = await parseJsonBody(request, bookCreateSchema);
+  if (error) return error;
+
   const id = randomUUID();
 
   const [book] = await db.insert(books).values({
@@ -41,10 +44,10 @@ export async function POST(request: Request) {
     publishedDate: body.publishedDate || null,
     genre: body.genre || null,
     description: body.description || null,
-    status: body.status ?? "want",
+    status: body.status,
     rating: body.rating || null,
     memo: body.memo || null,
-    pageCount: body.pageCount || null,
+    pageCount: body.pageCount ?? null,
     startedAt: body.startedAt ? new Date(body.startedAt) : null,
     finishedAt: body.finishedAt ? new Date(body.finishedAt) : null,
   }).returning();
