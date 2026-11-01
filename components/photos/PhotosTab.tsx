@@ -63,12 +63,17 @@ export default function PhotosTab({ bookId, initialPhotos, onOcrToQuote }: { boo
 
   // 写真が切り替わったらキャプションをリセット。
   // effect ではなくレンダリング中に前回値と比較して調整する
-  // （effect だと一度古いキャプションを描いてから差し替わる）
-  const [captionPhotoId, setCaptionPhotoId] = useState<string | null>(null);
-  if (selectedPhoto && selectedPhoto.id !== captionPhotoId) {
-    setCaptionPhotoId(selectedPhoto.id);
-    setCaptionDraft(selectedPhoto.caption ?? "");
-    setCaptionSaved(false);
+  // （effect だと一度古いキャプションを描いてから差し替わる）。
+  // モーダルを閉じたとき (null) も追従させる。そうしないと同じ写真を
+  // 開き直したときに前回の未保存の下書きが残ってしまう。
+  const selectedPhotoId = selectedPhoto?.id ?? null;
+  const [captionPhotoId, setCaptionPhotoId] = useState<string | null>(selectedPhotoId);
+  if (selectedPhotoId !== captionPhotoId) {
+    setCaptionPhotoId(selectedPhotoId);
+    if (selectedPhoto) {
+      setCaptionDraft(selectedPhoto.caption ?? "");
+      setCaptionSaved(false);
+    }
   }
 
   async function handleUpload(files: FileList | null) {
