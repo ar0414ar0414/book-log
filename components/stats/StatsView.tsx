@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import { BookOpen, Star, FileText, TrendingUp, User, Clock, Zap } from "lucide-react";
 import type { BookListItem } from "@/types";
-import { localizeGenre } from "@/lib/utils";
+import { computeStats, availableYears as computeAvailableYears } from "@/lib/stats";
 
 const MONTH_LABELS = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"];
 const COLORS = ["#4f46e5", "#7c3aed", "#2563eb", "#0891b2", "#059669", "#d97706"];
@@ -11,99 +11,11 @@ const COLORS = ["#4f46e5", "#7c3aed", "#2563eb", "#0891b2", "#059669", "#d97706"
 export default function StatsView({ books }: { books: BookListItem[] }) {
   const currentYear = new Date().getFullYear();
 
-  const availableYears = useMemo(() => {
-    const years = new Set<number>();
-    years.add(currentYear);
-    books.forEach((b) => {
-      if (b.status === "done") {
-        const d = b.finishedAt ?? b.updatedAt ?? b.createdAt;
-        years.add(new Date(d).getFullYear());
-      }
-    });
-    return [...years].sort((a, b) => b - a);
-  }, [books, currentYear]);
+  const availableYears = useMemo(() => computeAvailableYears(books), [books]);
 
   const [year, setYear] = useState(currentYear);
 
-  const stats = useMemo(() => {
-    const doneDate = (b: BookListItem) =>
-      b.finishedAt ? new Date(b.finishedAt) : new Date(b.updatedAt ?? b.createdAt);
-
-    const doneThisYear = books.filter((b) =>
-      b.status === "done" && doneDate(b).getFullYear() === year
-    );
-
-    const totalPages = doneThisYear.reduce((s, b) => s + (b.pageCount ?? 0), 0);
-    const ratings = doneThisYear.filter((b) => b.rating != null).map((b) => b.rating!);
-    const avgRating = ratings.length ? ratings.reduce((a, b) => a + b, 0) / ratings.length : 0;
-
-    const monthly = Array.from({ length: 12 }, (_, i) =>
-      doneThisYear.filter((b) => doneDate(b).getMonth() === i).length
-    );
-
-    const genreMap = new Map<string, number>();
-    doneThisYear.forEach((b) => {
-      const g = localizeGenre(b.genre?.trim()) || "未分類";
-      genreMap.set(g, (genreMap.get(g) ?? 0) + 1);
-    });
-    const genreSorted = [...genreMap.entries()]
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 6);
-
-    const ratingDist = [5, 4, 3, 2, 1].map((r) => ({
-      r,
-      count: books.filter((b) => Math.round(b.rating ?? 0) === r).length,
-    }));
-
-    const authorMap = new Map<string, { count: number; ratingSum: number; ratingCount: number }>();
-    doneThisYear.forEach((b) => {
-      const a = b.author?.trim();
-      if (!a) return;
-      const entry = authorMap.get(a) ?? { count: 0, ratingSum: 0, ratingCount: 0 };
-      entry.count += 1;
-      if (b.rating != null) { entry.ratingSum += b.rating; entry.ratingCount += 1; }
-      authorMap.set(a, entry);
-    });
-    const authorSorted = [...authorMap.entries()]
-      .sort((a, b) => b[1].count - a[1].count)
-      .slice(0, 8)
-      .map(([name, { count, ratingSum, ratingCount }]) => ({
-        name,
-        count,
-        avgRating: ratingCount > 0 ? ratingSum / ratingCount : null,
-      }));
-
-    // 平均読了日数（startedAt と finishedAt が両方ある本のみ）
-    const booksWithDuration = doneThisYear.filter(
-      (b) => b.startedAt != null && b.finishedAt != null
-    );
-    const avgDays =
-      booksWithDuration.length > 0
-        ? Math.round(
-            booksWithDuration.reduce((sum, b) => {
-              const days = Math.max(
-                1,
-                Math.round(
-                  (new Date(b.finishedAt!).getTime() - new Date(b.startedAt!).getTime()) /
-                    86400000
-                )
-              );
-              return sum + days;
-            }, 0) / booksWithDuration.length
-          )
-        : null;
-
-    // 月平均ペース・年間予測
-    const monthsElapsed = year === currentYear ? new Date().getMonth() + 1 : 12;
-    const monthlyPace =
-      doneThisYear.length > 0
-        ? Math.round((doneThisYear.length / monthsElapsed) * 10) / 10
-        : 0;
-    const projectedAnnual =
-      year === currentYear && monthlyPace > 0 ? Math.round(monthlyPace * 12) : null;
-
-    return { doneThisYear, totalPages, avgRating, monthly, genreSorted, ratingDist, authorSorted, avgDays, monthlyPace, projectedAnnual, booksWithDurationCount: booksWithDuration.length };
-  }, [books, year]);
+  const stats = useMemo(() => computeStats(books, year), [books, year]);
 
   const maxMonthly = Math.max(...stats.monthly, 1);
   const maxGenre = stats.genreSorted[0]?.[1] ?? 1;

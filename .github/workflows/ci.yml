@@ -1,0 +1,40 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          # ローカル・Vercel ともに Node 24 系
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+
+      - name: Type check
+        run: npm run typecheck
+
+      # 既知の違反は eslint-suppressions.json に記録済み。
+      # 新しく増えた違反だけがここで落ちる。
+      - name: Lint
+        run: npm run lint
+
+      - name: Test
+        run: npm test
+
+      # /login が静的プリレンダリングされ、その中で Supabase クライアントを
+      # 生成するためビルドにも公開用の環境変数が要る。
+      # ビルドが通るかの確認が目的なのでダミー値でよい。
+      - name: Build
+        run: npm run build
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: https://placeholder.supabase.co
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: placeholder-anon-key

@@ -19,7 +19,7 @@ const SORT_OPTIONS: { value: SortKey; label: string }[] = [
   { value: "finishedAt_desc", label: "読了日（新しい順）" },
 ];
 
-function sortBooks(books: BookListItem[], key: SortKey): BookListItem[] {
+export function sortBooks(books: BookListItem[], key: SortKey): BookListItem[] {
   return [...books].sort((a, b) => {
     switch (key) {
       case "createdAt_desc":
