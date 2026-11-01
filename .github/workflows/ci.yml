@@ -22,8 +22,6 @@ jobs:
       - name: Type check
         run: npm run typecheck
 
-      # 既知の違反は eslint-suppressions.json に記録済み。
-      # 新しく増えた違反だけがここで落ちる。
       - name: Lint
         run: npm run lint
 

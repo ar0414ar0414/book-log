@@ -61,13 +61,15 @@ export default function PhotosTab({ bookId, initialPhotos, onOcrToQuote }: { boo
       .catch(() => {});
   }, [bookId]);
 
-  // 写真が切り替わったらキャプションをリセット
-  useEffect(() => {
-    if (selectedPhoto) {
-      setCaptionDraft(selectedPhoto.caption ?? "");
-      setCaptionSaved(false);
-    }
-  }, [selectedPhoto?.id]);
+  // 写真が切り替わったらキャプションをリセット。
+  // effect ではなくレンダリング中に前回値と比較して調整する
+  // （effect だと一度古いキャプションを描いてから差し替わる）
+  const [captionPhotoId, setCaptionPhotoId] = useState<string | null>(null);
+  if (selectedPhoto && selectedPhoto.id !== captionPhotoId) {
+    setCaptionPhotoId(selectedPhoto.id);
+    setCaptionDraft(selectedPhoto.caption ?? "");
+    setCaptionSaved(false);
+  }
 
   async function handleUpload(files: FileList | null) {
     if (!files || files.length === 0) return;

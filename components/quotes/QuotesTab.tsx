@@ -68,8 +68,13 @@ export default function QuotesTab({
   });
   const [userTags, setUserTags] = useState(initialTags);
   const [tagFilter, setTagFilter] = useState<string | null>(null);
-  const [showForm, setShowForm] = useState(false);
-  const [form, setForm] = useState({ text: "", pageNumber: "", chapter: "", memo: "" });
+  const [showForm, setShowForm] = useState(Boolean(ocrDraft));
+  const [form, setForm] = useState({
+    text: ocrDraft ?? "",
+    pageNumber: "",
+    chapter: "",
+    memo: "",
+  });
   const [saving, setSaving] = useState(false);
   const [ocrLoading, setOcrLoading] = useState(false);
   const cameraInputRef = useRef<HTMLInputElement>(null);
@@ -83,13 +88,15 @@ export default function QuotesTab({
   const [editSaving, setEditSaving] = useState(false);
   const pickerRef = useRef<HTMLDivElement>(null);
 
+  // OCR から引用化したときは、BookDetail がタブを切り替える＝このタブは
+  // 毎回マウントし直されるので、下書きは props から state を同期するのではなく
+  // 初期値として受け取れば足りる（上の useState を参照）。
+  // ここでは親に「受け取った」ことだけ伝えて ocrDraft をクリアしてもらう。
   useEffect(() => {
-    if (ocrDraft) {
-      setForm((f) => ({ ...f, text: ocrDraft }));
-      setShowForm(true);
-      onOcrDraftConsumed?.();
-    }
-  }, [ocrDraft]); // eslint-disable-line react-hooks/exhaustive-deps
+    if (ocrDraft) onOcrDraftConsumed?.();
+    // マウント時に一度だけ
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     function onClickOutside(e: MouseEvent) {

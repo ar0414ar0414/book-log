@@ -1,15 +1,15 @@
 "use client";
 
-import { useState, useEffect, useLayoutEffect, useRef, useMemo } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import Link from "next/link";
 import {
   BookOpen, Star, Search, LayoutGrid, List, Plus, ArrowUpDown, X, Check,
 } from "lucide-react";
 import { cn, STATUS_LABELS, STATUS_COLORS } from "@/lib/utils";
 import type { BookListItem, BookStatus } from "@/types";
+import { viewModeCookie, type ViewMode } from "@/lib/view-mode";
 
 type SortKey = "createdAt_desc" | "createdAt_asc" | "title_asc" | "rating_desc" | "finishedAt_desc";
-type ViewMode = "grid" | "list";
 
 const SORT_OPTIONS: { value: SortKey; label: string }[] = [
   { value: "createdAt_desc", label: "追加日（新しい順）" },
@@ -42,22 +42,21 @@ export function sortBooks(books: BookListItem[], key: SortKey): BookListItem[] {
 export default function BooksShelf({
   books,
   statusFilter,
+  initialViewMode,
 }: {
   books: BookListItem[];
   statusFilter?: string;
+  initialViewMode: ViewMode;
 }) {
   const [query, setQuery] = useState("");
   const [searchOpen, setSearchOpen] = useState(false);
   const [sortKey, setSortKey] = useState<SortKey>("createdAt_desc");
   const [sortOpen, setSortOpen] = useState(false);
-  const [viewMode, setViewMode] = useState<ViewMode>("grid");
+  // 初期値はサーバーが Cookie から読んで渡してくれるので、マウント後に
+  // 読み直して切り替える必要がない（＝表示のチラつきが出ない）
+  const [viewMode, setViewMode] = useState<ViewMode>(initialViewMode);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const sortRef = useRef<HTMLDivElement>(null);
-
-  useLayoutEffect(() => {
-    const saved = localStorage.getItem("folio_view_mode") as ViewMode | null;
-    if (saved === "grid" || saved === "list") setViewMode(saved);
-  }, []);
 
   useEffect(() => {
     function onClickOutside(e: MouseEvent) {
@@ -82,7 +81,7 @@ export default function BooksShelf({
 
   function toggleView(mode: ViewMode) {
     setViewMode(mode);
-    localStorage.setItem("folio_view_mode", mode);
+    document.cookie = viewModeCookie(mode);
   }
 
   const currentSort = SORT_OPTIONS.find((o) => o.value === sortKey)!;

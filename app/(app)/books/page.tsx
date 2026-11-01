@@ -1,3 +1,4 @@
+import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import { db } from "@/lib/db";
 import { books, bookListColumns } from "@/db/schema";
@@ -6,6 +7,7 @@ import Link from "next/link";
 import { Plus } from "lucide-react";
 import { STATUS_LABELS, cn } from "@/lib/utils";
 import BooksShelf from "@/components/books/BooksShelf";
+import { VIEW_MODE_COOKIE, isViewMode } from "@/lib/view-mode";
 
 export default async function BooksPage({
   searchParams,
@@ -13,6 +15,10 @@ export default async function BooksPage({
   searchParams: Promise<{ status?: string }>;
 }) {
   const { status } = await searchParams;
+  // 表示モードは localStorage ではなく Cookie に持つ。サーバー側で読めるので
+  // グリッドで描いてからリストに切り替わるチラつきが起きない。
+  const savedViewMode = (await cookies()).get(VIEW_MODE_COOKIE)?.value;
+  const viewMode = isViewMode(savedViewMode) ? savedViewMode : "grid";
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return null;
@@ -60,7 +66,11 @@ export default async function BooksPage({
         ))}
       </div>
 
-      <BooksShelf books={allBooks as import("@/types").BookListItem[]} statusFilter={status} />
+      <BooksShelf
+        books={allBooks as import("@/types").BookListItem[]}
+        statusFilter={status}
+        initialViewMode={viewMode}
+      />
     </div>
   );
 }

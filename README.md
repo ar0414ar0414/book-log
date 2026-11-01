@@ -142,9 +142,7 @@ CI では疎通確認が目的ではないのでダミー値を渡していま�
 
 GitHub Actions で `typecheck → lint → test → build` を実行します。
 
-ESLint の既知の違反は `eslint-suppressions.json` に記録済みです。**新しく増えた違反は CI で落ちます**。
-記録されているのは `react-hooks/set-state-in-effect` の 4 件で、いずれも localStorage の読み出しや
-props 由来の状態リセットによるものです。未解決の課題として残しています。
+ESLint のエラーは 0 件です（警告のみ残っています）。
 
 ## デプロイ
 
