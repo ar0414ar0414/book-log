@@ -10,5 +10,5 @@
 -- STEP 1: 新コードは url を INSERT しないので NOT NULL を外しておく
 ALTER TABLE photos ALTER COLUMN url DROP NOT NULL;
 
--- STEP 2: デプロイ完了後に列を削除
--- ALTER TABLE photos DROP COLUMN url;
+-- STEP 2: デプロイ完了後に列を削除（適用済み）
+ALTER TABLE photos DROP COLUMN url;
