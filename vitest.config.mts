@@ -1,9 +1,9 @@
 import { defineConfig } from "vitest/config";
 import { fileURLToPath } from "node:url";
 
-// next-pwa (workbox-build) が @babel/core 7 に固定しているため
-// @vitejs/plugin-react (@babel/core 8 要求) は入れていない。
-// そのためコンポーネントのレンダリングテストは行わず、純粋なロジックのみを対象にする。
+// いまは純粋なロジックのみを対象にしている。
+// コンポーネントのレンダリングテストを足す場合は
+// @vitejs/plugin-react-swc + jsdom + @testing-library/react を追加する。
 export default defineConfig({
   resolve: {
     alias: {
