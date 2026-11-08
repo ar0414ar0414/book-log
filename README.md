@@ -91,6 +91,25 @@ npm run dev
 4. その SQL を Supabase の SQL Editor で実行
 
 Drizzle の journal をベースライン化すれば `db:migrate` を使えるようになりますが、現状は未対応です。
+いずれにせよ `drizzle-kit push` は使わないこと（次項）。
+
+### この Supabase プロジェクトは別アプリと同居している
+
+`public` スキーマには、このアプリのテーブル（`users` / `books` / `quotes` / `tags` /
+`quote_tags` / `photos` / `ai_conversations`）のほかに、**別アプリのテーブル**が存在する。
+
+```
+ai_requests, asset_snapshots, assets, fire_settings,
+liabilities, life_events, monthly_finance
+```
+
+このリポジトリのコードは一切参照していないが、**スキーマ操作のときは必ず意識すること**。
+
+- **`drizzle-kit push` は使わないこと。** `db/schema.ts` と実 DB を直接突き合わせるため、
+  スキーマに無い上記テーブルを削除対象として提案する。事故防止のため
+  `db:push` スクリプトは package.json から外してある
+- `drizzle-kit generate` は `drizzle/` のスナップショットとの差分を見るだけなので安全
+- 手で SQL を流すときも、対象テーブルを明示すること
 
 ### `DATABASE_URL` は Connection Pooler を使う
 
