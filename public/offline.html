@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>オフライン – Folio</title>
+    <style>
+      :root { color-scheme: light dark; }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0; min-height: 100vh;
+        display: flex; align-items: center; justify-content: center;
+        padding: 1.5rem; text-align: center;
+        font-family: system-ui, -apple-system, "Hiragino Sans", "Noto Sans JP", sans-serif;
+        background: #f8fafc; color: #0f172a;
+      }
+      .card {
+        width: 100%; max-width: 22rem; background: #fff;
+        border: 1px solid #f1f5f9; border-radius: 1rem;
+        padding: 2rem 1.5rem; display: grid; gap: 1rem; justify-items: center;
+      }
+      .icon {
+        width: 3.5rem; height: 3.5rem; border-radius: 1rem;
+        background: #eef2ff; display: grid; place-items: center;
+      }
+      h1 { font-size: 1.05rem; margin: 0; }
+      p { font-size: .875rem; color: #64748b; margin: 0; line-height: 1.7; }
+      button {
+        width: 100%; background: #4f46e5; color: #fff; border: 0;
+        padding: .75rem; border-radius: .75rem; font-size: .9rem;
+        font-weight: 500; cursor: pointer;
+      }
+      @media (prefers-color-scheme: dark) {
+        body { background: #0f172a; color: #f1f5f9; }
+        .card { background: #1e293b; border-color: #334155; }
+        .icon { background: #1e1b4b; }
+        p { color: #94a3b8; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <div class="icon" aria-hidden="true">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="2" stroke-linecap="round">
+          <path d="M4 4h16v16H4z" opacity=".25" />
+          <path d="M2 2l20 20" />
+          <path d="M8.5 16.5a5 5 0 0 1 7 0" opacity=".6" />
+        </svg>
+      </div>
+      <h1>オフラインです</h1>
+      <p>
+        このページはまだ端末に保存されていません。<br />
+        一度開いたことのある画面なら、オフラインでも表示できます。
+      </p>
+      <button onclick="location.reload()">再読み込み</button>
+    </div>
+  </body>
+</html>

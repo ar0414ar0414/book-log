@@ -23,6 +23,17 @@ export default function NavBar({ user }: { user: User }) {
 
   async function signOut() {
     await supabase.auth.signOut();
+    // オフライン表示用に画面の控えを端末へ保存しているため、
+    // サインアウト時に消しておく（共用端末で前の利用者の内容が残らないように）
+    try {
+      navigator.serviceWorker?.controller?.postMessage({ type: "CLEAR_CACHES" });
+      if ("caches" in window) {
+        const keys = await caches.keys();
+        await Promise.all(keys.map((k) => caches.delete(k)));
+      }
+    } catch {
+      // キャッシュを消せなくてもサインアウト自体は進める
+    }
     router.push("/login");
   }
 

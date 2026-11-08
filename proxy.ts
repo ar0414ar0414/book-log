@@ -6,5 +6,7 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|icons|manifest.json|sw.js|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)"],
+  // offline.html は Service Worker がオフライン時に出す静的ページなので、
+  // 認証リダイレクトの対象から外す（/login に飛ぶとキャッシュできない）
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|icons|manifest.json|sw.js|offline.html|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)"],
 };
