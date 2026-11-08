@@ -114,11 +114,13 @@ export default function BooksShelf({
                 type="text"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
+                aria-label="タイトル・著者で検索"
                 placeholder="タイトル・著者..."
                 className="flex-1 min-w-0 text-sm bg-transparent focus:outline-none text-slate-700 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500"
               />
               {query && (
                 <button
+                  aria-label="検索をクリア"
                   onClick={() => setQuery("")}
                   className="text-slate-300 dark:text-slate-600 hover:text-slate-500 dark:hover:text-slate-400 transition-colors"
                 >
@@ -136,6 +138,7 @@ export default function BooksShelf({
         ) : (
           <>
             <button
+              aria-label="本棚を検索"
               onClick={openSearch}
               className="w-9 h-9 flex items-center justify-center rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-500 dark:text-slate-400 hover:border-indigo-300 dark:hover:border-indigo-600 hover:text-indigo-500 dark:hover:text-indigo-400 transition-colors shadow-sm flex-shrink-0"
             >

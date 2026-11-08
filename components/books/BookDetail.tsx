@@ -3,6 +3,7 @@
 import { useState, useRef } from "react";
 import { BookOpen, Star, Quote, Image as ImageIcon, Bot, Trash2, ArrowLeft, Sparkles, Copy, Check, Loader2, ChevronDown, ChevronUp, AlertCircle, Brain, Lightbulb, X } from "lucide-react";
 import { useAiProvider } from "@/hooks/useAiProvider";
+import { useDialog } from "@/hooks/useDialog";
 import Link from "next/link";
 import { cn, STATUS_LABELS, STATUS_COLORS, formatDate, localizeGenre } from "@/lib/utils";
 import type { BookStatus } from "@/types";
@@ -102,6 +103,7 @@ export default function BookDetail({ book, initialQuotes, initialPhotos, initial
   const [editingCurrentPage, setEditingCurrentPage] = useState(false);
   const [currentPageDraft, setCurrentPageDraft] = useState("");
   const { provider } = useAiProvider();
+  const postPopupRef = useDialog<HTMLDivElement>(showPostPopup, () => setShowPostPopup(false));
   const router = useRouter();
   const touchStartX = useRef<number | null>(null);
   const cardTouchStartX = useRef<number | null>(null);
@@ -258,7 +260,7 @@ export default function BookDetail({ book, initialQuotes, initialPhotos, initial
         <Link href="/books" className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors active:scale-90 active:opacity-60">
           <ArrowLeft className="w-5 h-5 text-slate-600 dark:text-slate-400" />
         </Link>
-        <button onClick={handleDelete} disabled={deleting} className="p-2 hover:bg-red-50 dark:hover:bg-red-950/50 text-red-400 hover:text-red-600 dark:hover:text-red-400 rounded-lg transition-colors">
+        <button aria-label="この本を削除" onClick={handleDelete} disabled={deleting} className="p-2 hover:bg-red-50 dark:hover:bg-red-950/50 text-red-400 hover:text-red-600 dark:hover:text-red-400 rounded-lg transition-colors">
           <Trash2 className="w-4 h-4" />
         </button>
       </div>
@@ -527,14 +529,21 @@ export default function BookDetail({ book, initialQuotes, initialPhotos, initial
 
       {/* 読了ポップアップ */}
       {showPostPopup && (
-        <div className="fixed inset-0 z-50 bg-black/60 flex items-end sm:items-center justify-center p-4">
+        <div
+          ref={postPopupRef}
+          role="dialog"
+          aria-modal="true"
+          aria-label="読了後のふりかえりを書く"
+          tabIndex={-1}
+          className="fixed inset-0 z-50 bg-black/60 flex items-end sm:items-center justify-center p-4 outline-none"
+        >
           <div className="bg-white dark:bg-slate-800 rounded-2xl w-full max-w-md p-5 space-y-4">
             <div className="flex items-start justify-between">
               <div>
                 <p className="font-bold text-slate-900 dark:text-slate-100">読了おめでとう🎉</p>
                 <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">読んで何が変わりましたか？</p>
               </div>
-              <button onClick={() => setShowPostPopup(false)} className="text-slate-300 dark:text-slate-600 hover:text-slate-500 dark:hover:text-slate-400 p-1">
+              <button aria-label="閉じる" onClick={() => setShowPostPopup(false)} className="text-slate-300 dark:text-slate-600 hover:text-slate-500 dark:hover:text-slate-400 p-1">
                 <X className="w-4 h-4" />
               </button>
             </div>

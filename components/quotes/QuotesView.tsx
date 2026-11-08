@@ -93,11 +93,12 @@ export default function QuotesView({ items }: { items: QuoteItem[] }) {
                   type="text"
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
+                  aria-label="引用・メモを検索"
                   placeholder="引用・メモを検索..."
                   className="flex-1 min-w-0 text-sm bg-transparent focus:outline-none text-slate-700 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500"
                 />
                 {query && (
-                  <button onClick={() => setQuery("")} className="text-slate-300 dark:text-slate-600 hover:text-slate-500 dark:hover:text-slate-400 transition-colors">
+                  <button aria-label="検索をクリア" onClick={() => setQuery("")} className="text-slate-300 dark:text-slate-600 hover:text-slate-500 dark:hover:text-slate-400 transition-colors">
                     <X className="w-3.5 h-3.5" />
                   </button>
                 )}
@@ -112,6 +113,7 @@ export default function QuotesView({ items }: { items: QuoteItem[] }) {
           ) : (
             <>
               <button
+                aria-label="引用を検索"
                 onClick={() => setSearchOpen(true)}
                 className="w-9 h-9 flex items-center justify-center rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-500 dark:text-slate-400 hover:border-indigo-300 dark:hover:border-indigo-600 hover:text-indigo-500 dark:hover:text-indigo-400 transition-colors shadow-sm flex-shrink-0"
               >

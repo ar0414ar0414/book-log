@@ -151,6 +151,7 @@ export default function BookForm() {
                 className={cn(inputCls, "mt-0")}
               />
               <button
+                aria-label="本を検索"
                 type="button"
                 onClick={handleSearch}
                 disabled={searching}
@@ -208,6 +209,7 @@ export default function BookForm() {
         <div className="flex items-start gap-4">
           <img src={form.coverUrl} alt={form.title} className="w-16 h-22 object-cover rounded-lg shadow" />
           <button
+            aria-label="表紙画像をクリア"
             type="button"
             onClick={() => setForm((f) => ({ ...f, coverUrl: "" }))}
             className="text-xs text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300"
@@ -219,8 +221,9 @@ export default function BookForm() {
 
       <div className="space-y-4">
         <div>
-          <label className="text-sm font-medium text-slate-700 dark:text-slate-300">タイトル *</label>
+          <label htmlFor="book-title" className="text-sm font-medium text-slate-700 dark:text-slate-300">タイトル *</label>
           <input
+            id="book-title"
             required
             value={form.title}
             onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
@@ -230,16 +233,18 @@ export default function BookForm() {
 
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="text-sm font-medium text-slate-700 dark:text-slate-300">著者</label>
+            <label htmlFor="book-author" className="text-sm font-medium text-slate-700 dark:text-slate-300">著者</label>
             <input
+            id="book-author"
               value={form.author}
               onChange={(e) => setForm((f) => ({ ...f, author: e.target.value }))}
               className={inputCls}
             />
           </div>
           <div>
-            <label className="text-sm font-medium text-slate-700 dark:text-slate-300">ページ数</label>
+            <label htmlFor="book-page-count" className="text-sm font-medium text-slate-700 dark:text-slate-300">ページ数</label>
             <input
+            id="book-page-count"
               type="number"
               min={1}
               value={form.pageCount}
@@ -251,13 +256,14 @@ export default function BookForm() {
         </div>
 
         <div>
-          <label className="text-sm font-medium text-slate-700 dark:text-slate-300">ステータス</label>
-          <div className="mt-1 flex gap-2">
+          <span id="book-status-label" className="text-sm font-medium text-slate-700 dark:text-slate-300">ステータス</span>
+          <div role="group" aria-labelledby="book-status-label" className="mt-1 flex gap-2">
             {STATUS_OPTIONS.map(({ value, label }) => (
               <button
                 key={value}
                 type="button"
                 onClick={() => setForm((f) => ({ ...f, status: value }))}
+                aria-pressed={form.status === value}
                 className={cn(
                   "flex-1 py-2 rounded-xl text-sm font-medium border transition-colors",
                   form.status === value
@@ -274,8 +280,9 @@ export default function BookForm() {
         {(form.status === "reading" || form.status === "done") && (
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="text-sm font-medium text-slate-700 dark:text-slate-300">読み始め</label>
+              <label htmlFor="book-started-at" className="text-sm font-medium text-slate-700 dark:text-slate-300">読み始め</label>
               <input
+                id="book-started-at"
                 type="date"
                 value={form.startedAt}
                 onChange={(e) => setForm((f) => ({ ...f, startedAt: e.target.value }))}
@@ -284,8 +291,9 @@ export default function BookForm() {
             </div>
             {form.status === "done" && (
               <div>
-                <label className="text-sm font-medium text-slate-700 dark:text-slate-300">読了日</label>
+                <label htmlFor="book-finished-at" className="text-sm font-medium text-slate-700 dark:text-slate-300">読了日</label>
                 <input
+                  id="book-finished-at"
                   type="date"
                   value={form.finishedAt}
                   onChange={(e) => setForm((f) => ({ ...f, finishedAt: e.target.value }))}
@@ -297,13 +305,15 @@ export default function BookForm() {
         )}
 
         <div>
-          <label className="text-sm font-medium text-slate-700 dark:text-slate-300">評価</label>
-          <div className="mt-1 flex gap-1">
+          <span id="book-rating-label" className="text-sm font-medium text-slate-700 dark:text-slate-300">評価</span>
+          <div role="group" aria-labelledby="book-rating-label" className="mt-1 flex gap-1">
             {[1, 2, 3, 4, 5].map((n) => (
               <button
                 key={n}
                 type="button"
                 onClick={() => setForm((f) => ({ ...f, rating: n === f.rating ? 0 : n }))}
+                aria-label={`星${n}つ`}
+                aria-pressed={n <= form.rating}
                 className="p-1"
               >
                 <Star
@@ -318,8 +328,9 @@ export default function BookForm() {
         </div>
 
         <div>
-          <label className="text-sm font-medium text-slate-700 dark:text-slate-300">メモ</label>
+          <label htmlFor="book-memo" className="text-sm font-medium text-slate-700 dark:text-slate-300">メモ</label>
           <AutoResizeTextarea
+            id="book-memo"
             value={form.memo}
             onChange={(e) => setForm((f) => ({ ...f, memo: e.target.value }))}
             rows={3}

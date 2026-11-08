@@ -7,6 +7,7 @@ import ReactMarkdown from "react-markdown";
 import imageCompression from "browser-image-compression";
 import AutoResizeTextarea from "@/components/ui/AutoResizeTextarea";
 import { useAiProvider } from "@/hooks/useAiProvider";
+import { useDialog } from "@/hooks/useDialog";
 
 interface PhotoItem {
   id: string; url: string; caption: string | null; extractedText: string | null; createdAt: Date;
@@ -75,6 +76,9 @@ export default function PhotosTab({ bookId, initialPhotos, onOcrToQuote }: { boo
       setCaptionSaved(false);
     }
   }
+
+  const photoDialogRef = useDialog<HTMLDivElement>(Boolean(selectedPhoto), closeModal);
+  const fullscreenRef = useDialog<HTMLDivElement>(Boolean(fullscreenPhoto), () => setFullscreenPhoto(null));
 
   async function handleUpload(files: FileList | null) {
     if (!files || files.length === 0) return;
@@ -233,18 +237,24 @@ export default function PhotosTab({ bookId, initialPhotos, onOcrToQuote }: { boo
       {/* fullscreen image viewer */}
       {fullscreenPhoto && (
         <div
-          className="fixed inset-0 z-[60] bg-black flex items-center justify-center"
+          ref={fullscreenRef}
+          role="dialog"
+          aria-modal="true"
+          aria-label="写真を拡大表示"
+          tabIndex={-1}
+          className="fixed inset-0 z-[60] bg-black flex items-center justify-center outline-none"
           onClick={() => setFullscreenPhoto(null)}
         >
           <button
             className="absolute top-4 right-4 p-2 text-white/70 hover:text-white bg-black/40 rounded-full"
             onClick={() => setFullscreenPhoto(null)}
+            aria-label="拡大表示を閉じる"
           >
             <X className="w-5 h-5" />
           </button>
           <img
             src={fullscreenPhoto}
-            alt=""
+            alt="拡大表示中の本の写真"
             className="max-w-full max-h-full object-contain"
             onClick={(e) => e.stopPropagation()}
           />
@@ -258,7 +268,12 @@ export default function PhotosTab({ bookId, initialPhotos, onOcrToQuote }: { boo
           onClick={closeModal}
         >
           <div
-            className="bg-white dark:bg-slate-800 rounded-2xl w-full max-w-lg flex flex-col max-h-[90vh]"
+            ref={photoDialogRef}
+            role="dialog"
+            aria-modal="true"
+            aria-label="写真の詳細"
+            tabIndex={-1}
+            className="bg-white dark:bg-slate-800 rounded-2xl w-full max-w-lg flex flex-col max-h-[90vh] outline-none"
             onClick={(e) => e.stopPropagation()}
           >
             {/* ヘッダー（常に表示） */}
@@ -312,7 +327,7 @@ export default function PhotosTab({ bookId, initialPhotos, onOcrToQuote }: { boo
             {/* 画像（タップで拡大） */}
             <img
               src={selectedPhoto.url}
-              alt=""
+              alt={selectedPhoto.caption ?? "本の写真"}
               className="w-full max-h-64 object-contain bg-black cursor-zoom-in"
               onClick={() => setFullscreenPhoto(selectedPhoto.url)}
             />

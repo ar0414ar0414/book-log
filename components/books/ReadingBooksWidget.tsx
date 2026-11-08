@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useDialog } from "@/hooks/useDialog";
 import Link from "next/link";
 import { BookOpen, Pencil, Check, X } from "lucide-react";
 
@@ -17,6 +18,7 @@ function ReadingBookCard({ book }: { book: ReadingBook }) {
   const [currentPage, setCurrentPage] = useState(book.currentPage ?? 0);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [draft, setDraft] = useState("");
+  const sheetRef = useDialog<HTMLDivElement>(sheetOpen, () => setSheetOpen(false));
   const [saving, setSaving] = useState(false);
 
   const percent = book.pageCount
@@ -121,7 +123,14 @@ function ReadingBookCard({ book }: { book: ReadingBook }) {
           />
 
           {/* シート本体 */}
-          <div className="fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-slate-800 rounded-t-2xl shadow-2xl max-w-lg mx-auto">
+          <div
+            ref={sheetRef}
+            role="dialog"
+            aria-modal="true"
+            aria-label={`${book.title} の読書ページを更新`}
+            tabIndex={-1}
+            className="fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-slate-800 rounded-t-2xl shadow-2xl max-w-lg mx-auto outline-none"
+          >
             {/* ドラッグハンドル */}
             <div className="flex justify-center pt-3 pb-1">
               <div className="w-10 h-1 rounded-full bg-slate-200 dark:bg-slate-600" />
@@ -143,6 +152,7 @@ function ReadingBookCard({ book }: { book: ReadingBook }) {
                 </p>
               </div>
               <button
+                aria-label="閉じる"
                 onClick={() => setSheetOpen(false)}
                 className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
               >
@@ -173,6 +183,7 @@ function ReadingBookCard({ book }: { book: ReadingBook }) {
                   max={book.pageCount ?? undefined}
                   value={draft}
                   onChange={(e) => setDraft(e.target.value)}
+                  aria-label="現在のページ数"
                   placeholder={book.pageCount ? `ページ数を入力（1〜${book.pageCount}）` : "ページ数を入力"}
                   className="flex-1 border border-slate-200 dark:border-slate-600 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-indigo-400 dark:focus:border-indigo-500 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500"
                 />

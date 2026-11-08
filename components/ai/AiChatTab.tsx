@@ -259,10 +259,12 @@ export default function AiChatTab({ bookId, initialChat, initialSummary }: { boo
         <input
           value={input}
           onChange={(e) => setInput(e.target.value)}
+          aria-label="この本についての質問や感想"
           placeholder="この本について質問や感想を..."
           className="flex-1 min-w-0 border border-slate-200 dark:border-slate-600 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-indigo-400 dark:focus:border-indigo-500 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500"
         />
         <button
+          aria-label="送信"
           type="submit"
           disabled={!input.trim() || loading}
           className="px-4 py-2.5 bg-indigo-600 dark:bg-indigo-500 text-white rounded-xl hover:bg-indigo-700 dark:hover:bg-indigo-600 disabled:opacity-50 transition-colors"

@@ -7,6 +7,7 @@ import ReactMarkdown from "react-markdown";
 import AutoResizeTextarea from "@/components/ui/AutoResizeTextarea";
 import { cn } from "@/lib/utils";
 import { useAiProvider } from "@/hooks/useAiProvider";
+import { useDialog } from "@/hooks/useDialog";
 
 const SS_KEY = "folio_deleted_quotes";
 function getDeletedIds(): Set<string> {
@@ -87,6 +88,7 @@ export default function QuotesTab({
   const [editForm, setEditForm] = useState({ text: "", pageNumber: "", chapter: "", memo: "" });
   const [editSaving, setEditSaving] = useState(false);
   const pickerRef = useRef<HTMLDivElement>(null);
+  const editSheetRef = useDialog<HTMLDivElement>(Boolean(editingQuote), () => setEditingQuote(null));
 
   // OCR から引用化したときは、BookDetail がタブを切り替える＝このタブは
   // 毎回マウントし直されるので、下書きは props から state を同期するのではなく
@@ -428,6 +430,7 @@ export default function QuotesTab({
                 )}
               >
                 <button
+                  aria-label="お気に入り" aria-pressed={q.isFavorite}
                   onClick={() => toggleFavorite(q.id, q.isFavorite)}
                   className="absolute top-2.5 right-2.5 p-1.5 rounded-lg transition-colors hover:bg-amber-50 dark:hover:bg-amber-950/30"
                 >
@@ -458,6 +461,7 @@ export default function QuotesTab({
                       >
                         {tag.name}
                         <button
+                          aria-label="タグを外す"
                           onClick={() => removeTagFromQuote(q.id, tag.id)}
                           className="opacity-70 hover:opacity-100 transition-opacity"
                         >
@@ -480,6 +484,7 @@ export default function QuotesTab({
                   </div>
                   <div className="flex items-center gap-1.5 flex-shrink-0 -mr-1">
                     <button
+                      aria-label="引用を編集"
                       onClick={() => openEdit(q)}
                       className="p-1.5 rounded-lg text-slate-300 dark:text-slate-600 hover:text-indigo-500 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/30 transition-colors"
                     >
@@ -495,6 +500,7 @@ export default function QuotesTab({
                       </button>
                     ) : (
                       <button
+                        aria-label="引用を削除"
                         onClick={() => setConfirmDeleteId(q.id)}
                         className="p-1.5 rounded-lg text-slate-300 dark:text-slate-600 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
                       >
@@ -636,7 +642,14 @@ export default function QuotesTab({
             className="fixed inset-0 bg-black/40 z-40 backdrop-blur-sm"
             onClick={() => setEditingQuote(null)}
           />
-          <div className="fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-slate-800 rounded-t-2xl shadow-2xl max-w-lg mx-auto">
+          <div
+            ref={editSheetRef}
+            role="dialog"
+            aria-modal="true"
+            aria-label="引用を編集"
+            tabIndex={-1}
+            className="fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-slate-800 rounded-t-2xl shadow-2xl max-w-lg mx-auto outline-none"
+          >
             <div className="flex justify-center pt-3 pb-1">
               <div className="w-10 h-1 rounded-full bg-slate-200 dark:bg-slate-600" />
             </div>
@@ -645,6 +658,7 @@ export default function QuotesTab({
               <p className="font-semibold text-slate-900 dark:text-slate-100">引用を編集</p>
               <button
                 onClick={() => setEditingQuote(null)}
+                aria-label="編集を閉じる"
                 className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors text-slate-400 dark:text-slate-500"
               >
                 <X className="w-4 h-4" />

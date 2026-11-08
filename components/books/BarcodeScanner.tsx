@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { X, Loader2 } from "lucide-react";
 import { BrowserMultiFormatReader } from "@zxing/browser";
+import { useDialog } from "@/hooks/useDialog";
 import { NotFoundException } from "@zxing/library";
 
 interface Props {
@@ -11,6 +12,7 @@ interface Props {
 }
 
 export default function BarcodeScanner({ onDetected, onClose }: Props) {
+  const dialogRef = useDialog<HTMLDivElement>(true, onClose);
   const videoRef = useRef<HTMLVideoElement>(null);
   const readerRef = useRef<BrowserMultiFormatReader | null>(null);
   const [status, setStatus] = useState<"loading" | "scanning" | "error">("loading");
@@ -73,11 +75,19 @@ export default function BarcodeScanner({ onDetected, onClose }: Props) {
   }, [onDetected]);
 
   return (
-    <div className="fixed inset-0 z-50 bg-black flex flex-col">
+    <div
+      ref={dialogRef}
+      role="dialog"
+      aria-modal="true"
+      aria-label="ISBN バーコードをスキャン"
+      tabIndex={-1}
+      className="fixed inset-0 z-50 bg-black flex flex-col outline-none"
+    >
       {/* ヘッダー */}
       <div className="flex items-center justify-between px-4 pt-safe-top py-3">
         <p className="text-white text-sm font-medium">バーコードをスキャン</p>
         <button
+          aria-label="スキャンを閉じる"
           onClick={onClose}
           className="w-9 h-9 flex items-center justify-center rounded-full bg-white/10 text-white"
         >
