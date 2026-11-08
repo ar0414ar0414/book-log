@@ -38,7 +38,7 @@ describe("getAiClient", () => {
     for (const p of ["gemini", "claude"] as const) {
       const c = getAiClient(p);
       expect(typeof c.generateText).toBe("function");
-      expect(typeof c.chatWithHistory).toBe("function");
+      expect(typeof c.chatStream).toBe("function");
       expect(typeof c.visionOcr).toBe("function");
     }
   });

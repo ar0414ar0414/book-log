@@ -12,7 +12,7 @@ export const geminiClient: AiClient = {
     return result.response.text();
   },
 
-  async chatWithHistory(systemPrompt, history, message) {
+  async *chatStream(systemPrompt, history, message) {
     const chat = geminiModel.startChat({
       history: [
         { role: "user", parts: [{ text: systemPrompt }] },
@@ -23,8 +23,11 @@ export const geminiClient: AiClient = {
         })),
       ],
     });
-    const result = await chat.sendMessage(message);
-    return result.response.text();
+    const result = await chat.sendMessageStream(message);
+    for await (const chunk of result.stream) {
+      const text = chunk.text();
+      if (text) yield text;
+    }
   },
 
   async visionOcr(imageBase64, mimeType, prompt) {

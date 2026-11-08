@@ -16,20 +16,22 @@ export const claudeClient: AiClient = {
     return block.text;
   },
 
-  async chatWithHistory(systemPrompt, history, message) {
+  async *chatStream(systemPrompt, history, message) {
     const messages: Anthropic.MessageParam[] = [
       ...history.map((m) => ({ role: m.role as "user" | "assistant", content: m.content })),
       { role: "user", content: message },
     ];
-    const msg = await anthropic.messages.create({
+    const stream = anthropic.messages.stream({
       model: MODEL,
       max_tokens: 1024,
       system: systemPrompt,
       messages,
     });
-    const block = msg.content[0];
-    if (!block || block.type !== "text") throw new Error("Unexpected response type from Claude");
-    return block.text;
+    for await (const event of stream) {
+      if (event.type === "content_block_delta" && event.delta.type === "text_delta") {
+        yield event.delta.text;
+      }
+    }
   },
 
   async visionOcr(imageBase64, mimeType, prompt) {

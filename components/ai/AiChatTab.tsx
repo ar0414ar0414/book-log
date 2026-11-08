@@ -45,17 +45,48 @@ export default function AiChatTab({ bookId, initialChat, initialSummary }: { boo
     setLoading(true);
     setError(null);
 
+    const replyId = `reply-${Date.now()}`;
+
     try {
       const res = await fetch("/api/ai/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ bookId, message: userMsg, provider }),
       });
-      const data = await res.json();
-      if (!res.ok) { setError(data.message ?? "エラーが発生しました"); return; }
-      setMessages((m) => [...m, {
-        id: (Date.now() + 1).toString(), role: "assistant", content: data.reply, createdAt: new Date()
-      }]);
+
+      // 本文を返し始める前の失敗は JSON で返ってくる（上限超過など）
+      if (!res.ok) {
+        const data = await res.json().catch(() => null);
+        setError(data?.message ?? "エラーが発生しました");
+        return;
+      }
+      if (!res.body) { setError("エラーが発生しました"); return; }
+
+      // 受け取ったぶんから順に画面へ反映する
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let acc = "";
+      let started = false;
+
+      try {
+        while (true) {
+          const { value, done } = await reader.read();
+          if (done) break;
+          acc += decoder.decode(value, { stream: true });
+          if (!started) {
+            started = true;
+            setMessages((m) => [...m, {
+              id: replyId, role: "assistant", content: acc, createdAt: new Date(),
+            }]);
+          } else {
+            setMessages((m) => m.map((x) => (x.id === replyId ? { ...x, content: acc } : x)));
+          }
+        }
+      } catch {
+        // 返答の途中で切れた場合。ここまでの内容は残したうえで知らせる
+        if (started) setError("返答が途中で切れました。もう一度お試しください。");
+        else setError("エラーが発生しました");
+      }
     } finally {
       setLoading(false);
     }
